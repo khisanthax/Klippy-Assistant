@@ -1,4 +1,4 @@
-param([string]$Installer = 'dist\Klippy-Setup-0.1.0-preview.1.exe')
+param([string]$Installer = 'dist\Klippy-Setup-0.2.0-preview.1.exe')
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $taskRoot = (Resolve-Path -LiteralPath '.').Path

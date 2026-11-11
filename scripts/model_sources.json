@@ -1,0 +1,30 @@
+{
+  "wake": {
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2",
+    "sha256": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+    "filename": "wake.tar.bz2",
+    "directory": "sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01"
+  },
+  "asr": {
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.en.tar.bz2",
+    "sha256": "2bd6cf965c8bb3e068ef9fa2191387ee63a9dfa2a4e37582a8109641c20005dd",
+    "filename": "asr.tar.bz2",
+    "directory": "sherpa-onnx-whisper-tiny.en"
+  },
+  "tts": {
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2",
+    "sha256": "72c347230107ef8a31098ec4d468a605244beef5f1ed00db97efa13518800653",
+    "filename": "kokoro.tar.bz2",
+    "directory": "kokoro-int8-multi-lang-v1_0"
+  },
+  "llama_binary": {
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip",
+    "sha256": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+    "filename": "llama.zip"
+  },
+  "llm": {
+    "url": "https://huggingface.co/ggml-org/Qwen3-1.7B-GGUF/resolve/daeb8e2d528a760970442092f6bf1e55c3b659eb/Qwen3-1.7B-Q4_K_M.gguf",
+    "sha256": "d2387ca2dbfee2ffabce7120d3770dadca0b293052bc2f0e138fdc940d9bc7b5",
+    "filename": "Qwen3-1.7B-Q4_K_M.gguf"
+  }
+}

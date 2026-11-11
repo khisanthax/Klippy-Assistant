@@ -1,5 +1,48 @@
 # Logbook
 
+## 2026-11-11 — Phase 2 offline voice implementation and qualification
+
+User authorized continuing Phase 2 autonomously, with no live printer actions. Read the
+logbook and inspected the existing code before changes. No printer endpoint was contacted.
+
+Implemented pronunciation-equivalent Klippy/Hey Klippy BPE token paths; actual synthetic
+short-name and stop-talking tests now pass for two voices. Clippy is a homophone and is
+documented as acoustically indistinguishable. Klipper/clipper and ordinary speech are
+negative probes; full physical accuracy and false-positive rates remain unqualified.
+
+Replaced half-duplex capture with bounded duplex PCM, rendered-audio reference, WebRTC
+AEC3, a confidence-checked linear echo path, near-end evidence gating and an exact-prefix
+local ASR wake fallback during playback. AEC3 alone suppressed a short wake syllable in
+double-talk; real-model simulations found and drove this fix. The recorded real-time
+synthetic barge test now stops playback at about 0.74 seconds and transcribes the request,
+with zero own-echo wakes/requests. Queued speech and ASR are generation-bound. Added
+stale LLM cancellation and capture-time confirmation binding; wake interruption preserves
+an already reviewed pending action, while printer changes invalidate audio context.
+
+Model pack: 57 hashed model, binary, data and notice files assembled from pinned inputs.
+Selected Kokoro v1.0 with a CMUdict-derived BSD-2-Clause lexicon; discarded VITS and the
+unreviewed CMU-in-IPA/eSpeak lexicons. CMUdict's GPL wrapper is build-only and excluded
+from freezing. Included license evidence/notices for KWS, Whisper, Qwen, Kokoro, CMUdict,
+llama.cpp/LLVM plus WebRTC/Abseil/PFFFT/RNNoise/ONNX Runtime dependencies. The qualified
+manifest distinguishes redistribution/integrity review from acoustic stable-release gates.
+
+Tests: 99 local tests passed before final packaging. Real-model probe passed with zero
+printer writes and no device opens. A Windows default-device smoke exposed an STA/MTA
+COM initialization error after PortAudio import; handling HRESULTs fixed it. A second
+physical capture/render smoke opened the default WASAPI pair, processed 884 frames,
+completed the short TTS phrase, and produced zero wake/utterance events. No microphone
+recordings or transcripts were saved. This is not a human wake/calibration test.
+
+Files: voice/audio/windows_audio/speech_text/models/runtime/conversation/app modules,
+voice and model tests, reproducible model assembly, pinned source inventory, license
+notices, device-free integration probe, PHASE2_REPORT.md, packaging/CI updates.
+
+In progress: build 0.2.0 offline voice preview with the complete model payload; run frozen
+self-test, installed-model checks and independent Windows CI. Then update evidence and
+publish accurately labeled preview. Optional speaker enrollment remains deferred; human
+microphone/room tests, unplug/replug and clean VM acceptance remain open. Never execute
+live printer actions during this task.
+
 ## 2026-11-11 — Published private engineering preview
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.1.0-preview.1

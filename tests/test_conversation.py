@@ -123,3 +123,43 @@ async def test_transcripts_not_persisted(rig):
     dump = "\n".join(store.db.iterdump())
     assert "Klippy status" not in dump
     assert "63%" not in dump
+
+
+async def test_interruption_prevents_stale_llm_result_from_proposing(rig):
+    import asyncio
+
+    from klippy.domain import Action, Intent
+    _, sim, engine, _ = rig
+    entered, release = asyncio.Event(), asyncio.Event()
+    class Model:
+        async def interpret(self, *args):
+            entered.set()
+            await release.wait()
+            return Intent(action=Action.HOME, printer_id="sim")
+    conversation = Conversation(engine, llm=Model())
+    task = asyncio.create_task(conversation.hear("please perform homing"))
+    await entered.wait()
+    conversation.clear()
+    release.set()
+    assert await task is None
+    assert engine.pending is None and not sim.writes
+
+
+async def test_voice_confirmation_requires_capture_time_token(rig):
+    _, sim, engine, _ = rig
+    conversation = Conversation(engine)
+    await conversation.hear("Klippy home", source="voice")
+    with pytest.raises(Rejected):
+        await conversation.hear("confirm", source="voice")
+    assert not sim.writes
+
+
+async def test_wake_interruption_preserves_exact_pending_confirmation(rig):
+    _, sim, engine, _ = rig
+    conversation = Conversation(engine)
+    await conversation.hear("Klippy home", source="voice")
+    token = engine.pending.token
+    conversation.interrupt()
+    assert engine.pending.token == token
+    await conversation.hear("Klippy confirm", source="voice", confirmation_token=token)
+    assert len(sim.writes) == 1  # Simulated transport only.

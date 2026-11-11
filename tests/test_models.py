@@ -51,3 +51,18 @@ def test_complete_fixture_passes_integrity_not_model_qualification(tmp_path):
     manifest = pack(tmp_path)
     (tmp_path / "manifest.json").write_text(json.dumps(manifest))
     assert verify_pack(tmp_path) == manifest
+
+
+def test_experimental_pack_cannot_be_loaded_as_qualified(tmp_path):
+    manifest = pack(tmp_path)
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ModelUnavailable, match="redistribution"):
+        verify_pack(tmp_path, require_qualified=True)
+
+
+def test_unverified_runtime_dll_blocks_launch(tmp_path):
+    manifest = pack(tmp_path)
+    (tmp_path / "injected.dll").write_bytes(b"not in manifest")
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ModelUnavailable, match="unverified binary"):
+        verify_pack(tmp_path)

@@ -4,6 +4,7 @@ import os
 import secrets
 import socket
 import subprocess
+import sys
 from pathlib import Path
 
 import httpx
@@ -31,8 +32,15 @@ class LlamaRuntime:
                 "--ctx-size", "2048", "--threads", str(min(os.cpu_count() or 2, 4)),
                 "--parallel", "1", "--n-gpu-layers", "0", "--api-key", self.api_key]
         try:
+            native_root = Path(getattr(sys, "_MEIPASS", sys.base_prefix))
+            native_paths = [binary.parent, native_root, native_root / "shiboken6", native_root / "PySide6",
+                            Path(sys.prefix) / "Lib/site-packages/shiboken6",
+                            Path(os.environ.get("SystemRoot", "C:/Windows")) / "System32"]
+            environment = {**os.environ, "PATH": os.pathsep.join(str(p) for p in native_paths),
+                           "HF_HUB_OFFLINE": "1", "HF_DATASETS_OFFLINE": "1"}
             self.process = subprocess.Popen(args, cwd=binary.parent, stdin=subprocess.DEVNULL,
                                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                            env=environment,
                                             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
             async with httpx.AsyncClient(timeout=2, trust_env=False) as client:
                 for _ in range(240):

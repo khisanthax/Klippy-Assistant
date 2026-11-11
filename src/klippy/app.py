@@ -6,7 +6,6 @@ import json
 import sys
 import threading
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -156,7 +155,9 @@ class Window(QMainWindow):
         self.voice = None
         self.runtime = LlamaRuntime()
         self.discovery = None
-        self.speech_pool = ThreadPoolExecutor(max_workers=1)
+        self.turn = 0
+        self.voice_loading = False
+        self.voice_failed = False
         self.worker = Worker()
         self.worker.result.connect(self.result)
         self.worker.error.connect(self.failure)
@@ -287,7 +288,7 @@ class Window(QMainWindow):
         self.sensitivity = QDoubleSpinBox()
         self.sensitivity.setRange(0.01, 1.0)
         self.sensitivity.setSingleStep(0.01)
-        self.sensitivity.setValue(self.store.get("wake_threshold", 0.25))
+        self.sensitivity.setValue(self.store.get("wake_threshold", 0.15))
         self.sensitivity.valueChanged.connect(lambda v: self.store.set("wake_threshold", v))
         layout.addWidget(QLabel("Wake detection threshold (lower is more sensitive; reload pack after changing)"))
         layout.addWidget(self.sensitivity)
@@ -310,7 +311,7 @@ class Window(QMainWindow):
         self.monitor_enabled.toggled.connect(lambda v: self.store.set("monitor_enabled", v))
         layout.addWidget(self.monitor_enabled)
         self.spoken = QCheckBox("Speak responses and fault notifications")
-        self.spoken.setChecked(self.store.get("spoken", False))
+        self.spoken.setChecked(self.store.get("spoken", True))
         self.spoken.toggled.connect(lambda v: self.store.set("spoken", v))
         layout.addWidget(self.spoken)
         row = QHBoxLayout()
@@ -319,7 +320,8 @@ class Window(QMainWindow):
         layout.addLayout(row)
         layout.addWidget(QLabel("No recordings or transcripts are saved. Configuration exports contain private printer\n"
                                 "addresses and definitions; keep them private. Credentials stay in the Windows vault.\n"
-                                "Speaker enrollment and hands-free barge-in are not enabled in this preview."))
+                                "Voice interruption uses local echo cancellation. Microphone/room calibration remains necessary.\n"
+                                "Optional speaker enrollment is not enabled."))
         layout.addStretch()
 
     def reload_printers(self):
@@ -350,6 +352,9 @@ class Window(QMainWindow):
         else:
             self.engine.cancel()
             self.store.set("selected", None)
+        if self.voice:
+            self.voice.pending_token = None
+            self.voice.reset_session()
         self.reload_macros()
 
     def target(self):
@@ -499,17 +504,33 @@ class Window(QMainWindow):
         text = self.input.text().strip()
         self.input.clear()
         if text:
-            self.command_busy = True
-            self.send_button.setEnabled(False)
-            self.worker.submit("answer", self.conversation.hear(text))
+            self.submit_turn(text)
+
+    def submit_turn(self, text, *, source="manual", confirmation_token=None):
+        self.turn += 1
+        turn = self.turn
+        self.command_busy = True
+        self.send_button.setEnabled(False)
+        async def request():
+            try:
+                value = await self.conversation.hear(text, source=source, confirmation_token=confirmation_token)
+                return turn, value, False
+            except (Rejected, ConnectionFailure) as exc:
+                return turn, str(exc), True
+        self.worker.submit("turn", request())
 
     def confirm(self):
         if self.engine.pending and not self.command_busy:
             self.command_busy = True
-            self.worker.submit("answer", self.engine.confirm(self.engine.pending.token))
+            self.submit_turn("confirm", source="voice", confirmation_token=self.engine.pending.token)
 
     def cancel(self):
-        self.engine.cancel()
+        self.turn += 1
+        self.conversation.clear()
+        if self.voice:
+            self.voice.pending_token = None
+        self.command_busy = False
+        self.send_button.setEnabled(True)
         self.write_message("Pending action canceled.")
 
     def stop_speaking(self):
@@ -526,6 +547,7 @@ class Window(QMainWindow):
         self.polling = False
         self.write_message(text)
         self.sprite.announce(self.active_name() + " · Needs attention", "error")
+        self.say(text)
 
     def result(self, name, value):
         if name == "poll":
@@ -543,23 +565,41 @@ class Window(QMainWindow):
             self.write_message(f"Read-only connection test: connected={value.connected}, state={value.state}")
         elif name == "voice_loaded":
             from .voice import VoiceLoop
-            self.voice = VoiceLoop(value, self.voice_text, lambda text: self.worker.result.emit("voice_state", text))
+            backend, llm = value
+            self.voice_loading = False
+            self.voice = VoiceLoop(backend, self.voice_text, lambda text: self.worker.result.emit("voice_state", text),
+                                   lambda epoch: self.worker.result.emit("voice_wake", epoch))
             self.voice.start()
-            self.conversation.llm = self.loaded_llm
-            self.model_status.setText("Local speech pack loaded. Manual interruption available; hands-free barge-in disabled.")
+            self.conversation.llm = llm
+            self.model_status.setText("Offline voice loaded · Echo cancellation and wake-word interruption active" +
+                                     (" · LLM unavailable; basic commands available" if llm is None else ""))
+        elif name == "voice_wake":
+            if self.voice and value == self.voice.epoch and self.voice.enabled.is_set():
+                self.turn += 1
+                self.conversation.interrupt()
+                self.voice.pending_token = self.engine.pending.token if self.engine.pending else None
+                self.command_busy = False
+                self.send_button.setEnabled(True)
         elif name == "voice_state":
             self.model_status.setText(value)
             if value == "Listening":
                 self.sprite.announce(self.active_name() + " · Listening", "listening")
             elif value == "Speaking":
                 self.sprite.state = "speaking"
+            elif value == "Speech finished" and self.conversation.until:
+                self.conversation.until = self.conversation.clock() + self.conversation.timeout
         elif name == "voice_input":
-            if not self.command_busy:
-                self.command_busy = True
-                self.worker.submit("answer", self.conversation.hear(value, source="voice"))
-        elif name == "answer":
+            if self.voice and self.voice.enabled.is_set() and value.epoch == self.voice.epoch:
+                self.submit_turn(value.text, source="voice", confirmation_token=value.confirmation_token)
+        elif name == "turn":
+            turn, value, error = value
+            if turn != self.turn:
+                return
             self.command_busy = False
             self.send_button.setEnabled(True)
+            if error:
+                self.failure(value)
+                return
             if value and value != "speech_stopped":
                 self.write_message(value)
                 self.sprite.announce(self.active_name() + " · Responding", "speaking")
@@ -567,38 +607,47 @@ class Window(QMainWindow):
             elif value == "speech_stopped":
                 self.stop_speaking()
             self.reload_printers()
+            if self.voice:
+                self.voice.pending_token = self.engine.pending.token if self.engine.pending else None
 
     def voice_text(self, text):
         self.worker.result.emit("voice_input", text)
 
     def say(self, text):
         if self.voice and self.spoken.isChecked():
-            voice = self.voice
-            def speak():
-                self.worker.result.emit("voice_state", "Speaking")
-                try:
-                    voice.speak(text)
-                except Exception:
-                    self.worker.result.emit("voice_state", "Speaker unavailable; text response remains accessible")
-                finally:
-                    self.worker.result.emit("voice_state", "Speech finished")
-            self.speech_pool.submit(speak)
+            self.voice.say(text)
 
     def load_voice(self):
         path = QFileDialog.getExistingDirectory(self, "Select verified local model pack")
         if path:
-            async def load():
-                from .voice import SherpaBackend
-                root = Path(path)
-                manifest = await asyncio.to_thread(verify_pack, root)
+            self.store.set("model_pack", path)
+            self.load_voice_path(Path(path))
+
+    def load_voice_path(self, root):
+        if self.voice_loading:
+            return
+        self.voice_loading = True
+        self.voice_failed = False
+        self.model_status.setText("Loading local voice models…")
+        async def load():
+            from .voice import SherpaBackend
+            try:
+                manifest = await asyncio.to_thread(verify_pack, root, require_qualified=True)
                 backend = await asyncio.to_thread(SherpaBackend, root, manifest["speech_config"],
-                                                  self.store.get("wake_threshold", 0.25))
-                self.loaded_llm = await self.runtime.start(root)
-                return backend
-            if self.voice:
-                self.voice.close()
-                self.voice = None
-            self.worker.submit("voice_loaded", load())
+                                                  self.store.get("wake_threshold", 0.15))
+                try:
+                    llm = await self.runtime.start(root)
+                except ModelUnavailable:
+                    llm = None
+                return backend, llm
+            except BaseException:
+                self.voice_loading = False
+                self.voice_failed = True
+                raise
+        if self.voice:
+            self.voice.close()
+            self.voice = None
+        self.worker.submit("voice_loaded", load())
 
     def save_schedule(self):
         try:
@@ -615,6 +664,8 @@ class Window(QMainWindow):
         settings["override"] = not listening_enabled(settings, datetime.now())
         self.store.set("listening", settings)
         self.conversation.clear()
+        if self.voice:
+            self.voice.reset_session()
 
     def clear_override(self):
         settings = self.store.get("listening", {})
@@ -649,6 +700,11 @@ class Window(QMainWindow):
         enabled = listening_enabled(self.store.get("listening", {}), datetime.now())
         if self.voice:
             (self.voice.enabled.set if enabled else self.voice.enabled.clear)()
+        elif enabled and not self.voice_loading and not self.voice_failed and not self.smoke:
+            from .models import bundled_pack
+            root = Path(self.store.get("model_pack")) if self.store.get("model_pack") else bundled_pack()
+            if root:
+                self.load_voice_path(root)
         self.state_label.setText(f"{self.active_name()} · Microphone {'enabled' if enabled and self.voice else 'off'} · "
                                  f"Monitoring {'enabled' if self.monitor_enabled.isChecked() else 'off'}")
         pending = self.engine.pending
@@ -656,6 +712,8 @@ class Window(QMainWindow):
             self.engine.cancel()
             pending = None
         self.confirm_button.setEnabled(pending is not None and not self.command_busy)
+        if self.voice:
+            self.voice.pending_token = pending.token if pending else None
         if self.runtime.process and self.runtime.process.poll() is not None:
             self.conversation.llm = None
             self.runtime.close()
@@ -693,7 +751,6 @@ class Window(QMainWindow):
             self.voice.close()
         if self.discovery:
             self.discovery.close()
-        self.speech_pool.shutdown(wait=False, cancel_futures=True)
         self.worker.close()
         self.runtime.close()
         self.tray.hide()
@@ -706,7 +763,24 @@ def main():
     parser.add_argument("--show", action="store_true", help="Open control panel on startup")
     parser.add_argument("--smoke-test", action="store_true", help="Launch/close UI using isolated temporary settings")
     parser.add_argument("--smoke-report", type=Path, help="Write isolated startup diagnostic result")
+    parser.add_argument("--voice-self-test", action="store_true", help="Exercise bundled models without opening devices or live printers")
+    parser.add_argument("--voice-pack", type=Path, help="Override the voice model pack for a device-free self-test")
     args = parser.parse_args()
+    if args.voice_self_test:
+        from .models import bundled_pack
+        from .voice_probe import run
+        report_path = args.smoke_report or Path("voice-self-test.json")
+        try:
+            root = args.voice_pack or bundled_pack()
+            if root is None:
+                raise ModelUnavailable("Bundled model pack is missing")
+            report = run(root.resolve())
+            report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+            return 0 if report["passed"] else 1
+        except Exception:
+            import traceback
+            report_path.write_text(traceback.format_exc(), encoding="utf-8")
+            return 1
     app = QApplication(sys.argv[:1])
     app.setQuitOnLastWindowClosed(False)
     app.setStyle("Fusion")
@@ -717,6 +791,7 @@ def main():
         try:
             store = Store(Path(temp) / "settings.sqlite" if args.smoke_test else data_directory() / "settings.sqlite")
             if args.smoke_test:
+                import pywebrtc_audio  # noqa: F401
                 import sherpa_onnx  # noqa: F401
                 import sounddevice  # noqa: F401
             window = Window(store, smoke=args.smoke_test)

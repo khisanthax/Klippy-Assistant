@@ -1,6 +1,567 @@
 {
-  "format": 1,
-  "status": "unqualified",
-  "assets": [],
-  "speech_config": {}
+  "format": 2,
+  "qualification": {
+    "status": "redistribution-reviewed",
+    "reviewed_on": "2026-11-11",
+    "scope": "License and integrity qualification, not microphone/room accuracy or stable-release acceptance",
+    "components": [
+      {
+        "name": "GigaSpeech KWS",
+        "license": "Apache-2.0",
+        "evidence": [
+          "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2#README.md",
+          "https://github.com/k2-fsa/sherpa-onnx/issues/3802#issuecomment-6415898531"
+        ],
+        "notices": [
+          "notices/Apache-2.0.txt",
+          "wake/README.md"
+        ]
+      },
+      {
+        "name": "Whisper tiny.en ONNX",
+        "license": "MIT",
+        "evidence": [
+          "https://github.com/openai/whisper/tree/86098128c0b4f24f0e2aa2994de830614b474227#license",
+          "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.en.tar.bz2"
+        ],
+        "notices": [
+          "notices/Whisper-MIT.txt"
+        ]
+      },
+      {
+        "name": "Kokoro v1.0 ONNX and voices",
+        "license": "Apache-2.0",
+        "evidence": [
+          "https://huggingface.co/hexgrad/Kokoro-82M/tree/f3ff3571791e39611d31c381e3a41a3af07b4987",
+          "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2"
+        ],
+        "notices": [
+          "notices/Apache-2.0.txt",
+          "tts/LICENSE"
+        ]
+      },
+      {
+        "name": "CMUdict derived lexicon",
+        "license": "BSD-2-Clause",
+        "evidence": [
+          "https://github.com/cmusphinx/cmudict/blob/74790861f652b15e4ac49015a90074ad62a27690/LICENSE",
+          "https://pypi.org/project/cmudict/1.1.3/"
+        ],
+        "notices": [
+          "notices/CMUdict-BSD.txt"
+        ]
+      },
+      {
+        "name": "Qwen3 1.7B Q4_K_M",
+        "license": "Apache-2.0",
+        "evidence": [
+          "https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/blob/90862c4b9d2787eaed51d12237eafdfe7c5f6077/LICENSE",
+          "https://huggingface.co/ggml-org/Qwen3-1.7B-GGUF/resolve/daeb8e2d528a760970442092f6bf1e55c3b659eb/Qwen3-1.7B-Q4_K_M.gguf"
+        ],
+        "notices": [
+          "notices/Apache-2.0.txt"
+        ]
+      },
+      {
+        "name": "llama.cpp CPU and LLVM OpenMP",
+        "license": "MIT AND Apache-2.0 WITH LLVM-exception",
+        "evidence": [
+          "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip"
+        ],
+        "notices": [
+          "notices/LLAMA-httplib.txt",
+          "notices/LLAMA-jsonhpp.txt",
+          "notices/LLAMA-MIT.txt",
+          "notices/LLAMA-rotatebits.txt",
+          "notices/LLAMA-sha256.txt",
+          "notices/LLAMA-xxhash.txt",
+          "llama/LICENSE-LLVM-OpenMP"
+        ]
+      }
+    ]
+  },
+  "assets": [
+    {
+      "path": "Qwen3-1.7B-Q4_K_M.gguf",
+      "role": "llm",
+      "source": "https://huggingface.co/ggml-org/Qwen3-1.7B-GGUF/resolve/daeb8e2d528a760970442092f6bf1e55c3b659eb/Qwen3-1.7B-Q4_K_M.gguf",
+      "version": "daeb8e2d528a760970442092f6bf1e55c3b659eb",
+      "license": "Apache-2.0",
+      "sha256": "d2387ca2dbfee2ffabce7120d3770dadca0b293052bc2f0e138fdc940d9bc7b5"
+    },
+    {
+      "path": "asr/tiny.en-decoder.int8.onnx",
+      "role": "asr",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.en.tar.bz2#tiny.en-decoder.int8.onnx",
+      "version": "2bd6cf965c8bb3e068ef9fa2191387ee63a9dfa2a4e37582a8109641c20005dd",
+      "license": "MIT",
+      "sha256": "06c0e6ff6348d427e51839219d1c886c18cfdf411e629e33f5e1679bff9c1527"
+    },
+    {
+      "path": "asr/tiny.en-encoder.int8.onnx",
+      "role": "asr",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.en.tar.bz2#tiny.en-encoder.int8.onnx",
+      "version": "2bd6cf965c8bb3e068ef9fa2191387ee63a9dfa2a4e37582a8109641c20005dd",
+      "license": "MIT",
+      "sha256": "0ce578b827c94a961aacb8fa14b02f096504b337e5c94be37c36238cbe3e8bc6"
+    },
+    {
+      "path": "asr/tiny.en-tokens.txt",
+      "role": "asr",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.en.tar.bz2#tiny.en-tokens.txt",
+      "version": "2bd6cf965c8bb3e068ef9fa2191387ee63a9dfa2a4e37582a8109641c20005dd",
+      "license": "MIT",
+      "sha256": "306cd27f03c1a714eca7108e03d66b7dc042abe8c258b44c199a7ed9838dd930"
+    },
+    {
+      "path": "llama/LICENSE-LLVM-OpenMP",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#LICENSE-LLVM-OpenMP",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "sha256": "fdad1758a9e1f9d5a81e18879b3406772115edc92c24bfa36b70c654f325e8e4"
+    },
+    {
+      "path": "llama/ggml-base.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-base.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "3a0399fa51102a86824255beda9d021ea7e8cd2bd8ca448a43a9a80aa4829290"
+    },
+    {
+      "path": "llama/ggml-cpu-alderlake.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-alderlake.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "1de7a0d14d70bd741f2e4cdfa959176fee26680d6fbc78c717c0bd19e20b6233"
+    },
+    {
+      "path": "llama/ggml-cpu-cannonlake.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-cannonlake.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "1451909b84c223739247088a0e03db0f89bcd83461f2af43f53d794727afddcd"
+    },
+    {
+      "path": "llama/ggml-cpu-cascadelake.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-cascadelake.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "74d79278bd20143d3e7deeb2b5c033555f9d621016a7152b5190a2fcbf30265c"
+    },
+    {
+      "path": "llama/ggml-cpu-cooperlake.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-cooperlake.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "737f0e96f23ca7d66c8dc55eace36ebbfd47770a9a228c804ffff5bf66f933a8"
+    },
+    {
+      "path": "llama/ggml-cpu-haswell.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-haswell.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "85d9ffd6f84fd0ec01586420b935ac4d5a5c9a1ab76b533eb3ddc060c1fe2869"
+    },
+    {
+      "path": "llama/ggml-cpu-icelake.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-icelake.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "41ca727e74b171983ea9afe0250553706c09225c10a8c6ad72a619f9189279a8"
+    },
+    {
+      "path": "llama/ggml-cpu-ivybridge.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-ivybridge.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "39752b7667cb34b3bbd06178fac83803f6089771d43873a9c81015d2a98c280b"
+    },
+    {
+      "path": "llama/ggml-cpu-piledriver.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-piledriver.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "65bef2ae4f69256d9aff053a6fff1abdbd33acdbc51ede863d8bc5bd43c53ee8"
+    },
+    {
+      "path": "llama/ggml-cpu-sandybridge.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-sandybridge.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "5359624dee5670cb299c08f4a49347f7a6f4d0df35ed4c0a91164e4d771b3e23"
+    },
+    {
+      "path": "llama/ggml-cpu-sapphirerapids.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-sapphirerapids.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "a7a395d0e49f182240c9a2ed1d623398911506bdae418baf161354541aa06a89"
+    },
+    {
+      "path": "llama/ggml-cpu-skylakex.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-skylakex.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "6bd53dc5731c5b9e4d3fbf98a9dc5b3ce76d357be9a579bc6c8cedac035462e8"
+    },
+    {
+      "path": "llama/ggml-cpu-sse42.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-sse42.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "1e1700e6b6eef26b6abb0bc68669b6ee9fdad2b8d00058e491cb5160eb54afc2"
+    },
+    {
+      "path": "llama/ggml-cpu-x64.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-x64.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "81877c8787f9d5680b990f4cf5f8b89ba5b02ee5064b36abfd53d9d2ffb50916"
+    },
+    {
+      "path": "llama/ggml-cpu-zen4.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-cpu-zen4.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "b5c1eec79e83878303acfa774f1275d9e025493b2c23f2a01af09fe985cdc21a"
+    },
+    {
+      "path": "llama/ggml-rpc.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml-rpc.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "6f7508cdb895ba2d5cba72ade374ba04a3bf408da0c8f0203ac9de9ec5993ebf"
+    },
+    {
+      "path": "llama/ggml.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#ggml.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "06dfdff8b7b834c757ec5b5411abfc0f732604fb595eaaffbdc6da563523e8a1"
+    },
+    {
+      "path": "llama/libomp.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#libomp.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "sha256": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c"
+    },
+    {
+      "path": "llama/llama-batched-bench-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-batched-bench-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "c6ebea5727fa9389ffa863831f594d0f8e12be52078b72ff3ddf96846d56e8e0"
+    },
+    {
+      "path": "llama/llama-bench-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-bench-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "da476f661ea0f7c1944528b2a41e746e61ff5b31830b6493be76ab8efd72f0cc"
+    },
+    {
+      "path": "llama/llama-cli-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-cli-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "d717cbcf8165393d29fda98282018c777de028306f407bc5894eb05f3788474b"
+    },
+    {
+      "path": "llama/llama-common.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-common.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "0898e517843e4478b5178621dc878552b4d40a4d47d7b6f1775e7897f4e2344e"
+    },
+    {
+      "path": "llama/llama-completion-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-completion-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "e817efece35b0aa03b4527054638d6e576ba1c36df82a33eabfc834fa70bfac4"
+    },
+    {
+      "path": "llama/llama-fit-params-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-fit-params-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "563c26491a23411f36fff5ba862a3d8adf1d9c71e432bc64bd50dc705bb88da3"
+    },
+    {
+      "path": "llama/llama-perplexity-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-perplexity-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "07f127d8dc44b0c47b0502bb2f370a1d93c24a8fae88e82a69e8de6e47a677b3"
+    },
+    {
+      "path": "llama/llama-quantize-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-quantize-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "df915f459101d6c36362298721537b4a28312d985a47a1422ca26868afedda44"
+    },
+    {
+      "path": "llama/llama-server-impl.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-server-impl.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "c5d306bdcad1c4011f18a1c01ae2fcdca48a197af0d421c2931ace2cfb487fc6"
+    },
+    {
+      "path": "llama/llama-server.exe",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama-server.exe",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "00d50686815af38249d0218c91558fbd0e9093ac8c074bac86196907f4305e31"
+    },
+    {
+      "path": "llama/llama.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#llama.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "211b91d86e67c49f12eb97992b45ae4c2fc797d6edab48637835a877c808890e"
+    },
+    {
+      "path": "llama/mtmd.dll",
+      "role": "llama_binary",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-cpu-x64.zip#mtmd.dll",
+      "version": "98901e327c252875accaf2d1bf364e10e868843b0b63468baad1aa945cdc5da2",
+      "license": "MIT",
+      "sha256": "74a3cace50f6c545cc66e4dc05e2aecf465f146ea1b4000376cd9834598a3e14"
+    },
+    {
+      "path": "notices/Apache-2.0.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "Apache-2.0",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "notices/CMUdict-BSD.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "BSD-2-Clause",
+      "sha256": "bd4ce8e44170a5f9f481310ca85c51de3c4f851a65e679b40e603b143bd3542a"
+    },
+    {
+      "path": "notices/LLAMA-MIT.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "MIT",
+      "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+    },
+    {
+      "path": "notices/LLAMA-httplib.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "MIT",
+      "sha256": "4b45cbe16d7b71b89ae6127e26e0d90a029198ca5e958ad8e3d0b8bbed364d8b"
+    },
+    {
+      "path": "notices/LLAMA-jsonhpp.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "MIT",
+      "sha256": "c0d068392ea65358b798b8c165103560f06e9e3b38c4ab4e2d8810a7b931af86"
+    },
+    {
+      "path": "notices/LLAMA-rotatebits.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "MIT",
+      "sha256": "ca0b44aec101afb6b46f4c39b23369fa06a64fb9c0add37c2689d702156fee55"
+    },
+    {
+      "path": "notices/LLAMA-sha256.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "LicenseRef-Public-Domain",
+      "sha256": "b81d0022ca6367918c67b57e9647d3513ee58809fd4b0ef0b3492f1356bced25"
+    },
+    {
+      "path": "notices/LLAMA-xxhash.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "BSD-2-Clause",
+      "sha256": "6ffedbc0f7878612d2b23589f1ff2ab15633e1df7963a5d9fc750ec5500c7e7a"
+    },
+    {
+      "path": "notices/Whisper-MIT.txt",
+      "role": "notice",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/tree/main/packaging/licenses",
+      "version": "review-2026-11-11",
+      "license": "MIT",
+      "sha256": "b5d65a59060e68c4ff940e1eddfa6f94b2d68fdf58ed7f4dd57721c997e35e9d"
+    },
+    {
+      "path": "tts/LICENSE",
+      "role": "tts",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2#LICENSE",
+      "version": "72c347230107ef8a31098ec4d468a605244beef5f1ed00db97efa13518800653",
+      "license": "Apache-2.0",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "tts/README.md",
+      "role": "tts",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2#README.md",
+      "version": "72c347230107ef8a31098ec4d468a605244beef5f1ed00db97efa13518800653",
+      "license": "Apache-2.0",
+      "sha256": "87359cd32dfdff6dfeb16633b5a116aee3b9ac69dec3302378270a2cab9885b1"
+    },
+    {
+      "path": "tts/klippy-cmudict.txt",
+      "role": "tts",
+      "source": "https://pypi.org/project/cmudict/1.1.3/",
+      "version": "cmudict-1.1.3; klippy-arpabet-recipe-1",
+      "license": "BSD-2-Clause",
+      "sha256": "7e0c435f6037b4beb573433d004ad084cefa1f216b94dbafbaff473c17eab6ae"
+    },
+    {
+      "path": "tts/model.int8.onnx",
+      "role": "tts",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2#model.int8.onnx",
+      "version": "72c347230107ef8a31098ec4d468a605244beef5f1ed00db97efa13518800653",
+      "license": "Apache-2.0",
+      "sha256": "75635ea3b85a32d00094dcdd61a258aba87c160f7c264c304a7b3ae9d734195e"
+    },
+    {
+      "path": "tts/tokens.txt",
+      "role": "tts",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2#tokens.txt",
+      "version": "72c347230107ef8a31098ec4d468a605244beef5f1ed00db97efa13518800653",
+      "license": "Apache-2.0",
+      "sha256": "6ebb6bb288f20f3ae8d004d3c2ca27697da27c037d75e81a60e2a6a663f95425"
+    },
+    {
+      "path": "tts/voices.bin",
+      "role": "tts",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2#voices.bin",
+      "version": "72c347230107ef8a31098ec4d468a605244beef5f1ed00db97efa13518800653",
+      "license": "Apache-2.0",
+      "sha256": "1c5a5b983d3d50d8586d437a51f3faa2da7919ce76a013c081e65671a3447c29"
+    },
+    {
+      "path": "wake/README.md",
+      "role": "wake",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2#README.md",
+      "version": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+      "license": "Apache-2.0",
+      "sha256": "74e42d37d63acd2366b042151d576fcc0c4917a41de339414a37f1e79f4e80e2"
+    },
+    {
+      "path": "wake/bpe.model",
+      "role": "wake",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2#bpe.model",
+      "version": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+      "license": "Apache-2.0",
+      "sha256": "c8a2a0129c4ab8e463164c142f82d25649661b122c8cd0b7aab5c9e80b90ad24"
+    },
+    {
+      "path": "wake/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "role": "wake",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2#decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "version": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+      "license": "Apache-2.0",
+      "sha256": "e40ff43297abe815e8898494c17e71bba2152d9d40fa3eb803f75d0f7533329a"
+    },
+    {
+      "path": "wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "role": "wake",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2#encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "version": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+      "license": "Apache-2.0",
+      "sha256": "1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678"
+    },
+    {
+      "path": "wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "role": "wake",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2#joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "version": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+      "license": "Apache-2.0",
+      "sha256": "eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c"
+    },
+    {
+      "path": "wake/klippy-keywords.txt",
+      "role": "wake",
+      "source": "https://github.com/khisanthax/Klippy-Assistant/blob/main/scripts/prepare_models.py",
+      "version": "klippy-phonetic-recipe-1; sentencepiece-0.2.3",
+      "license": "Apache-2.0",
+      "sha256": "aa8b55aa7dcde53c503d790d01d9e80ec6b9c7e61c871ccf1410402b6bcaae2b"
+    },
+    {
+      "path": "wake/tokens.txt",
+      "role": "wake",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2#tokens.txt",
+      "version": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+      "license": "Apache-2.0",
+      "sha256": "fd2ded4050a55d2b1578870ba8697d02371980217806b7558bd0a5cc60f3ba53"
+    }
+  ],
+  "speech_config": {
+    "tts_kind": "kokoro",
+    "voice_id": 3,
+    "wake": {
+      "tokens": "wake/tokens.txt",
+      "encoder": "wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "decoder": "wake/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "joiner": "wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "keywords_file": "wake/klippy-keywords.txt"
+    },
+    "asr": {
+      "encoder": "asr/tiny.en-encoder.int8.onnx",
+      "decoder": "asr/tiny.en-decoder.int8.onnx",
+      "tokens": "asr/tiny.en-tokens.txt"
+    },
+    "tts": {
+      "model": "tts/model.int8.onnx",
+      "voices": "tts/voices.bin",
+      "tokens": "tts/tokens.txt",
+      "lexicon": "tts/klippy-cmudict.txt"
+    }
+  },
+  "runtime": {
+    "binary": "llama/llama-server.exe",
+    "model": "Qwen3-1.7B-Q4_K_M.gguf"
+  }
 }

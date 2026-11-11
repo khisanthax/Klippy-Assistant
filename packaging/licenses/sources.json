@@ -1,0 +1,58 @@
+[
+  {
+    "path": "Apache-2.0.txt",
+    "source": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "path": "Whisper-MIT.txt",
+    "source": "https://raw.githubusercontent.com/openai/whisper/86098128c0b4f24f0e2aa2994de830614b474227/LICENSE",
+    "sha256": "b5d65a59060e68c4ff940e1eddfa6f94b2d68fdf58ed7f4dd57721c997e35e9d"
+  },
+  {
+    "path": "LLAMA-MIT.txt",
+    "source": "https://raw.githubusercontent.com/ggml-org/llama.cpp/b12110/LICENSE",
+    "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+  },
+  {
+    "path": "WebRTC-BSD.txt",
+    "source": "https://raw.githubusercontent.com/webrtc-mirror/webrtc/main/LICENSE",
+    "sha256": "ab00a482b6a3902e40211b43c5d0441962ea99b6cc7c25c0f243fa270b78d482"
+  },
+  {
+    "path": "WebRTC-PATENTS.txt",
+    "source": "https://raw.githubusercontent.com/strands-labs/pywebrtc-audio/1bc860a2051c2b9b3c10b8c778770794b9321d84/vendor/webrtc_audio/PATENTS",
+    "sha256": "01462e2068d1a04c2274f3389773014c14ed9bc3446b28303543bd3e3c064145"
+  },
+  {
+    "path": "WebRTC-Abseil.txt",
+    "source": "https://raw.githubusercontent.com/strands-labs/pywebrtc-audio/1bc860a2051c2b9b3c10b8c778770794b9321d84/vendor/webrtc_audio/abseil/LICENSE",
+    "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747"
+  },
+  {
+    "path": "WebRTC-jsoncpp.txt",
+    "source": "https://raw.githubusercontent.com/strands-labs/pywebrtc-audio/1bc860a2051c2b9b3c10b8c778770794b9321d84/vendor/webrtc_audio/jsoncpp/LICENSE",
+    "sha256": "76c45ece83a26117f86f4e349e7df118708e061e87225328fb478ce1e8b3eb86"
+  },
+  {
+    "path": "RNNoise-BSD.txt",
+    "source": "https://raw.githubusercontent.com/xiph/rnnoise/master/COPYING",
+    "sha256": "e2f59ff41d9d03adc3dcf3deff170f8c8cf4a6eb4a9b174762a7656d23200ffa"
+  },
+  {
+    "path": "ONNXRuntime-MIT.txt",
+    "source": "https://raw.githubusercontent.com/microsoft/onnxruntime/v1.28.2/LICENSE",
+    "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+  },
+  {
+    "path": "ONNXRuntime-ThirdParty.txt",
+    "source": "https://raw.githubusercontent.com/microsoft/onnxruntime/v1.28.2/ThirdPartyNotices.txt",
+    "sha256": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2"
+  },
+  {
+    "path": "PFFFT-NOTICE.txt",
+    "source": "https://raw.githubusercontent.com/strands-labs/pywebrtc-audio/1bc860a2051c2b9b3c10b8c778770794b9321d84/vendor/webrtc_audio/third_party/pffft/src/pffft.c",
+    "sha256": "5e5bcdb710616235d35523b1542483c643e839177cd80f1dd4d1aa07f2976b57",
+    "derivation": "initial license comment, verbatim"
+  }
+]

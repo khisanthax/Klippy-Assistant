@@ -1,13 +1,13 @@
-Klippy Assistant 0.1.0 Engineering Preview
+Klippy Assistant 0.2.0 Offline Voice Engineering Preview
 
 This package is unsigned and is not a stable v1.0 release.
 
 It includes the desktop app, manual commands, safety confirmations, macro review and
-notification-only printer monitoring. It does not include a qualified speech/LLM model pack.
-Voice controls remain disabled unless a separately qualified local pack is supplied.
-No cloud service or automatic model download is used.
+notification-only printer monitoring. It includes local speech and language models;
+no cloud service or post-install model download is required. Enable listening to load
+the bundled engines. The microphone starts off unless configured otherwise.
 
-Hardware actuation and microphone accuracy have not been qualified. Test safely with a
+Hardware actuation and broad microphone/room accuracy have not been qualified. Test safely with a
 simulated printer first. Firmware and physical emergency controls remain essential.
 
 Settings and Windows credential-vault entries are preserved on upgrade and uninstall.

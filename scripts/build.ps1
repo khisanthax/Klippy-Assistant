@@ -1,5 +1,6 @@
 param(
     [switch]$Stable,
+    [string]$ModelPack = 'local\bundle-models-voice',
     [string]$Iscc = '',
     [string]$Python = '.venv\Scripts\python.exe'
 )
@@ -11,9 +12,10 @@ function Invoke-Checked {
     if ($LASTEXITCODE -ne 0) { throw "Build step failed: $Exe" }
 }
 if ($Stable) {
-    Invoke-Checked $Python @('-c', 'from pathlib import Path; from klippy.models import verify_pack; verify_pack(Path("models"))')
     throw 'Stable publication remains disabled until RELEASE_CHECKLIST.md has reviewed hardware/installer evidence.'
 }
+$taskModelPack = (Resolve-Path -LiteralPath $ModelPack).Path
+Invoke-Checked $Python @('scripts/verify_models.py', $taskModelPack, '--qualified')
 Invoke-Checked $Python @('-m', 'pytest', '-q')
 Invoke-Checked $Python @('-m', 'ruff', 'check', 'src', 'tests', 'scripts')
 Invoke-Checked $Python @('scripts/collect_licenses.py', 'build/licenses')
@@ -26,8 +28,10 @@ try {
         (Join-Path $env:SystemRoot 'System32'), $env:SystemRoot) -join ';'
     Invoke-Checked $taskPythonExe @('-m', 'PyInstaller', '--noconfirm', '--clean', '--windowed', '--onedir',
         '--name', 'Klippy', '--paths', 'src', '--collect-all', 'sherpa_onnx', '--collect-all', 'sounddevice',
+        '--collect-all', 'pywebrtc_audio', '--additional-hooks-dir', 'packaging/hooks',
+        '--exclude-module', 'cmudict', '--exclude-module', 'sentencepiece',
         '--hidden-import', 'keyring.backends.Windows', '--add-data', 'build/licenses;licenses',
-        '--add-data', 'models/manifest.json;models', 'scripts/launcher.py')
+        '--add-data', ($taskModelPack + ';models'), 'scripts/launcher.py')
 } finally {
     $env:PATH = $taskPreviousPath
 }
@@ -35,6 +39,10 @@ $smokeReport = Join-Path $PWD 'build\frozen-smoke.txt'
 $process = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--smoke-test', '--smoke-report', ('"' + $smokeReport + '"')) -WindowStyle Hidden -PassThru
 if (-not $process.WaitForExit(30000)) { $process.Kill(); throw 'Frozen application smoke test timed out' }
 if ($process.ExitCode -ne 0) { throw 'Frozen application smoke test failed' }
+$voiceReport = Join-Path $PWD 'build\frozen-voice.json'
+$voiceProcess = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--voice-self-test', '--smoke-report', ('"' + $voiceReport + '"')) -WindowStyle Hidden -PassThru
+if (-not $voiceProcess.WaitForExit(180000)) { $voiceProcess.Kill(); throw 'Frozen offline voice self-test timed out' }
+if ($voiceProcess.ExitCode -ne 0) { throw "Frozen offline voice self-test failed; see $voiceReport" }
 if (-not $Iscc) {
     $candidates = @(
         (Join-Path $PWD 'local\inno\ISCC.exe'),

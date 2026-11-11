@@ -21,15 +21,26 @@ class Conversation:
         self.engine, self.llm, self.clock, self.timeout = engine, llm, clock, timeout
         self.until = 0.0
         self.draft = None
+        self.generation = 0
 
     def clear(self):
+        self.generation += 1
         self.until = 0.0
         self.draft = None
         self.engine.cancel()
 
-    async def hear(self, text, *, source="manual", own_voice=False):
+    def interrupt(self):
+        """Stop stale interpretation without changing an already-reviewed pending action."""
+        self.generation += 1
+        self.until = self.clock() + self.timeout
+        if self.engine.pending is None:
+            self.engine.cancel()  # Invalidate validation still in flight.
+
+    async def hear(self, text, *, source="manual", own_voice=False, confirmation_token=None):
         if own_voice:
             return None
+        self.generation += 1
+        generation = self.generation
         if self.clock() >= self.until:
             self.draft = None
         text = text.strip().lower().rstrip(".!?")
@@ -52,7 +63,8 @@ class Conversation:
             self.draft = None
             return "Pending action canceled."
         if text == "confirm":
-            token = self.engine.pending.token if self.engine.pending else ""
+            token = ((confirmation_token or "") if source == "voice" else
+                     self.engine.pending.token if self.engine.pending else "")
             return await self.engine.confirm(token)
         # Any other utterance cancels the prior action before interpretation, including failures.
         self.engine.cancel()
@@ -91,6 +103,8 @@ class Conversation:
             intent = await self.llm.interpret(text, selected, self.engine.store.macros(selected))
         if intent is None:
             raise Rejected("Please specify a status query, printer action, or approved macro")
+        if generation != self.generation:
+            return None  # A wake/correction/cancel superseded inference while it was awaited.
         try:
             return await self.engine.propose(intent)
         except NeedsParameter:
