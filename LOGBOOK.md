@@ -1,5 +1,27 @@
 # Logbook
 
+## 2026-11-11 — Preview acceptance evidence and publication preparation
+
+Final application suite: 78 passed locally; Ruff clean. Windows CI passed on aa5b30c
+(run 43022588573). Independent Windows CI installer build is being followed to completion.
+Phase 1 GitHub issue/milestone closed; all later phases retain their incomplete gates.
+
+Final local frozen startup/shutdown including Sherpa and sounddevice native imports passed.
+Unsigned installer built: 56,473,009 bytes, SHA256
+b45d58b8f7b8048c7bd23cc4eedab679ac4d4bdab98084d20ab1c9e99c2e8971.
+Per-user installation, same-version reinstall, actual isolated SQLite sentinel preservation,
+installed startup, uninstall and retained isolated data all passed on development host.
+Installer contains relevant user docs, GNU license texts and Qt replacement/source notices.
+No clean VM/cross-version qualification is claimed. Tests never touched actual user settings.
+
+Added negated-action regressions and print-error notification while firmware stays ready.
+No live printer writes. Inspected the rendered native Windows panel visually; fonts/layout
+are legible and unclipped. Synthetic engine evidence remains under benchmarks/.
+
+Next action: finish independent CI build, publish v0.1.0-preview.1 as a private prerelease
+with installer/checksum/report, record publication, and continue Phase 2's primary wake,
+hands-free interruption and model redistribution work. Full project remains incomplete.
+
 ## 2026-11-11 — Windows preview packaging and real local engine probes
 
 Completed: source pushed to private repository; eight GitHub milestones/issues created;

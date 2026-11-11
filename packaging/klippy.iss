@@ -27,6 +27,11 @@ Name: "startup"; Description: "Start Klippy with Windows (hidden in tray)"; Flag
 Source: "..\dist\Klippy\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\RELEASE_CHECKLIST.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\RELEASE_REPORT.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\ROADMAP.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\TEST_PLAN.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\LOGBOOK.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\THIRD_PARTY_LICENSES.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Klippy Assistant"; Filename: "{app}\Klippy.exe"; Parameters: "--show"

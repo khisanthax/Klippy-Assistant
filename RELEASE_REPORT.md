@@ -38,10 +38,10 @@ README.md describes manual data removal. Installer is unsigned.
 
 ## Verification
 
-78 local automated tests passed. Ruff passed. Earlier Windows GitHub CI passed; consult
-the repository Actions tab for the final evidence commit. Source and frozen Windows
+78 local automated tests passed. Ruff passed. Windows GitHub CI passed on application
+commit aa5b30c ([run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43022588573)). Source and frozen Windows
 startup/clean shutdown passed, including native speech/audio imports. The installer built
-and initial per-user install/reinstall/preservation/installed launch/uninstall checks passed
+and per-user install/reinstall/SQLite preservation/installed launch/uninstall checks passed
 on the development host. Final evidence is maintained in LOGBOOK.md.
 
 Read-only real hardware: configured Mercury SSH access verified; two Moonraker instances
@@ -63,7 +63,7 @@ CPU-only synthetic probes, not the requested typical 16 GB end-user baseline:
 | Whisper ASR | 0.142 s; synthetic text: pause the test printer |
 | Llama startup | 3.324 s (warm filesystem cache; separate earlier run 11.13 s) |
 | Qwen interpretation | 1.552–3.165 s across three synthetic prompts |
-| Preview installer | approximately 53.8 MiB before final license/docs repackaging |
+| Preview installer | 56,473,009 bytes (53.9 MiB), including license/docs repackaging |
 
 Detailed JSON evidence is under benchmarks/. These small samples are not accuracy rates
 or latency guarantees. Full voice-pipeline latency, device changes, sleep/resume, model

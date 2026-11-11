@@ -4,7 +4,7 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 
 | Phase | Status | Verified / remaining |
 |---|---|---|
-| 1. Foundation | Implemented | Private repo pushed, runnable Qt application, storage, docs, 78 local tests; Windows CI green for earlier milestone, latest validation pending |
+| 1. Foundation | Complete | Private repo pushed, runnable Qt application, storage, docs, 78 local tests; Windows CI green on application commit aa5b30c; phase milestone/issue closed |
 | 2. Local voice and AI | Partial | Actual KWS/Whisper/VITS/Qwen candidate probes, bounded capture, owned offline llama process, schema+evidence validation; short Klippy wake failure, model rights review, acoustic qualification, speaker enrollment and hands-free interruption remain |
 | 3. Connectivity | Partial | Manual approval, vault keys, LAN discovery, HTTP client, status polling, subscription adapter, read-only API validated on one real instance; full fleet/auth/subscription qualification pending |
 | 4. Macro intelligence | Partial | Discovery, fingerprint/reapproval, conflicts, possible renames, aliases, review UI; semantic benchmark and rich differences pending |
