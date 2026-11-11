@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 import time
@@ -24,6 +25,7 @@ class Conversation:
         self.session = Session(clock, timeout)
         self.draft = None
         self.generation = 0
+        self.interpretation_task = None
 
     @property
     def until(self):
@@ -33,8 +35,14 @@ class Conversation:
     def until(self, value):
         self.session.deadline = value
 
+    def _cancel_interpretation(self):
+        task = self.interpretation_task
+        if task and not task.done():
+            task.get_loop().call_soon_threadsafe(task.cancel)
+
     def clear(self):
         self.generation += 1
+        self._cancel_interpretation()
         self.session.clear()
         self.draft = None
         self.engine.cancel()
@@ -42,6 +50,7 @@ class Conversation:
     def interrupt(self):
         """Stop stale interpretation without changing an already-reviewed pending action."""
         self.generation += 1
+        self._cancel_interpretation()
         self.session.clear()
         self.until = self.clock() + self.timeout
         if self.engine.pending is None:
@@ -67,6 +76,7 @@ class Conversation:
         if own_voice:
             return None
         self.generation += 1
+        self._cancel_interpretation()
         generation = self.generation
         if self.clock() >= self.until:
             self.draft = None
@@ -138,8 +148,18 @@ class Conversation:
                 intent = Intent(action=Action.MACRO, printer_id=selected, macro=matches[0], params=parameters)
         if intent is None and self.llm:
             # The model cannot grant permissions, produce code, choose an unselected printer or confirm.
-            with timings.span("llm_queue_and_inference"):
-                intent = await self.llm.interpret(text, selected, self.engine.store.macros(selected))
+            task = asyncio.create_task(self.llm.interpret(text, selected, self.engine.store.macros(selected)))
+            self.interpretation_task = task
+            try:
+                with timings.span("llm_queue_and_inference"):
+                    intent = await task
+            except asyncio.CancelledError:
+                if generation != self.generation:
+                    return None
+                raise
+            finally:
+                if self.interpretation_task is task:
+                    self.interpretation_task = None
         if intent is None:
             raise Rejected("Please specify a status query, printer action, or approved macro")
         if generation != self.generation:

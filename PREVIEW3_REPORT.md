@@ -8,6 +8,7 @@ remain open. No physical printer commands were used for development or qualifica
 - A shared follow-up session remains active through ASR, interpretation and playback.
   The default 30-second window restarts after an exchange completes. Wake interruption,
   bounded queues, own-speech rejection, exact tokens and stale-generation rejection remain.
+  New requests cancel stale interpretation tasks without canceling safety-engine transmissions.
 - Kokoro callbacks enqueue PCM during generation. A process-local 32 MiB/32-response
   cache avoids repeated synthesis. Models remain loaded between requests.
 - A spoken confirmation is unarmed until its exact prompt drains through playback plus

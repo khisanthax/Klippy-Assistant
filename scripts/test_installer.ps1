@@ -1,5 +1,6 @@
 param([string]$Installer = 'dist\Klippy-Setup-0.3.0-preview.1.exe', [string]$PreviousInstaller = '',
-      [string]$Python = '.venv\Scripts\python.exe', [switch]$BlockExternalNetwork)
+      [string]$Python = '.venv\Scripts\python.exe', [switch]$BlockExternalNetwork,
+      [switch]$MeasurePerformance)
 $ErrorActionPreference = 'Stop'
 function Wait-QaProcess {
     param($Process, [int]$Seconds)
@@ -57,6 +58,9 @@ try {
         '--voice-self-test','--smoke-report',('"' + $taskVoiceReport + '"'))
     Wait-QaProcess $taskVoice 240
     if (-not (Get-Content -LiteralPath $taskVoiceReport -Raw | ConvertFrom-Json).passed) { throw 'Installed voice gate failed' }
+    if ($MeasurePerformance) {
+        & (Join-Path $PSScriptRoot 'performance_probe.ps1') -Application 'local\installer-qa\application\Klippy.exe'
+    }
     $taskUninstaller = Start-Process -FilePath (Join-Path $taskInstallDir 'unins000.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="' + (Join-Path $taskQaRoot 'uninstall.log') + '"'))
     Wait-QaProcess $taskUninstaller 120
@@ -65,6 +69,7 @@ try {
     @{
         status='passed'; environment='Development host, not a clean VM';
         cross_version_upgrade=[bool]$PreviousInstaller; external_network_blocked=[bool]$BlockExternalNetwork;
+        performance_budget_test=[bool]$MeasurePerformance;
         installers=$taskInstallers; tests=@('per-user install','same-version reinstall preserving isolated data','installed application smoke test',
                 'installed complete-model offline voice integration',
                 'uninstall removes executable','uninstall preserves isolated user data');

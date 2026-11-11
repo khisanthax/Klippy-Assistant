@@ -13,11 +13,13 @@ Expanded phases 3–8 software: bounded fleet polling and Happy Hare notificatio
 macro warnings/rename diffs/synonyms/explicit numeric parameters; configurable operational
 confirmations with fresh mandatory validation; scrollable settings and companion preferences;
 validated backups with pre-restore SQLite online backup, revoked approvals and mic-off recovery.
-Original 99 tests remain unchanged; 138 tests and Ruff passed, including notification/prompt
+Original 99 tests remain unchanged; 139 tests and Ruff passed, including notification/prompt
 isolation, muted delivery, cache streaming and unknown-parameter regressions. Real-model source synthetic integration passed; zero printer writes.
 Numeric artifacts and qualification scope are in PREVIEW3_REPORT.md and benchmarks/preview3-*.
 
 Preparing 0.3.0-preview.1 build, upgrade/reinstall/installed checks and 16 GiB job-budget probe.
+New utterances now cancel only stale LLM interpretation tasks, avoiding queued obsolete inference;
+consequential safety-engine transmissions are never canceled/retried by that optimization.
 No Windows Sandbox executable, Hyper-V cmdlet, VBoxManage or vmrun is available here; host
 RAM is 68,630,749,184 bytes. A memory-budget test cannot close the 16 GB physical-VM gate.
 Next: run package qualification and independent Windows CI, record actual evidence, publish

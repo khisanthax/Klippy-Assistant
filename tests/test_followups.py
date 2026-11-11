@@ -43,6 +43,26 @@ async def test_followup_supersedes_slow_llm_without_losing_session(rig):
     assert engine.pending is None and not sim.writes
 
 
+async def test_new_interpretation_cancels_only_stale_inference(rig):
+    _, sim, engine, clock = rig
+    entered, cancelled = asyncio.Event(), asyncio.Event()
+    class LLM:
+        async def interpret(self, text, *args):
+            if "first" in text:
+                entered.set()
+                try:
+                    await asyncio.Event().wait()
+                finally:
+                    cancelled.set()
+            return Intent(action=Action.STATUS, printer_id="sim")
+    c = Conversation(engine, LLM(), clock=lambda: clock[0])
+    stale = asyncio.create_task(c.hear("Klippy first request", source="voice"))
+    await entered.wait()
+    assert "63%" in await asyncio.wait_for(c.hear("second request", source="voice"), 2)
+    assert await asyncio.wait_for(stale, 2) is None
+    assert cancelled.is_set() and not sim.writes
+
+
 @pytest.mark.parametrize("phrase,expected", [
     ("What's the nozzle temperature?", "Nozzle: 23.0"),
     ("How hot is the bed?", "Bed: 21.0"),
