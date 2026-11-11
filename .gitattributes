@@ -6,3 +6,5 @@
 *.yml text eol=lf
 *.ps1 text eol=crlf
 *.iss text eol=crlf
+# Preserve upstream notice text verbatim, including its whitespace.
+packaging/licenses/*.txt whitespace=-blank-at-eol,-blank-at-eof

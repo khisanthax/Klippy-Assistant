@@ -5,7 +5,7 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 | Phase | Status | Verified / remaining |
 |---|---|---|
 | 1. Foundation | Complete | Private repo pushed, runnable Qt application, storage, docs, 78 local tests; Windows CI green on application commit aa5b30c; phase milestone/issue closed |
-| 2. Local voice and AI | Partial | Actual KWS/Whisper/VITS/Qwen candidate probes, bounded capture, owned offline llama process, schema+evidence validation; short Klippy wake failure, model rights review, acoustic qualification, speaker enrollment and hands-free interruption remain |
+| 2. Local voice and AI | Core implemented; hardware gate open | Klippy/Hey Klippy synthetic detection fixed, actual Whisper/Kokoro/Qwen pipeline, duplex AEC/interruption, Windows capture/render smoke, 57-file license-reviewed payload; human wake/room accuracy and optional speaker enrollment remain open |
 | 3. Connectivity | Partial | Manual approval, vault keys, LAN discovery, HTTP client, status polling, subscription adapter, read-only API validated on one real instance; full fleet/auth/subscription qualification pending |
 | 4. Macro intelligence | Partial | Discovery, fingerprint/reapproval, conflicts, possible renames, aliases, review UI; semantic benchmark and rich differences pending |
 | 5. Safe execution | Partial | Central engine, schemas, state checks, confirmations, uncertain outcomes, dedicated emergency endpoint; supervised hardware tests pending |
@@ -16,8 +16,8 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 ## Next priority
 
 1. Keep safety regressions passing; exercise Windows build/installer and remote CI.
-2. Qualify model candidates and licenses; pin provenance and checksums, implement bundled
-   microphone-qualified Klippy detection. Owned llama.cpp lifecycle and actual BPE keyword tokens are implemented.
+2. Finish frozen/installed verification of the complete voice payload, then calibrate
+   microphone-qualified Klippy detection and room interruption with labeled human samples.
 3. Validate on a microphone with labeled recordings (Klippy, Hey Klippy, Klipper, Clippy,
    silence, own TTS, interruptions). Do not claim transcript tests validate acoustics.
 4. Supervised printer movement/heating/cancellation tests require the owner present.

@@ -19,14 +19,30 @@ license texts must accompany distribution. Model rights are independent of runti
 | llama.cpp candidate | MIT; not bundled until approved asset inventory exists |
 | Qwen3 1.7B GGUF candidate | Apache-2.0 according to official model card; not yet downloaded/qualified |
 
-No model pack is currently approved for redistribution. models/manifest.json intentionally has
-an empty asset inventory. Stable build gates reject it. A package license collector copies
-installed distribution license files; final binary inventory/legal review remains a gate.
+The Phase 2 model pack is approved for engineering-preview bundling based on the recorded
+publisher license statements and notices. models/manifest.json lists every included model,
+binary, data and notice hash plus primary license evidence. This is separate from acoustic
+accuracy, clean-machine qualification and stable-release acceptance.
+
+| Bundled Phase 2 component | License / provenance |
+|---|---|
+| GigaSpeech KWS ONNX | Apache-2.0 model card and maintainer clarification |
+| Whisper tiny.en ONNX | MIT original weights; converted export under the same weight rights |
+| Kokoro v1.0 ONNX and voices | Apache-2.0 upstream card and converted archive license |
+| Generated English lexicon | BSD-2-Clause CMUdict data, original ARPABET-to-IPA recipe; no CMU-in-IPA/eSpeak data |
+| Qwen3 1.7B Q4_K_M | Apache-2.0; pinned GGUF revision and upstream LFS checksum |
+| llama.cpp b12110 CPU DLLs/server | MIT; bundled LLVM OpenMP uses Apache-2.0 with LLVM exception |
+| WebRTC DSP wrapper | Apache-2.0; WebRTC BSD/PATENTS, Abseil, PFFFT, RNNoise and JSON notices included |
+| ONNX Runtime 1.28.2 | MIT and upstream third-party notices included |
+
+CMUdict's Python wrapper is GPL-3.0-or-later and is a build-time tool only. It is excluded
+from the frozen app, as is SentencePiece. The dictionary's independent BSD data notice
+is included in the model pack. Old VITS and third-party IPA lexicons are not bundled.
 
 GNU LGPLv3/GPLv3 texts and dynamic Qt replacement/source information are additionally
 included under packaging/licenses and copied into the installed license directory. The
 Qt source archive directory URLs were checked successfully on 2026-11-11.
-Experimental model cards/checksums are in models/candidates.json; the KWS card is
-Apache-2.0, VITS-LJS has a separate lexicon review gate, and no model weights ship in the preview.
+Experimental Phase 1 model cards/checksums remain in models/candidates.json for history.
+The production manifest and PHASE2_REPORT.md describe the selected replacement assets.
 
 Project code is private. No public license grant is made by this repository.

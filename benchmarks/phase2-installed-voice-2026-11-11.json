@@ -1,0 +1,251 @@
+{
+  "scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
+  "speech_load_seconds": 4.647,
+  "wake_cases": [
+    {
+      "phrase": "Klippy",
+      "synthetic_voice": 0,
+      "detected": true
+    },
+    {
+      "phrase": "Klippy",
+      "synthetic_voice": 3,
+      "detected": true
+    },
+    {
+      "phrase": "Hey Klippy",
+      "synthetic_voice": 0,
+      "detected": true
+    },
+    {
+      "phrase": "Hey Klippy",
+      "synthetic_voice": 3,
+      "detected": true
+    },
+    {
+      "phrase": "Klippy stop talking",
+      "synthetic_voice": 0,
+      "detected": true
+    },
+    {
+      "phrase": "Klippy stop talking",
+      "synthetic_voice": 3,
+      "detected": true
+    },
+    {
+      "phrase": "Hey Klippy stop talking",
+      "synthetic_voice": 0,
+      "detected": true
+    },
+    {
+      "phrase": "Hey Klippy stop talking",
+      "synthetic_voice": 3,
+      "detected": true
+    },
+    {
+      "phrase": "clipper",
+      "synthetic_voice": 0,
+      "detected": false
+    },
+    {
+      "phrase": "clipper",
+      "synthetic_voice": 3,
+      "detected": false
+    },
+    {
+      "phrase": "The printer is ready",
+      "synthetic_voice": 0,
+      "detected": false
+    },
+    {
+      "phrase": "The printer is ready",
+      "synthetic_voice": 3,
+      "detected": false
+    },
+    {
+      "phrase": "clippy",
+      "synthetic_voice": 0,
+      "detected": true
+    },
+    {
+      "phrase": "clippy",
+      "synthetic_voice": 3,
+      "detected": true
+    }
+  ],
+  "pipeline_transcripts": [
+    "Klippy what is the status of the test printer?"
+  ],
+  "own_echo_wakes": 0,
+  "own_echo_requests": 0,
+  "barge_wakes": 1,
+  "barge_candidates": [],
+  "barge_linear_fit_error": 1.570335707962373e-13,
+  "barge_states": [
+    "Listening",
+    "Listening"
+  ],
+  "asr_observations": [
+    {
+      "at": 5.48,
+      "text": "Clippy, what is the status of the test printer?",
+      "audio_seconds": 3.95
+    },
+    {
+      "at": 13.67,
+      "text": "Clear.",
+      "audio_seconds": 1.6
+    },
+    {
+      "at": 14.16,
+      "text": "Clibby stuff",
+      "audio_seconds": 1.6
+    },
+    {
+      "at": 14.63,
+      "text": "Clippy stop, top.",
+      "audio_seconds": 1.6
+    },
+    {
+      "at": 15.69,
+      "text": "Clippy stop talking",
+      "audio_seconds": 3.87
+    }
+  ],
+  "barge_frame_metrics": [
+    {
+      "at": 3.0,
+      "energy": 0.0,
+      "near_end": false,
+      "probe_busy": false,
+      "correlation": 0.987
+    },
+    {
+      "at": 3.1,
+      "energy": 0.0085,
+      "near_end": false,
+      "probe_busy": false,
+      "correlation": 0.967
+    },
+    {
+      "at": 3.2,
+      "energy": 0.0147,
+      "near_end": true,
+      "probe_busy": true,
+      "correlation": 0.508
+    },
+    {
+      "at": 3.3,
+      "energy": 0.1239,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.457
+    },
+    {
+      "at": 3.4,
+      "energy": 0.0169,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.579
+    },
+    {
+      "at": 3.5,
+      "energy": 0.0109,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.656
+    },
+    {
+      "at": 3.6,
+      "energy": 0.0929,
+      "near_end": true,
+      "probe_busy": true,
+      "correlation": 0.584
+    },
+    {
+      "at": 3.7,
+      "energy": 0.0044,
+      "near_end": true,
+      "probe_busy": true,
+      "correlation": 0.525
+    },
+    {
+      "at": 3.8,
+      "energy": 0.0033,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.49
+    },
+    {
+      "at": 3.9,
+      "energy": 0.021,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.879
+    },
+    {
+      "at": 4.0,
+      "energy": 0.1116,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.578
+    },
+    {
+      "at": 4.1,
+      "energy": 0.019,
+      "near_end": true,
+      "probe_busy": true,
+      "correlation": 0.45
+    },
+    {
+      "at": 4.2,
+      "energy": 0.0601,
+      "near_end": true,
+      "probe_busy": true,
+      "correlation": 0.404
+    },
+    {
+      "at": 4.3,
+      "energy": 0.0373,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.494
+    },
+    {
+      "at": 4.4,
+      "energy": 0.0343,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.426
+    },
+    {
+      "at": 4.5,
+      "energy": 0.0041,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.467
+    },
+    {
+      "at": 4.6,
+      "energy": 0.0018,
+      "near_end": true,
+      "probe_busy": false,
+      "correlation": 0.568
+    }
+  ],
+  "barge_requests": [
+    "Klippy stop talking"
+  ],
+  "barge_detection_seconds_from_user_start": 1.23,
+  "playback_flushed": true,
+  "llm_intent": {
+    "action": "temperatures",
+    "printer_id": "synthetic-printer",
+    "macro": null,
+    "params": {}
+  },
+  "simulated_status_response": "printing; 63% complete",
+  "printer_writes": 0,
+  "passed": true,
+  "homophone_note": "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
+}

@@ -63,5 +63,3 @@ def cmu_to_ipa(phones):
         value = "ə" if phone == "AH0" else "ɚ" if phone == "ER0" else PHONES[base]
         output.extend(value)
     return output
-
-

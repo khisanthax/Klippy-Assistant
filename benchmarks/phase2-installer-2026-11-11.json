@@ -1,0 +1,17 @@
+﻿{
+    "status":  "passed",
+    "limitations":  [
+                        "not a cross-version upgrade",
+                        "not clean-machine qualification",
+                        "not physical microphone accuracy"
+                    ],
+    "tests":  [
+                  "per-user install",
+                  "same-version reinstall preserving isolated data",
+                  "installed application smoke test",
+                  "installed complete-model offline voice integration",
+                  "uninstall removes executable",
+                  "uninstall preserves isolated user data"
+              ],
+    "environment":  "Development host, not a clean VM"
+}

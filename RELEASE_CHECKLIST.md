@@ -5,7 +5,7 @@ Stable release is blocked until every applicable item has evidence.
 - [x] Private repository pushed; CI passes on Windows.
 - [ ] Current LOGBOOK, roadmap, architecture, user guide, license notices.
 - [x] Application launches and closes cleanly from installed package (development host).
-- [ ] Complete local speech and LLM assets with reviewed redistribution rights, versions,
+- [x] Complete local speech and LLM assets with reviewed redistribution rights, versions,
       immutable sources, checksums and included license texts.
 - [ ] Verified Klippy wake word on actual microphone; no unrelated substitute.
 - [ ] Natural ASR/TTS, clarification, conversation expiry and hands-free interruption.
@@ -16,7 +16,7 @@ Stable release is blocked until every applicable item has evidence.
 - [ ] Fault monitoring never controls hardware; Happy Hare faults tested where available.
 - [ ] Companion visibility/animation/tray and listening schedule verified.
 - [ ] CPU-only benchmark results with host specifications.
-- [ ] Single installer with all required runtime/model assets; no post-install downloads.
+- [x] Single installer with all required runtime/model assets; no post-install downloads (0.2.0 preview).
 - [ ] Clean-machine install/upgrade/uninstall and offline runtime verified.
 - [ ] No critical/high defects; limitations documented; release artifact checksums.
 - [x] Digital signing status accurate (currently unsigned).

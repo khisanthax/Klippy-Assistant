@@ -1,5 +1,13 @@
 param([string]$Installer = 'dist\Klippy-Setup-0.2.0-preview.1.exe')
 $ErrorActionPreference = 'Stop'
+function Wait-QaProcess {
+    param($Process, [int]$Seconds)
+    $taskDeadline = [DateTime]::UtcNow.AddSeconds($Seconds)
+    while (-not $Process.WaitForExit(30000)) {
+        if ([DateTime]::UtcNow -ge $taskDeadline) { throw 'Installer QA process timed out' }
+    }
+    if ($Process.ExitCode -ne 0) { throw "Installer QA process failed: $($Process.ExitCode)" }
+}
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $taskRoot = (Resolve-Path -LiteralPath '.').Path
 $taskQaRoot = Join-Path $taskRoot 'local\installer-qa'
@@ -20,8 +28,7 @@ try {
         $taskInstallerProcess = Start-Process -FilePath (Join-Path $taskRoot $Installer) -WindowStyle Hidden -PassThru -ArgumentList @(
             '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CURRENTUSER','/NOICONS','/TASKS=""',
             ('/DIR="' + $taskInstallDir + '"'),('/LOG="' + (Join-Path $taskQaRoot "install-$taskIteration.log") + '"'))
-        if (-not $taskInstallerProcess.WaitForExit(60000)) { throw 'Installer timed out' }
-        if ($taskInstallerProcess.ExitCode -ne 0) { throw 'Installer failed' }
+        Wait-QaProcess $taskInstallerProcess 240
         if (-not (Test-Path -LiteralPath (Join-Path $taskInstallDir 'Klippy.exe'))) { throw 'Application missing after install' }
         if ((Get-Content -LiteralPath $taskSentinel) -ne 'Klippy installer QA sentinel') { throw 'Settings sentinel changed' }
         & .\.venv\Scripts\python scripts/installer_settings.py verify
@@ -31,16 +38,22 @@ try {
     $taskApp = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '--smoke-test','--smoke-report',('"' + $taskSmokeReport + '"'))
     if (-not $taskApp.WaitForExit(30000) -or $taskApp.ExitCode -ne 0) { throw 'Installed startup failed' }
+    $taskVoiceReport = Join-Path $taskQaRoot 'installed-voice.json'
+    $taskVoice = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
+        '--voice-self-test','--smoke-report',('"' + $taskVoiceReport + '"'))
+    Wait-QaProcess $taskVoice 240
+    if (-not (Get-Content -LiteralPath $taskVoiceReport -Raw | ConvertFrom-Json).passed) { throw 'Installed voice gate failed' }
     $taskUninstaller = Start-Process -FilePath (Join-Path $taskInstallDir 'unins000.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="' + (Join-Path $taskQaRoot 'uninstall.log') + '"'))
-    if (-not $taskUninstaller.WaitForExit(60000) -or $taskUninstaller.ExitCode -ne 0) { throw 'Uninstaller failed' }
+    Wait-QaProcess $taskUninstaller 120
     if (Test-Path -LiteralPath (Join-Path $taskInstallDir 'Klippy.exe')) { throw 'Application executable remains after uninstall' }
     if (-not (Test-Path -LiteralPath $taskSentinel)) { throw 'Uninstall removed preserved user data' }
     @{
         status='passed'; environment='Development host, not a clean VM';
         tests=@('per-user install','same-version reinstall preserving isolated data','installed application smoke test',
+                'installed complete-model offline voice integration',
                 'uninstall removes executable','uninstall preserves isolated user data');
-        limitations=@('not a cross-version upgrade','not clean-machine qualification','no speech model payload')
+        limitations=@('not a cross-version upgrade','not clean-machine qualification','not physical microphone accuracy')
     } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $taskQaRoot 'results.json') -Encoding utf8
     Write-Output 'Installer QA passed on development host. Clean VM and cross-version upgrade remain untested.'
 } finally {

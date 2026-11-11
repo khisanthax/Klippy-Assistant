@@ -1,5 +1,8 @@
 # Klippy engineering preview — 2026-11-11
 
+**Historical Phase 1 report.** See [PHASE2_REPORT.md](PHASE2_REPORT.md) for the current
+offline voice preview and its complete model payload. The limits below describe 0.1.0.
+
 ## Repository and version
 
 Private repository: https://github.com/khisanthax/Klippy-Assistant

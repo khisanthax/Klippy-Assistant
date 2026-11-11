@@ -1,5 +1,31 @@
 # Decisions and evidence
 
+## 2026-11-11 — Phase 2 selected voice payload
+
+- Added phonetic BPE spellings for Klippy/Hey Klippy with the same intended wake label.
+  Synthetic short-word probes now pass. Clippy remains a homophone, not a spelling-based
+  acoustic exclusion. No unrelated wake word is substituted.
+- Chose Kokoro v1.0 int8 (Apache-2.0) with an independently generated BSD-2-Clause
+  CMUdict lexicon. Excluded VITS/CMU-in-IPA/eSpeak data from distribution. CMUdict's GPL
+  wrapper and SentencePiece are build tools only and excluded from frozen imports.
+- Qualified 57 model/runtime/data/notice files for redistribution and integrity, separately
+  from acoustic stability. Inputs are checksum-pinned and output must match the committed
+  manifest. The app never invokes the downloader at runtime.
+- Added WebRTC AEC3 plus a confidence-checked linear reference path. Direct AEC3 alone
+  suppressed a short near-end syllable during double-talk. The local Whisper wake-prefix
+  verifier is a second path during playback, never an action/confirmation authority.
+- Chose timestamped 10 ms duplex WASAPI packets and Windows default endpoint ID checks.
+  PortAudio owns its streams in one thread; model work is separate. Confirmed upstream
+  Sherpa bindings release the Python GIL for inference. Queues are bounded and stale
+  audio/inference is invalidated on interruption, mute, device changes or discontinuity.
+- Fixed the COM STA/MTA conflict after PortAudio initialization. A real default-device
+  capture/render smoke succeeded without saving speech or contacting a printer.
+- Voice confirmations carry the capture-time action token; delayed ASR cannot confirm a
+  different pending request. A wake stops speech/inference while preserving an already
+  reviewed confirmation until the user's actual request is interpreted.
+
+See PHASE2_REPORT.md and the Phase 2 JSON evidence for actual results and limits.
+
 ## 2026-11-11 — Initial implementation
 
 - Python 3.13.3 and PySide6 6.12.0 installed successfully on this Windows host. Python 3.12+

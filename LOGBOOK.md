@@ -1,5 +1,26 @@
 # Logbook
 
+## 2026-11-11 — Phase 2 frozen and installed-model gates passed
+
+99 source tests and Ruff passed, as did Windows test CI. Built one unsigned 0.2.0-preview.1
+installer with all 57 model/runtime/data/notice assets: 1,489,177,877 bytes (~1.39 GiB),
+SHA256 1cd1ccb981b7e7539c42b717e008ef3531ec39d0c1054afc2be34ab1b78e96c7.
+Frozen self-test loaded bundled assets, ran the local CPU LLM, rejected own echo and
+interrupted simulated playback at ~0.71 s. No printer writes.
+
+Per-user install, same-version reinstall preserving isolated SQLite, installed startup,
+installed complete-model voice gate, uninstall and retained isolated data passed. The
+installed probe measured a 1.23 s synthetic interruption, zero own echo requests and zero
+printer writes. Actual user settings were untouched. Windows default audio smoke completed
+TTS over 884 capture frames with zero own wake/utterance events, no saved microphone
+recordings/transcripts and zero printer connections.
+
+Evidence is under benchmarks/phase2-*.json and PHASE2_REPORT.md. Independent complete-model
+Windows build run 43062031011 is being followed; test job passed. Next: finish CI, publish
+voice prerelease and update issue #2. Human wake/room accuracy, unplug/replug, 16 GB baseline,
+clean VM/cross-version and supervised safety gates stay open. Speaker enrollment remains
+optional/deferred. No live printer actions permitted or performed.
+
 ## 2026-11-11 — Phase 2 offline voice implementation and qualification
 
 User authorized continuing Phase 2 autonomously, with no live printer actions. Read the
