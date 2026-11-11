@@ -5,7 +5,7 @@ import math
 import re
 import secrets
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .domain import Action, Intent, Snapshot, digest, safe_macro_name
 from .macros import discover
@@ -31,6 +31,8 @@ class Pending:
     intent_json: str
     expires: float
     binding: str
+    ready: bool = True
+    hard_expires: float = 0.0
 
 
 class SafetyEngine:
@@ -41,10 +43,21 @@ class SafetyEngine:
         self.pending: Pending | None = None
         self.lock = asyncio.Lock()
         self.generation = 0
+        self.confirmation_seconds = 25
 
     def cancel(self):
         self.generation += 1
         self.pending = None
+
+    def delivery_finished(self, token, success):
+        pending = self.pending
+        if pending is None or pending.token != token or pending.ready:
+            return
+        if not success or self.clock() >= pending.hard_expires:
+            self.cancel()
+        else:
+            self.pending = replace(pending, ready=True,
+                                   expires=min(pending.hard_expires, self.clock() + self.confirmation_seconds))
 
     def select(self, printer_id):
         self.cancel()
@@ -58,6 +71,8 @@ class SafetyEngine:
             raise Rejected("Printer is not approved")
         if self.store.get("selected") != printer.id:
             raise Rejected("Select the target printer first")
+        if intent.query_subject is not None and intent.action != Action.TEMPERATURES:
+            raise Rejected("Unexpected temperature subject")
         if intent.macro is not None and intent.action != Action.MACRO:
             raise Rejected("Unexpected macro field")
         if intent.action not in (Action.MACRO, Action.HEAT) and intent.params:
@@ -128,10 +143,11 @@ class SafetyEngine:
                 raise Rejected("Printer state changed during macro validation")
             state = fresh
         binding = digest({"intent": intent.model_dump(mode="json"), "printer": printer.model_dump(mode="json"),
-                          "state": {"ready": state.ready, "state": state.state}, "policy": policy})
+                          "state": {"ready": state.ready, "state": state.state}, "policy": policy,
+                          "confirmations": self.store.get("confirmations", {})})
         return client, state, script, binding
 
-    async def propose(self, intent: Intent):
+    async def propose(self, intent: Intent, *, defer_confirmation=False):
         async with self.lock:
             self.cancel()
             generation = self.generation
@@ -140,40 +156,56 @@ class SafetyEngine:
                 raise Rejected("Request was canceled or target changed during validation")
             if intent.action in READ_ONLY:
                 if intent.action == Action.TEMPERATURES:
-                    return "; ".join(f"{k}: {v:.1f} degrees" for k, v in state.temperatures.items()) or "No temperatures available"
+                    values = state.temperatures
+                    if intent.query_subject:
+                        key = "heater_bed" if intent.query_subject == "bed" else "extruder"
+                        value = values.get(key)
+                        return (f"{intent.query_subject.capitalize()}: {value:.1f} degrees Celsius" if value is not None
+                                else f"{intent.query_subject.capitalize()} temperature unavailable")
+                    return ". ".join(f"{dict(extruder='Nozzle', heater_bed='Bed').get(k, k)}: {v:.1f} degrees Celsius"
+                                     for k, v in state.temperatures.items()) or "No temperatures available"
                 if intent.action == Action.MACROS:
                     current, notices = discover(await client.macro_config(), self.store.macros(intent.printer_id))
                     self.store.replace_macros(intent.printer_id, current)
                     return "Macros: " + ", ".join(current) + (". " + "; ".join(notices) if notices else "")
-                return f"{state.state}; {state.progress:.0%} complete"
-            self.pending = Pending(secrets.token_urlsafe(24), intent.model_dump_json(), self.clock() + 25, binding)
+                progress = f"{state.progress:.0%} complete" if state.progress is not None else "Progress unavailable"
+                return f"{state.state}; {progress}"
+            self.pending = Pending(secrets.token_urlsafe(24), intent.model_dump_json(), self.clock() + (180 if defer_confirmation else self.confirmation_seconds), binding,
+                                   not defer_confirmation, self.clock() + 180)
+            configurable = {Action.PAUSE, Action.RESUME, Action.CANCEL, Action.HOME, Action.HEAT}
+            if intent.action in configurable and self.store.get("confirmations", {}).get(intent.action.value) is False:
+                self.pending = replace(self.pending, ready=True)
+                return await self._confirm_locked(self.pending.token)
             printer = next(p for p in self.store.printers() if p.id == intent.printer_id)
             warning = " Check the bed and toolhead path are clear." if intent.action in (Action.HOME, Action.MACRO) else ""
-            return f"Confirm {intent.action.value} on {printer.name}?{warning} Say exactly 'confirm' or choose Confirm within 25 seconds."
+            return f"Confirm {intent.action.value} on {printer.name}?{warning} Say exactly 'confirm' or choose Confirm within {self.confirmation_seconds} seconds after the prompt finishes."
 
     async def confirm(self, token):
         async with self.lock:
-            pending = self.pending
-            self.cancel()  # Single use, including failure. Never retry a consequential request.
-            generation = self.generation
-            if pending is None or not secrets.compare_digest(token, pending.token) or self.clock() >= pending.expires:
-                raise Rejected("Confirmation is missing or expired")
-            intent = Intent.model_validate_json(pending.intent_json)
-            client, _state, script, binding = await self.validate(intent)
-            if generation != self.generation or binding != pending.binding:
-                raise Rejected("Printer state, macro, or permissions changed; request again")
+            return await self._confirm_locked(token)
+
+    async def _confirm_locked(self, token):
+        pending = self.pending
+        self.cancel()  # Single use, including failure. Never retry a consequential request.
+        generation = self.generation
+        if pending is None or not pending.ready or not secrets.compare_digest(token, pending.token) or self.clock() >= pending.expires:
+            raise Rejected("Confirmation is missing or expired")
+        intent = Intent.model_validate_json(pending.intent_json)
+        client, _state, script, binding = await self.validate(intent)
+        if generation != self.generation or binding != pending.binding:
+            raise Rejected("Printer state, macro, or permissions changed; request again")
+        try:
+            await client.execute(intent, script)
+        except ConnectionFailure:
+            self.store.event(intent.printer_id, "outcome_unknown")
+            return "Transmission outcome is unknown. I will not retry. Check the printer before requesting another action."
+        self.store.event(intent.printer_id, "command_sent")
+        if intent.action in (Action.PAUSE, Action.RESUME, Action.CANCEL):
             try:
-                await client.execute(intent, script)
+                after = await client.snapshot()
+                expected = {Action.PAUSE: "paused", Action.RESUME: "printing", Action.CANCEL: "cancelled"}
+                if after.state == expected[intent.action]:
+                    return f"Printer reports {after.state}."
             except ConnectionFailure:
-                self.store.event(intent.printer_id, "outcome_unknown")
-                return "Transmission outcome is unknown. I will not retry. Check the printer before requesting another action."
-            self.store.event(intent.printer_id, "command_sent")
-            if intent.action in (Action.PAUSE, Action.RESUME, Action.CANCEL):
-                try:
-                    after = await client.snapshot()
-                    expected = {Action.PAUSE: "paused", Action.RESUME: "printing", Action.CANCEL: "cancelled"}
-                    if after.state == expected[intent.action]:
-                        return f"Printer reports {after.state}."
-                except ConnectionFailure:
-                    pass
-            return "Request accepted; physical completion has not been verified."
+                pass
+        return "Request accepted; physical completion has not been verified."

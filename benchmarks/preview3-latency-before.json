@@ -1,0 +1,26 @@
+[
+  {
+    "case": "temperature",
+    "run": 1,
+    "first_audio_seconds": 8.273,
+    "audio_seconds": 5.813
+  },
+  {
+    "case": "temperature",
+    "run": 2,
+    "first_audio_seconds": 8.349,
+    "audio_seconds": 5.813
+  },
+  {
+    "case": "confirmation",
+    "run": 1,
+    "first_audio_seconds": 11.538,
+    "audio_seconds": 9.113
+  },
+  {
+    "case": "confirmation",
+    "run": 2,
+    "first_audio_seconds": 11.606,
+    "audio_seconds": 9.114
+  }
+]

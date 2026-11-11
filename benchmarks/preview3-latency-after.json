@@ -1,0 +1,38 @@
+{
+  "scope": "CPU TTS; first PCM available, not measured physical audibility",
+  "host": "AMD64 Family 25 Model 33 Stepping 0, AuthenticAMD",
+  "rows": [
+    {
+      "case": "temperature",
+      "run": 1,
+      "cache": false,
+      "first_pcm_seconds": 1.935,
+      "generation_seconds": 6.91,
+      "audio_seconds": 5.811
+    },
+    {
+      "case": "temperature",
+      "run": 2,
+      "cache": true,
+      "first_pcm_seconds": 0.0,
+      "generation_seconds": 0.0,
+      "audio_seconds": 5.811
+    },
+    {
+      "case": "confirmation",
+      "run": 1,
+      "cache": false,
+      "first_pcm_seconds": 2.051,
+      "generation_seconds": 9.651,
+      "audio_seconds": 9.108
+    },
+    {
+      "case": "confirmation",
+      "run": 2,
+      "cache": true,
+      "first_pcm_seconds": 0.0,
+      "generation_seconds": 0.0,
+      "audio_seconds": 9.108
+    }
+  ]
+}

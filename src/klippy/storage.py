@@ -4,6 +4,7 @@ import json
 import os
 import sqlite3
 import threading
+import uuid
 from functools import wraps
 from pathlib import Path
 
@@ -28,6 +29,7 @@ class Store:
     """Only settings/operational event codes are persisted. No utterance API exists."""
 
     def __init__(self, path: Path):
+        self.path = path.resolve()
         self.lock = threading.RLock()
         path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(path, check_same_thread=False)
@@ -89,7 +91,7 @@ class Store:
 
     @serialized
     def event(self, printer_id, code):
-        allowed = {"disconnected", "connected", "fault", "paused", "command_sent", "outcome_unknown"}
+        allowed = {"disconnected", "connected", "fault", "mmu_fault", "paused", "command_sent", "outcome_unknown"}
         if code not in allowed:
             raise ValueError("Operational codes only")
         with self.db:
@@ -99,7 +101,9 @@ class Store:
     @serialized
     def export(self, path: Path):
         # Macros/addresses are private user configuration. Never export credentials.
-        payload = {"version": 1, "printers": [p.model_dump(mode="json") for p in self.printers()],
+        payload = {"version": 2, "preferences": {key: self.get(key, default) for key, default in
+                   (("followup_seconds", 30), ("confirmation_seconds", 30), ("spoken", True),
+                    ("monitor_enabled", True), ("wake_threshold", .15))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
                    "selected": self.get("selected"), "listening": self.get("listening", {}),
                    "macros": {p.id: [m.model_dump(mode="json") for m in self.macros(p.id).values()]
                               for p in self.printers()}}
@@ -108,11 +112,35 @@ class Store:
     @serialized
     def restore(self, path: Path):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        if payload.get("version") != 1:
+        if payload.get("version") not in (1, 2):
             raise ValueError("Unsupported backup")
         printers = [Printer.model_validate_json(json.dumps(p)) for p in payload["printers"]]
         registries = {p.id: [Macro.model_validate_json(json.dumps(m)) for m in
                             payload.get("macros", {}).get(p.id, [])] for p in printers}
+        if len({p.id for p in printers}) != len(printers):
+            raise ValueError("Duplicate printer identifiers")
+        for registry in registries.values():
+            if len({m.name for m in registry}) != len(registry):
+                raise ValueError("Duplicate macro names")
+        preferences = payload.get("preferences", {})
+        allowed = {"followup_seconds": (10, 120), "confirmation_seconds": (10, 120),
+                   "wake_threshold": (.01, 1)}
+        if not isinstance(preferences, dict) or set(preferences) - {*allowed, "spoken", "monitor_enabled"}:
+            raise ValueError("Invalid preferences")
+        for key, value in preferences.items():
+            if key in allowed:
+                low, high = allowed[key]
+                if type(value) not in (int, float) or not low <= value <= high:
+                    raise ValueError("Invalid preference range")
+            elif type(value) is not bool:
+                raise ValueError("Invalid preference type")
+        # A SQLite online backup includes committed WAL pages before any mutation.
+        backup = self.path.with_name(self.path.stem + ".before-restore-" + uuid.uuid4().hex[:12] + ".sqlite")
+        destination = sqlite3.connect(backup)
+        try:
+            self.db.backup(destination)
+        finally:
+            destination.close()
         # Restored devices and macros require approval on this installation.
         with self.db:
             self.db.execute("DELETE FROM printers")
@@ -124,6 +152,15 @@ class Store:
                     self.db.execute("INSERT INTO macros VALUES (?,?,?)", (p.id, m.name, m.model_copy(
                         update={"approved": False, "enabled": False, "reviewed": False}).model_dump_json()))
             self.db.execute("DELETE FROM settings WHERE key='selected'")
+            for key, value in preferences.items():
+                self.db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, json.dumps(value)))
+            # Heater bounds belong to a reviewed physical device, not a restored identifier.
+            self.db.execute("DELETE FROM settings WHERE key='heater_limits'")
+            # Recovery never silently restores immediate actions or an enabled microphone.
+            self.db.execute("INSERT OR REPLACE INTO settings VALUES ('confirmations','{}')")
+            self.db.execute("INSERT OR REPLACE INTO settings VALUES ('listening',?)",
+                            (json.dumps({"mode": "manual", "enabled": False}),))
+        return backup
 
 
 class Credentials:

@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QMenu,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QSystemTrayIcon,
     QTableWidget,
     QTableWidgetItem,
@@ -38,8 +39,9 @@ from PySide6.QtWidgets import (
 
 from . import __version__
 from .conversation import Conversation
+from .diagnostics import current, timings
 from .domain import Printer
-from .listening import listening_enabled
+from .listening import listening_enabled, validate_windows
 from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
 from .monitor import Monitor
@@ -100,7 +102,7 @@ def companion_icon(state="idle", frame=0):
 
 
 class Sprite(QWidget):
-    def __init__(self, summon):
+    def __init__(self, summon, store):
         super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint |
                          Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -116,8 +118,15 @@ class Sprite(QWidget):
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
         self.summon = summon
+        self.store = store
+        self.hide_seconds = store.get("companion_seconds", 10)
+        self.notifications = store.get("companion_notifications", True)
         self.offset = QPoint()
-        self.move(60, 100)
+        position = store.get("companion_position", [60, 100])
+        point = QPoint(*position)
+        if not any(screen.availableGeometry().contains(point) for screen in QApplication.screens()):
+            point = QPoint(60, 100)
+        self.move(point)
         self.state = "idle"
         self.frame = 0
         self.animation = QTimer(self)
@@ -129,12 +138,14 @@ class Sprite(QWidget):
             self.frame += 1
             self.icon.setPixmap(companion_icon(self.state, self.frame).pixmap(64, 64))
 
-    def announce(self, text, state="idle"):
+    def announce(self, text, state="idle", *, force=False):
+        if not self.notifications and not force:
+            return
         self.state = state
         self.label.setText(text[:100])
         self.adjustSize()
         self.show()
-        self.timer.start(10000)
+        self.timer.start(int(self.hide_seconds * 1000))
 
     def mousePressEvent(self, event):
         self.offset = event.globalPosition().toPoint() - self.pos()
@@ -142,6 +153,9 @@ class Sprite(QWidget):
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.MouseButton.LeftButton:
             self.move(event.globalPosition().toPoint() - self.offset)
+
+    def mouseReleaseEvent(self, event):
+        self.store.set("companion_position", [self.x(), self.y()])
 
     def mouseDoubleClickEvent(self, event):
         self.summon()
@@ -163,6 +177,8 @@ class Window(QMainWindow):
         self.worker.error.connect(self.failure)
         self.engine = SafetyEngine(store, self.client)
         self.conversation = Conversation(self.engine)
+        self.engine.confirmation_seconds = self.store.get("confirmation_seconds", 30)
+        self.conversation.timeout = self.conversation.session.timeout = self.store.get("followup_seconds", 30)
         self.monitor = Monitor(store, self.client)
         self.polling = False
         self.command_busy = False
@@ -170,7 +186,7 @@ class Window(QMainWindow):
         self.setWindowTitle(f"Klippy Assistant · {__version__} · Engineering preview")
         self.setWindowIcon(companion_icon())
         self.resize(940, 680)
-        self.sprite = Sprite(self.summon)
+        self.sprite = Sprite(self.summon, store)
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
         self.make_console()
@@ -203,7 +219,13 @@ class Window(QMainWindow):
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(22, 22, 22, 22)
         layout.setSpacing(14)
-        self.tabs.addTab(widget, title)
+        if title == "Settings":
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setWidget(widget)
+            self.tabs.addTab(scroll, title)
+        else:
+            self.tabs.addTab(widget, title)
         return layout
 
     def button(self, label, callback):
@@ -244,8 +266,8 @@ class Window(QMainWindow):
     def make_fleet(self):
         layout = self.page("Printers")
         layout.addWidget(QLabel("Only explicitly approved printers can be controlled. Discovery never enrolls automatically."))
-        self.fleet = QTableWidget(0, 3)
-        self.fleet.setHorizontalHeaderLabels(["Name", "Endpoint (private)", "Approval"])
+        self.fleet = QTableWidget(0, 5)
+        self.fleet.setHorizontalHeaderLabels(["Name", "Endpoint (private)", "Approval", "Status", "Happy Hare"])
         self.fleet.horizontalHeader().setStretchLastSection(True)
         self.fleet.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.fleet.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
@@ -292,6 +314,27 @@ class Window(QMainWindow):
         self.sensitivity.valueChanged.connect(lambda v: self.store.set("wake_threshold", v))
         layout.addWidget(QLabel("Wake detection threshold (lower is more sensitive; reload pack after changing)"))
         layout.addWidget(self.sensitivity)
+        for key, label in [("followup_seconds", "Follow-up window after each response (seconds)"),
+                           ("confirmation_seconds", "Confirmation response window after speech (seconds)")]:
+            spin = QDoubleSpinBox()
+            spin.setObjectName(key)
+            spin.setRange(10, 120)
+            spin.setDecimals(0)
+            spin.setValue(self.store.get(key, 30))
+            spin.valueChanged.connect(lambda value, setting=key: self.save_timeout(setting, value))
+            layout.addWidget(QLabel(label))
+            layout.addWidget(spin)
+        layout.addWidget(QLabel("Confirmations are enabled by default. Disabling a prompt below allows an explicit request to act immediately. "
+                                "Enrollment, state, limits and fresh validation always apply. Macros and critical operations always require confirmation."))
+        for action in ("pause", "resume", "cancel", "home", "heat"):
+            check = QCheckBox("Confirm " + action)
+            check.setChecked(self.store.get("confirmations", {}).get(action, True) is not False)
+            check.toggled.connect(lambda enabled, operation=action: self.save_confirmation(operation, enabled))
+            layout.addWidget(check)
+        self.diagnostics = QLabel(timings.compact())
+        self.diagnostics.setWordWrap(True)
+        layout.addWidget(self.diagnostics)
+        layout.addWidget(self.button("Measure reaction with simulated printer", self.reaction_test))
         self.listening = QComboBox()
         self.listening.addItems(["manual", "scheduled", "always"])
         self.listening.setCurrentText(self.store.get("listening", {}).get("mode", "manual"))
@@ -312,7 +355,7 @@ class Window(QMainWindow):
         layout.addWidget(self.monitor_enabled)
         self.spoken = QCheckBox("Speak responses and fault notifications")
         self.spoken.setChecked(self.store.get("spoken", True))
-        self.spoken.toggled.connect(lambda v: self.store.set("spoken", v))
+        self.spoken.toggled.connect(self.save_spoken)
         layout.addWidget(self.spoken)
         row = QHBoxLayout()
         row.addWidget(self.button("Export configuration", self.export_config))
@@ -322,7 +365,45 @@ class Window(QMainWindow):
                                 "addresses and definitions; keep them private. Credentials stay in the Windows vault.\n"
                                 "Voice interruption uses local echo cancellation. Microphone/room calibration remains necessary.\n"
                                 "Optional speaker enrollment is not enabled."))
+        companion = QCheckBox("Show companion notifications")
+        companion.setChecked(self.sprite.notifications)
+        companion.toggled.connect(lambda value: (self.store.set("companion_notifications", value),
+                                                  setattr(self.sprite, "notifications", value)))
+        layout.addWidget(companion)
+        duration = QDoubleSpinBox()
+        duration.setRange(2, 120)
+        duration.setValue(self.sprite.hide_seconds)
+        duration.valueChanged.connect(lambda value: (self.store.set("companion_seconds", value),
+                                                       setattr(self.sprite, "hide_seconds", value)))
+        layout.addWidget(QLabel("Companion auto-hide delay (seconds)"))
+        layout.addWidget(duration)
+        for label in layout.parentWidget().findChildren(QLabel):
+            label.setWordWrap(True)
         layout.addStretch()
+
+    def reaction_test(self):
+        from .reaction_probe import run
+        self.worker.submit("reaction", run())
+
+    def save_spoken(self, enabled):
+        self.store.set("spoken", enabled)
+        if not enabled:
+            if self.engine.pending and not self.engine.pending.ready:
+                self.engine.delivery_finished(self.engine.pending.token, False)
+            self.stop_speaking()
+
+    def save_confirmation(self, action, enabled):
+        preferences = self.store.get("confirmations", {})
+        preferences[action] = enabled
+        self.store.set("confirmations", preferences)
+        self.cancel()
+
+    def save_timeout(self, key, value):
+        self.store.set(key, int(value))
+        if key == "confirmation_seconds":
+            self.engine.confirmation_seconds = int(value)
+        else:
+            self.conversation.timeout = self.conversation.session.timeout = int(value)
 
     def reload_printers(self):
         printers = self.store.printers()
@@ -337,7 +418,12 @@ class Window(QMainWindow):
         self.selected.blockSignals(False)
         self.fleet.setRowCount(len(printers))
         for row, p in enumerate(printers):
-            for col, text in enumerate((p.name, p.url, "Approved" if p.approved else "Needs approval")):
+            state = self.monitor.previous.get(p.id)
+            mmu = self.monitor.mmu.get(p.id)
+            progress = f"{state.progress:.0%}" if state and state.progress is not None else "Progress unavailable"
+            status = (f"{state.state} · {progress}" if state.connected else "Disconnected") if state else "Not polled"
+            mmu_text = f"{mmu.state}; tool {mmu.tool}; gate {mmu.gate}" if mmu and mmu.available else "Unavailable / not fitted"
+            for col, text in enumerate((p.name, p.url, "Approved" if p.approved else "Needs approval", status, mmu_text)):
                 item = QTableWidgetItem(text)
                 item.setData(Qt.ItemDataRole.UserRole, p.id)
                 self.fleet.setItem(row, col, item)
@@ -439,7 +525,18 @@ class Window(QMainWindow):
 
     def inspect_macro(self):
         macro = self.macro_target()
-        self.definition.setPlainText(f"{macro.description}\n\n{macro.definition}" if macro else "")
+        if not macro:
+            self.definition.clear()
+            return
+        import difflib
+
+        from .macros import conflicts
+        warnings = [*macro.review_notes, *conflicts(self.store.macros(self.store.get("selected")))]
+        diff = ""
+        if macro.previous_definition is not None:
+            diff = "\n\nChanges (previous/current):\n" + "\n".join(difflib.unified_diff(
+                macro.previous_definition.splitlines(), macro.definition.splitlines(), fromfile="previous", tofile="current", lineterm=""))
+        self.definition.setPlainText("\n".join(warnings) + f"\n{macro.description}\n\n{macro.definition}" + diff)
 
     def refresh_macros(self):
         printer = self.target()
@@ -478,10 +575,13 @@ class Window(QMainWindow):
             try:
                 from .domain import Macro
                 value = macro.model_dump(mode="json")
-                value.update(approved=True, enabled=True, reviewed=True, parameters=json.loads(params.text()),
+                value.update(approved=True, enabled=True, reviewed=True, previous_definition=None, review_notes=[],
+                             parameters=json.loads(params.text()),
                              aliases=[a.strip() for a in aliases.text().split(",") if a.strip()])
                 approved = Macro.model_validate_json(json.dumps(value))
                 registry = self.store.macros(printer.id)
+                if registry.get(macro.name) is None or registry[macro.name].fingerprint != macro.fingerprint:
+                    raise ValueError("Registry changed during review")
                 registry[macro.name] = approved
                 self.engine.cancel()
                 self.store.replace_macros(printer.id, registry)
@@ -506,21 +606,29 @@ class Window(QMainWindow):
         if text:
             self.submit_turn(text)
 
-    def submit_turn(self, text, *, source="manual", confirmation_token=None):
+    def submit_turn(self, text, *, source="manual", confirmation_token=None, trace=None):
         self.turn += 1
         turn = self.turn
         self.command_busy = True
         self.send_button.setEnabled(False)
+        trace = trace or timings.new()
+        self.reaction_trace = trace
+        defer_confirmation = bool(self.voice and self.spoken.isChecked())
         async def request():
+            context = current.set(trace)
             try:
-                value = await self.conversation.hear(text, source=source, confirmation_token=confirmation_token)
+                with timings.span("intent_and_validation"):
+                    value = await self.conversation.hear(text, source=source, confirmation_token=confirmation_token,
+                                                         defer_confirmation=defer_confirmation)
                 return turn, value, False
             except (Rejected, ConnectionFailure) as exc:
                 return turn, str(exc), True
+            finally:
+                current.reset(context)
         self.worker.submit("turn", request())
 
     def confirm(self):
-        if self.engine.pending and not self.command_busy:
+        if self.engine.pending and self.engine.pending.ready and not self.command_busy:
             self.command_busy = True
             self.submit_turn("confirm", source="voice", confirmation_token=self.engine.pending.token)
 
@@ -550,8 +658,14 @@ class Window(QMainWindow):
         self.say(text)
 
     def result(self, name, value):
-        if name == "poll":
+        if name == "reaction":
+            trace, text = value
+            if self.voice and self.spoken.isChecked():
+                self.voice.say(text, trace=trace)
+            self.diagnostics.setText(timings.compact())
+        elif name == "poll":
             self.polling = False
+            self.reload_printers()
             for printer_name, code in value:
                 text = f"{printer_name}: {code}. No corrective action taken."
                 self.write_message(text)
@@ -568,14 +682,21 @@ class Window(QMainWindow):
             backend, llm = value
             self.voice_loading = False
             self.voice = VoiceLoop(backend, self.voice_text, lambda text: self.worker.result.emit("voice_state", text),
-                                   lambda epoch: self.worker.result.emit("voice_wake", epoch))
+                                   lambda epoch: self.worker.result.emit("voice_wake", epoch),
+                                   session=self.conversation.session,
+                                   on_delivery=lambda token, ok: self.worker.result.emit("delivery", (token, ok)))
             self.voice.start()
             self.conversation.llm = llm
             self.model_status.setText("Offline voice loaded · Echo cancellation and wake-word interruption active" +
                                      (" · LLM unavailable; basic commands available" if llm is None else ""))
+        elif name == "delivery":
+            token, success = value
+            self.engine.delivery_finished(token, success)
         elif name == "voice_wake":
             if self.voice and value == self.voice.epoch and self.voice.enabled.is_set():
                 self.turn += 1
+                if self.engine.pending and not self.engine.pending.ready:
+                    self.engine.delivery_finished(self.engine.pending.token, False)
                 self.conversation.interrupt()
                 self.voice.pending_token = self.engine.pending.token if self.engine.pending else None
                 self.command_busy = False
@@ -587,10 +708,10 @@ class Window(QMainWindow):
             elif value == "Speaking":
                 self.sprite.state = "speaking"
             elif value == "Speech finished" and self.conversation.until:
-                self.conversation.until = self.conversation.clock() + self.conversation.timeout
+                self.sprite.announce(self.active_name() + " · Listening", "listening")
         elif name == "voice_input":
             if self.voice and self.voice.enabled.is_set() and value.epoch == self.voice.epoch:
-                self.submit_turn(value.text, source="voice", confirmation_token=value.confirmation_token)
+                self.submit_turn(value.text, source="voice", confirmation_token=value.confirmation_token, trace=value.trace)
         elif name == "turn":
             turn, value, error = value
             if turn != self.turn:
@@ -603,7 +724,7 @@ class Window(QMainWindow):
             if value and value != "speech_stopped":
                 self.write_message(value)
                 self.sprite.announce(self.active_name() + " · Responding", "speaking")
-                self.say(value)
+                self.say(value, confirmation=True)
             elif value == "speech_stopped":
                 self.stop_speaking()
             self.reload_printers()
@@ -613,9 +734,13 @@ class Window(QMainWindow):
     def voice_text(self, text):
         self.worker.result.emit("voice_input", text)
 
-    def say(self, text):
+    def say(self, text, *, confirmation=False):
         if self.voice and self.spoken.isChecked():
-            self.voice.say(text)
+            pending = self.engine.pending
+            self.voice.say(text, token=pending.token if confirmation and pending and not pending.ready else None,
+                           trace=getattr(self, "reaction_trace", None))
+        elif confirmation and self.engine.pending and not self.engine.pending.ready:
+            self.engine.delivery_finished(self.engine.pending.token, True)
 
     def load_voice(self):
         path = QFileDialog.getExistingDirectory(self, "Select verified local model pack")
@@ -651,9 +776,7 @@ class Window(QMainWindow):
 
     def save_schedule(self):
         try:
-            windows = json.loads(self.schedule.text())
-            if not isinstance(windows, list) or not all(isinstance(w, dict) for w in windows):
-                raise ValueError()
+            windows = validate_windows(json.loads(self.schedule.text()))
             self.store.set("listening", {"mode": self.listening.currentText(), "windows": windows,
                                          "enabled": False})
         except ValueError:
@@ -682,8 +805,18 @@ class Window(QMainWindow):
         if path:
             try:
                 self.engine.cancel()
-                self.store.restore(Path(path))
+                backup = self.store.restore(Path(path))
+                self.cancel()
+                if self.voice:
+                    self.voice.reset_session()
                 self.reload_printers()
+                for key in ("confirmation_seconds", "followup_seconds"):
+                    self.findChild(QDoubleSpinBox, key).setValue(self.store.get(key, 30))
+                self.spoken.setChecked(self.store.get("spoken", True))
+                self.monitor_enabled.setChecked(self.store.get("monitor_enabled", True))
+                self.listening.setCurrentText("manual")
+                self.schedule.setText("[]")
+                self.write_message("Previous SQLite settings backed up to " + str(backup))
                 self.write_message("Restored. Printers and macros require reapproval; credentials were not imported.")
             except Exception:
                 self.failure("Backup invalid; configuration was not restored")
@@ -693,10 +826,11 @@ class Window(QMainWindow):
         return printer.name if printer else "No active printer"
 
     def show_sprite(self):
-        self.sprite.announce(self.active_name())
+        self.sprite.announce(self.active_name(), force=True)
 
     def tick(self):
         self.ticks += 1
+        self.diagnostics.setText(timings.compact())
         enabled = listening_enabled(self.store.get("listening", {}), datetime.now())
         if self.voice:
             (self.voice.enabled.set if enabled else self.voice.enabled.clear)()
@@ -711,7 +845,7 @@ class Window(QMainWindow):
         if pending and self.engine.clock() >= pending.expires:
             self.engine.cancel()
             pending = None
-        self.confirm_button.setEnabled(pending is not None and not self.command_busy)
+        self.confirm_button.setEnabled(pending is not None and pending.ready and not self.command_busy)
         if self.voice:
             self.voice.pending_token = pending.token if pending else None
         if self.runtime.process and self.runtime.process.poll() is not None:

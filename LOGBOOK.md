@@ -1,5 +1,28 @@
 # Logbook
 
+## 2026-11-11 — 0.3 software expansion and usability corrections
+
+Resumed latest main from 0.2.0-preview.1 without physical printer connections/actions.
+Original TTS measurements reproduced 8.3 s temperature and 11.6 s confirmation delays before
+any PCM. Streaming callbacks reduced first PCM to 1.935/2.051 s; repeated responses use an
+in-memory bounded cache. Shared session holds cover ASR/interpretation/playback; a specific
+prompt delivery arms its exact confirmation after output drain/tail, with total lifetime bound.
+Natural temperature/progress requests take the deterministic read-only path.
+
+Expanded phases 3–8 software: bounded fleet polling and Happy Hare notifications; functional
+macro warnings/rename diffs/synonyms/explicit numeric parameters; configurable operational
+confirmations with fresh mandatory validation; scrollable settings and companion preferences;
+validated backups with pre-restore SQLite online backup, revoked approvals and mic-off recovery.
+Original 99 tests remain unchanged; 138 tests and Ruff passed, including notification/prompt
+isolation, muted delivery, cache streaming and unknown-parameter regressions. Real-model source synthetic integration passed; zero printer writes.
+Numeric artifacts and qualification scope are in PREVIEW3_REPORT.md and benchmarks/preview3-*.
+
+Preparing 0.3.0-preview.1 build, upgrade/reinstall/installed checks and 16 GiB job-budget probe.
+No Windows Sandbox executable, Hyper-V cmdlet, VBoxManage or vmrun is available here; host
+RAM is 68,630,749,184 bytes. A memory-budget test cannot close the 16 GB physical-VM gate.
+Next: run package qualification and independent Windows CI, record actual evidence, publish
+an accurately labeled engineering preview. Hardware/clean-desktop-VM gates stay open.
+
 ## 2026-11-11 — Published offline voice preview 0.2.0
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.2.0-preview.1

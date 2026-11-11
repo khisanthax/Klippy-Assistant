@@ -10,10 +10,17 @@ class Monitor:
         self.store, self.clients = store, clients
         self.previous = {}
         self.cycles = 0
+        self.mmu = {}
+        self.semaphore = None
 
     async def poll(self):
         import asyncio
         self.cycles += 1
+        if self.semaphore is None:
+            self.semaphore = asyncio.Semaphore(4)
+        async def limited(printer):
+            async with self.semaphore:
+                return await one(printer)
         async def one(printer):
             try:
                 snapshot = await self.clients(printer).snapshot()
@@ -30,6 +37,17 @@ class Monitor:
                     self.store.replace_macros(printer.id, registry)
                 except (ConnectionFailure, KeyError, ValueError):
                     pass  # Writes independently revalidate discovery; a failed refresh grants no rights.
+            mmu_fault = False
+            if snapshot.connected:
+                try:
+                    mmu = await self.clients(printer).mmu_snapshot()
+                    old_mmu = self.mmu.get(printer.id)
+                    self.mmu[printer.id] = mmu
+                    mmu_fault = mmu.fault and (old_mmu is None or not old_mmu.fault)
+                except (ConnectionFailure, KeyError, ValueError, AttributeError):
+                    self.mmu.pop(printer.id, None)
+            else:
+                self.mmu.pop(printer.id, None)
             code = None
             if not snapshot.connected and (previous is None or previous.connected):
                 code = "disconnected"
@@ -39,9 +57,11 @@ class Monitor:
                 code = "fault"
             elif snapshot.state == "paused" and (previous is None or previous.state != "paused"):
                 code = "paused"
+            if mmu_fault and code is None:
+                code = "mmu_fault"
             if code:
                 self.store.event(printer.id, code)
                 return printer.name, code
             return None
-        values = await asyncio.gather(*(one(p) for p in self.store.printers() if p.approved))
+        values = await asyncio.gather(*(limited(p) for p in self.store.printers() if p.approved))
         return [v for v in values if v]

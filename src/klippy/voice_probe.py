@@ -20,11 +20,14 @@ from klippy.voice import SherpaBackend, VoiceLoop
 
 
 def run(pack):
+    from .offline_probe import deny_external_network
+    deny_external_network()
     manifest = verify_pack(pack, require_qualified=True)
     started = time.perf_counter()
     backend = SherpaBackend(pack, manifest["speech_config"])
     report = {"scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
-              "speech_load_seconds": round(time.perf_counter() - started, 3), "wake_cases": []}
+              "speech_load_seconds": round(time.perf_counter() - started, 3),
+              "python_external_network_denied": True, "wake_cases": []}
     def audio(text, voice=3, speed=1.0):
         # Probe alternate public synthetic voices without opening playback devices.
         from klippy.speech_text import normalize_for_speech

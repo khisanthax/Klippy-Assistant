@@ -24,3 +24,16 @@ def listening_enabled(settings: dict, now: datetime) -> bool:
                             or ((now.weekday() - 1) % 7 in days and minute < end)):
             return True
     return False
+
+
+def validate_windows(windows):
+    if not isinstance(windows, list) or len(windows) > 32:
+        raise ValueError("At most 32 schedule windows")
+    for window in windows:
+        if not isinstance(window, dict) or set(window) != {"days", "start", "end"}:
+            raise ValueError("Each window needs days, start and end")
+        if (not isinstance(window["days"], list) or not window["days"]
+                or any(type(day) is not int or not 0 <= day <= 6 for day in window["days"])
+                or any(type(window[key]) is not int or not 0 <= window[key] < 1440 for key in ("start", "end"))):
+            raise ValueError("Invalid schedule window")
+    return windows

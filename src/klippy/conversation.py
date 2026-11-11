@@ -4,9 +4,11 @@ import json
 import re
 import time
 
+from .diagnostics import timings
 from .domain import Action, Intent, StrictModel
 from .macros import candidates, words
 from .safety import NeedsParameter, Rejected
+from .session import Session
 
 
 class Interpretation(StrictModel):
@@ -19,24 +21,49 @@ class Conversation:
 
     def __init__(self, engine, llm=None, clock=time.monotonic, timeout=30):
         self.engine, self.llm, self.clock, self.timeout = engine, llm, clock, timeout
-        self.until = 0.0
+        self.session = Session(clock, timeout)
         self.draft = None
         self.generation = 0
 
+    @property
+    def until(self):
+        return self.session.until
+
+    @until.setter
+    def until(self, value):
+        self.session.deadline = value
+
     def clear(self):
         self.generation += 1
-        self.until = 0.0
+        self.session.clear()
         self.draft = None
         self.engine.cancel()
 
     def interrupt(self):
         """Stop stale interpretation without changing an already-reviewed pending action."""
         self.generation += 1
+        self.session.clear()
         self.until = self.clock() + self.timeout
         if self.engine.pending is None:
             self.engine.cancel()  # Invalidate validation still in flight.
 
-    async def hear(self, text, *, source="manual", own_voice=False, confirmation_token=None):
+    async def hear(self, text, *, source="manual", own_voice=False, confirmation_token=None, defer_confirmation=False):
+        if own_voice or (source == "voice" and self.clock() >= self.until
+                         and not re.match(r"^(?:hey\s+)?klippy\b", text.strip(), re.I)):
+            return None
+        if self.clock() >= self.until:
+            self.draft = None
+            if source == "voice":
+                self.engine.cancel()
+        hold = self.session.begin()
+        generation = self.generation + 1
+        try:
+            return await self._hear(text, source=source, confirmation_token=confirmation_token,
+                                    defer_confirmation=defer_confirmation)
+        finally:
+            self.session.finish(hold, refresh=generation == self.generation)
+
+    async def _hear(self, text, *, source="manual", own_voice=False, confirmation_token=None, defer_confirmation=False):
         if own_voice:
             return None
         self.generation += 1
@@ -91,28 +118,49 @@ class Conversation:
                         params = {**self.draft.params, missing[0]: float(match[1])}
                         intent = self.draft.model_copy(update={"params": params})
         self.draft = None
-        intent = intent or self.basic(text, selected)
+        with timings.span("deterministic_intent"):
+            intent = intent or self.basic(text, selected)
         if intent is None:
             matches = candidates(text, self.engine.store.macros(selected))
             if len(matches) > 1:
                 raise Rejected("Which macro do you mean: " + ", ".join(matches) + "?")
             if len(matches) == 1:
-                intent = Intent(action=Action.MACRO, printer_id=selected, macro=matches[0])
+                macro = self.engine.store.macros(selected)[matches[0]]
+                parameters = {}
+                clauses = re.findall(r"\b([a-z_]+)\s*(?:=|is|of|at)?\s*(-?\d+(?:\.\d+)?)\b", text)
+                keys = [name.upper() for name, _ in clauses]
+                if set(keys) - set(macro.parameters) or len(keys) != len(set(keys)):
+                    raise Rejected("Specify each reviewed macro parameter once; unknown parameters are blocked")
+                for key in macro.parameters:
+                    match = re.search(r"\b" + re.escape(key.lower()) + r"\s*(?:=|is|of|at)?\s*(-?\d+(?:\.\d+)?)\b", text)
+                    if match:
+                        parameters[key] = float(match[1])
+                intent = Intent(action=Action.MACRO, printer_id=selected, macro=matches[0], params=parameters)
         if intent is None and self.llm:
             # The model cannot grant permissions, produce code, choose an unselected printer or confirm.
-            intent = await self.llm.interpret(text, selected, self.engine.store.macros(selected))
+            with timings.span("llm_queue_and_inference"):
+                intent = await self.llm.interpret(text, selected, self.engine.store.macros(selected))
         if intent is None:
             raise Rejected("Please specify a status query, printer action, or approved macro")
         if generation != self.generation:
             return None  # A wake/correction/cancel superseded inference while it was awaited.
         try:
-            return await self.engine.propose(intent)
+            return await self.engine.propose(intent, defer_confirmation=defer_confirmation)
         except NeedsParameter:
             self.draft = intent
             raise
 
     @staticmethod
     def basic(text, printer_id):
+        query = " ".join(text.lower().replace("what's", "what is").split())
+        if re.fullmatch(r"(?:what is |what are |tell me |tell me about |report |read )?(?:the )?(?:(nozzle|bed|extruder) )?temperatures?", query):
+            subject = "nozzle" if "nozzle" in query or "extruder" in query else "bed" if "bed" in query else None
+            return Intent(action=Action.TEMPERATURES, printer_id=printer_id, query_subject=subject)
+        if re.fullmatch(r"how hot is (?:the )?(nozzle|bed|extruder)", query):
+            return Intent(action=Action.TEMPERATURES, printer_id=printer_id,
+                          query_subject="bed" if query.endswith("bed") else "nozzle")
+        if query in {"how far along is", "how far along is the", "how far along", "is printing", "is it printing", "what is the status"}:
+            return Intent(action=Action.STATUS, printer_id=printer_id)
         normalized = re.sub(r"\b(please|can|could|you|the|it|that|printer|print|on|for|me|to)\b", " ", text)
         normalized = " ".join(normalized.split())
         phrases = {"pause": Action.PAUSE, "resume": Action.RESUME, "cancel": Action.CANCEL,
@@ -132,8 +180,18 @@ class LocalLLM:
     def __init__(self, port=18765, api_key=None):
         self.port = port
         self.api_key = api_key
+        import asyncio
+        self.lock = asyncio.Lock()
 
     async def interpret(self, text, printer_id, macros):
+        import time
+        queued = time.monotonic()
+        async with self.lock:
+            timings.duration("llm_queue", time.monotonic() - queued)
+            with timings.span("llm_inference"):
+                return await self._interpret(text, printer_id, macros)
+
+    async def _interpret(self, text, printer_id, macros):
         import httpx
         from pydantic import ValidationError
         allowed = [{"name": m.name, "parameters": list(m.parameters)} for m in macros.values()

@@ -5,11 +5,13 @@ import secrets
 import socket
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import httpx
 
 from .conversation import LocalLLM
+from .diagnostics import timings
 from .models import ModelUnavailable, verify_pack
 
 
@@ -20,6 +22,7 @@ class LlamaRuntime:
         self.api_key = secrets.token_urlsafe(32)
 
     async def start(self, root: Path):
+        started = time.monotonic()
         manifest = await asyncio.to_thread(verify_pack, root)
         if self.process:
             self.close()
@@ -50,6 +53,7 @@ class LlamaRuntime:
                         response = await client.get(f"http://127.0.0.1:{self.port}/health",
                                                     headers={"Authorization": "Bearer " + self.api_key})
                         if response.status_code == 200:
+                            timings.duration("llm_startup", time.monotonic() - started, timings.new())
                             return LocalLLM(self.port, self.api_key)
                     except httpx.HTTPError:
                         pass

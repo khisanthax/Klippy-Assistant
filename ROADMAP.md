@@ -6,12 +6,12 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 |---|---|---|
 | 1. Foundation | Complete | Private repo pushed, runnable Qt application, storage, docs, 78 local tests; Windows CI green on application commit aa5b30c; phase milestone/issue closed |
 | 2. Local voice and AI | Core implemented; hardware gate open | Klippy/Hey Klippy synthetic detection fixed, actual Whisper/Kokoro/Qwen pipeline, duplex AEC/interruption, Windows capture/render smoke, 57-file license-reviewed payload; human wake/room accuracy and optional speaker enrollment remain open |
-| 3. Connectivity | Partial | Manual approval, vault keys, LAN discovery, HTTP client, status polling, subscription adapter, read-only API validated on one real instance; full fleet/auth/subscription qualification pending |
-| 4. Macro intelligence | Partial | Discovery, fingerprint/reapproval, conflicts, possible renames, aliases, review UI; semantic benchmark and rich differences pending |
-| 5. Safe execution | Partial | Central engine, schemas, state checks, confirmations, uncertain outcomes, dedicated emergency endpoint; supervised hardware tests pending |
-| 6. Companion/monitoring | Partial | Hidden tray launch, movable animated companion, auto-hide, active banner, schedule, fault alerts, read-only reconnect macro refresh; richer MMU-specific fault handling and desktop acceptance pending |
-| 7. Stabilization | In progress | Simulated regressions and startup smoke testing; audio/CPU/sleep/real fleet gates pending |
-| 8. Distribution | Partial | Unsigned preview installer builds; install/reinstall/settings preservation/installed launch/uninstall passed on development host; complete licensed model payload, clean VM/cross-version qualification and stable release pending |
+| 3. Connectivity | Partial | Bounded concurrent fleet polling, per-printer status/MMU view, Happy Hare v3/v4 fault notifications, enrollment/vault/discovery/client implemented; simulated multi-printer isolation verified; actual fleet/auth/subscription qualification open |
+| 4. Macro intelligence | Partial | Discovery/reapproval, deterministic synonyms and numeric parameters, body similarity, rename warnings and review diffs implemented; extended semantic and actual fleet acceptance open |
+| 5. Safe execution | Partial | Central engine with mandatory fresh checks, configurable operational prompts, exact playback-bound confirmation windows, single-use tokens and uncertain outcomes; supervised hardware tests open |
+| 6. Companion/monitoring | Partial | Hidden tray launch, movable animated companion, auto-hide, active banner, schedule, fault alerts, read-only reconnect macro refresh; Happy Hare fault notifications, persisted companion position/visibility/duration and scrollable settings added; desktop/sleep acceptance open |
+| 7. Stabilization | In progress | Expanded simulated regressions, crash/WAL recovery, validated backup/restore and monotonic reaction diagnostics; memory-budget probe prepared; actual 16 GB VM/audio/sleep/fleet gates open |
+| 8. Distribution | Partial | Unsigned preview installer builds; install/reinstall/settings preservation/installed launch/uninstall passed on development host; complete licensed model payload, cross-version and external-egress installer qualification automated; clean Windows desktop VM and stable release gates remain open |
 
 ## Next priority
 
@@ -22,3 +22,10 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
    silence, own TTS, interruptions). Do not claim transcript tests validate acoustics.
 4. Supervised printer movement/heating/cancellation tests require the owner present.
 5. Complete qualification, then publish stable v1.0 only when every release gate passes.
+
+## 0.3 preview software work
+
+Shared processing/playback follow-up sessions, streamed/cached TTS, post-playback confirmation
+windows and deterministic natural temperature/progress queries address the owner usability report.
+See PREVIEW3_REPORT.md and benchmarks/preview3-*.json for measured scope. Hardware calibration
+does not block independent software work; it remains a separate acceptance gate.

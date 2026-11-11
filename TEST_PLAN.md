@@ -32,3 +32,23 @@ only enrolled LAN devices. Verify all required bundled models and license notice
 launch, upgrade with sentinel settings, uninstall keeping data and uninstall deleting data.
 Check shortcuts, optional Windows startup, credential removal options and no leftover app
 files. Capture installer hash, build environment, signatures and actual results.
+
+## 0.3 repeatable software qualification
+
+- `python -m pytest -q` and `python -m ruff check src tests scripts`: preserve the original
+  99 cases plus shared-session, delayed delivery, exact-token, notification isolation,
+  muted/failed playback, natural queries, fleet/MMU, confirmation preferences and recovery cases.
+- `python scripts/latency_probe.py --output local/latency-after.json`: real CPU TTS first
+  PCM, full generation and warm-cache timing, without opening devices.
+- `scripts/build.ps1`: complete qualified model payload, frozen launch and real-model
+  synthetic integration. The isolated integration process denies Python external sockets;
+  native llama.cpp uses offline mode. No real printer APIs are used.
+- `scripts/test_installer.ps1 -PreviousInstaller dist/Klippy-Setup-0.2.0-preview.1.exe`:
+  isolated actual upgrade, reinstall, SQLite preservation, installed startup/voice and uninstall.
+  Refuses to touch a registered owner installation. `-BlockExternalNetwork` additionally
+  blocks external egress for installed app/runtime executables and requires firewall privileges.
+- `scripts/performance_probe.ps1`: real frozen pipeline with inherited process-tree 16 GiB
+  commit limit and CPU/peak-memory accounting. This cannot substitute for 16 GB total-VM RAM.
+- Fresh Windows CI installer job provides independent offline/upgrade evidence. An actual
+  clean Windows desktop VM without Python, disabled networking, 16 GB total RAM and extended
+  sleep/resume/audio soak remains a separate gate; unavailable on this development host.

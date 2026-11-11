@@ -2,11 +2,11 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
-[Download the 0.2.0 voice preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.2.0-preview.1)
+[Download the 0.3.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.3.0-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.
 
-**0.2.0.dev1 — offline voice engineering preview, not stable v1.0.** The installer includes
+**0.3.0.dev1 — offline voice and fleet engineering preview, not stable v1.0.** The installer includes
 local wake-word, ASR, TTS and language models. Enable the microphone in the tray or
 Settings to load them. No post-install model download, Python, Ollama or cloud AI is needed.
 Microphone/room accuracy and supervised printer safety acceptance remain open.
@@ -17,6 +17,9 @@ echo cancellation and local wake verification support interruption. Synthetic do
 tests pass; the Windows default audio path also passed a capture/render smoke test.
 Clippy is a homophone and cannot be excluded by spelling. These are not broad acoustic
 accuracy results. See [PHASE2_REPORT.md](PHASE2_REPORT.md).
+
+See [PREVIEW3_REPORT.md](PREVIEW3_REPORT.md) for voice latency fixes, fleet/MMU monitoring,
+macro review improvements, confirmation settings, recovery and qualification limits.
 
 ## Run from source (Windows)
 
@@ -39,7 +42,10 @@ hides it. Choose Quit in the tray menu to exit. `--show` opens the panel immedia
    macro you want to enable. All approvals are per printer. Parameters need reviewed
    numeric bounds; dynamic/raw parameter access is blocked in this preview.
 5. Requests such as `pause`, `resume`, `cancel` and `home` require a confirmation
-   bound to the exact target/action and expiring in 25 seconds. No transmission retry.
+   bound to the exact target/action. The default response window is 30 seconds after
+   spoken playback finishes; interrupted/failed prompts cancel. Settings can change the
+   window or disable selected operational prompts. Mandatory checks always apply; macros
+   and critical operations retain confirmation. No transmission retry.
 
 For voice, enable listening and wait for the local model status to become ready. Say
 "Klippy, status" or "Hey Klippy, what's the temperature?". Follow-up listening lasts

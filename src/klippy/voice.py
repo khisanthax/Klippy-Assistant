@@ -5,16 +5,19 @@ import queue
 import re
 import threading
 import time
-from collections import deque
+from collections import OrderedDict, deque
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
 from .audio import FRAME, RATE, EchoFilter, Playback, default_device_pair, resample
+from .diagnostics import current, timings
 from .models import verify_pack
+from .session import Session
 from .speech_text import normalize_for_speech
 
 WAKE_PREFIX = re.compile(r"^(?:(?:hey|hi)[,\s]+)?(?:klippy|clippy|klippi|clippie|clipy)\b[\s,.!?]*", re.I)
@@ -26,6 +29,7 @@ class VoiceInput:
     epoch: int
     woke: bool
     confirmation_token: str | None = field(default=None, repr=False)
+    trace: int | None = None
 
 
 class SherpaBackend:
@@ -52,6 +56,8 @@ class SherpaBackend:
             with (root / lexicon).open(encoding="utf-8") as stream:
                 self.vocabulary = {line.split(" ", 1)[0] for line in stream if line.strip()}
         self.voice_id = config.get("voice_id", 0)
+        self.cache = OrderedDict()
+        self.cache_bytes = 0
 
     def reset_wake(self):
         self.stream = self.kws.create_stream()
@@ -71,10 +77,34 @@ class SherpaBackend:
         self.asr.decode_stream(stream)
         return stream.result.text
 
-    def synthesize(self, text, cancelled=None):
-        callback = (lambda samples, progress: 0 if cancelled() else 1) if cancelled else None
-        return self.tts.generate(normalize_for_speech(text, self.vocabulary or None),
-                                 sid=self.voice_id, callback=callback)
+    def synthesize(self, text, cancelled=None, on_chunk=None):
+        # Only this process's serialized TTS worker uses the bounded PCM cache.
+        with timings.span("normalization"):
+            normalized = normalize_for_speech(text, self.vocabulary or None)
+        key = (self.voice_id, normalized)
+        if key in self.cache:
+            self.cache.move_to_end(key)
+            audio = self.cache[key]
+            timings.duration("tts_cache_hit", 0)
+            if on_chunk and not (cancelled and cancelled()):
+                on_chunk(audio.samples, audio.sample_rate)
+            return audio
+        def callback(samples, progress):
+            if cancelled and cancelled():
+                return 0
+            if on_chunk:
+                on_chunk(samples, self.tts.sample_rate)
+            return 1
+        with timings.span("tts_generation"):
+            audio = self.tts.generate(normalized, sid=self.voice_id, callback=callback)
+        audio = SimpleNamespace(samples=np.asarray(audio.samples, dtype=np.float32), sample_rate=audio.sample_rate)
+        if not (cancelled and cancelled()) and audio.samples.nbytes <= 8 * 1024 * 1024:
+            self.cache[key] = audio
+            self.cache_bytes += audio.samples.nbytes
+            while self.cache_bytes > 32 * 1024 * 1024 or len(self.cache) > 32:
+                _, old = self.cache.popitem(last=False)
+                self.cache_bytes -= old.samples.nbytes
+        return audio
 
 
 class VoiceLoop:
@@ -86,7 +116,9 @@ class VoiceLoop:
     """
 
     def __init__(self, backend, on_text, on_state, on_wake=None, *, clock=time.monotonic,
-                 followup_seconds=30, energy_threshold=0.008):
+                 followup_seconds=30, energy_threshold=0.008, session=None, on_delivery=None):
+        self.session = session or Session(clock, followup_seconds)
+        self.on_delivery = on_delivery or (lambda token, success: None)
         self.backend, self.on_text, self.on_state = backend, on_text, on_state
         self.on_wake = on_wake or (lambda epoch: None)
         self.clock, self.followup_seconds, self.energy_threshold = clock, followup_seconds, energy_threshold
@@ -105,7 +137,7 @@ class VoiceLoop:
         self.preroll = deque(maxlen=300)
         self.frames = []
         self.voiced_frames = 0
-        self.listen_until = 0.0
+        self.session.deadline = 0.0
         self.last_voice = 0.0
         self.last_output = float("-inf")
         self.had_wake = False
@@ -122,6 +154,18 @@ class VoiceLoop:
         self.last_probe = float("-inf")
         self.last_energy = 0.0
         self.last_device_error = None
+        self.output_trace = None
+        self.first_render = False
+        self.wake_at = None
+        self.capture_queue_delay = 0.0
+
+    @property
+    def listen_until(self):
+        return self.session.until
+
+    @listen_until.setter
+    def listen_until(self, value):
+        self.session.deadline = value
 
     @property
     def epoch(self):
@@ -150,15 +194,18 @@ class VoiceLoop:
             thread.join(timeout=4)
         self.asr_pool.shutdown(wait=True, cancel_futures=True)
 
-    def say(self, text):
+    def say(self, text, token=None, trace=None):
         if self.closed.is_set():
             return
-        job = (self.epoch, text[:600])
+        hold = self.session.begin()
+        job = (self.epoch, text[:600], token, trace, hold, self.clock())
         try:
             self.speech.put_nowait(job)
         except queue.Full:
             try:
-                self.speech.get_nowait()
+                old = self.speech.get_nowait()
+                self.session.finish(old[4])
+                self.on_delivery(old[2], False)
             except queue.Empty:
                 pass
             self.speech.put_nowait(job)
@@ -166,34 +213,64 @@ class VoiceLoop:
     def _speak(self):
         while not self.closed.is_set():
             try:
-                epoch, text = self.speech.get(timeout=0.2)
+                epoch, text, token, trace, hold, queued = self.speech.get(timeout=0.2)
             except queue.Empty:
                 continue
-            if epoch != self.epoch:
-                continue
-            self.speaking.set()
-            session_active = self.listen_until > self.clock()
-            self.on_state("Speaking")
-            with self.spoken_lock:
-                self.spoken.append((self.clock(), text))
+            context = current.set(trace)
+            success = False
             try:
-                audio = self.backend.synthesize(text, cancelled=lambda: epoch != self.epoch or self.closed.is_set())
-                if epoch != self.epoch or self.closed.is_set():
+                if epoch != self.epoch:
                     continue
-                self.playback.enqueue(resample(audio.samples, audio.sample_rate), epoch)
-                while self.playback.remaining and epoch == self.epoch and not self.closed.is_set():
+                timings.duration("tts_queue", self.clock() - queued)
+                self.speaking.set()
+                self.on_state("Speaking")
+                self.output_trace, self.first_render = trace, False
+                with self.spoken_lock:
+                    self.spoken.append((self.clock(), text))
+                def chunk(samples, rate):
+                    if epoch == self.epoch and not self.closed.is_set():
+                        timings.mark("tts_first_pcm")
+                        self.playback.enqueue(resample(samples, rate), epoch)
+                def cancelled():
+                    return epoch != self.epoch or self.closed.is_set()
+                if isinstance(self.backend, SherpaBackend):
+                    self.backend.synthesize(text, cancelled=cancelled, on_chunk=chunk)
+                else:
+                    audio = self.backend.synthesize(text, cancelled=cancelled)
+                    chunk(audio.samples, audio.sample_rate)
+                deadline = time.monotonic() + 90
+                while self.playback.remaining and not cancelled():
+                    if time.monotonic() >= deadline:
+                        raise TimeoutError("Playback did not drain")
                     self.closed.wait(0.02)
+                # PortAudio has consumed PCM, but the DAC and echo tail must finish too.
+                tail_end = time.monotonic() + max(.65, self.delay_ms / 1000 + .1)
+                while time.monotonic() < tail_end and not cancelled():
+                    self.closed.wait(.02)
+                success = not cancelled()
+                timings.mark("playback_complete")
             except Exception:
+                self.playback.interrupt()
                 self.on_state("Speaker or speech model unavailable; text remains accessible")
             finally:
                 if epoch == self.epoch:
                     self.speaking.clear()
-                    if session_active:
-                        self.listen_until = max(self.listen_until, self.clock() + self.followup_seconds)
-                    self.on_state("Speech finished")
+                self.session.finish(hold)
+                self.on_delivery(token, success)
+                self.on_state("Speech finished" if success else "Speech interrupted or failed")
+                current.reset(context)
+
+    def _render(self, frames):
+        output = self.playback.render(frames)
+        if np.any(output) and not self.first_render:
+            self.first_render = True
+            timings.mark("first_audio_render", self.output_trace)
+            timings.mark("first_audible_estimate", self.output_trace,
+                         at=self.clock() + self.delay_ms / 1000)
+        return output
 
     def _callback(self, indata, outdata, frames, timing, status):
-        output = self.playback.render(frames)
+        output = self._render(frames)
         outdata[:, 0] = output
         if not self.enabled.is_set():
             return
@@ -205,7 +282,7 @@ class VoiceLoop:
             self.overrun.set()
 
     def _output_callback(self, outdata, frames, timing, status):
-        output = self.playback.render(frames)
+        output = self._render(frames)
         outdata[:, 0] = output
         if np.any(output):
             self.last_output = self.clock()
@@ -218,7 +295,7 @@ class VoiceLoop:
 
     def _reset_dsp(self):
         self._clear_capture()
-        self.listen_until = 0.0
+        self.session.clear()
         self.preroll.clear()
         self.near_end_until = 0.0
         self.backend.reset_wake()
@@ -261,6 +338,7 @@ class VoiceLoop:
             self._clear_capture()
             return
         if wake and near_end:
+            self.wake_at = now
             epoch = self.epoch if accepted_probe else self.interrupt()
             if not accepted_probe:
                 self.on_wake(epoch)
@@ -336,11 +414,22 @@ class VoiceLoop:
             self.reset_session()
             self.on_state("Speech queue full; please wake Klippy and repeat")
             return
+        trace = timings.new(self.last_voice)
+        timings.mark("vad_end", trace)
+        timings.duration("audio_queue", self.capture_queue_delay, trace)
+        if woke and self.wake_at is not None:
+            timings.mark("wake", trace, at=self.wake_at)
+        queued = self.clock()
+        hold = self.session.begin()
         def run():
+            context = current.set(trace)
             try:
                 if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set():
                     return
-                text = self.backend.transcribe(samples).strip()
+                timings.duration("asr_queue", self.clock() - queued)
+                with timings.span("asr"):
+                    text = self.backend.transcribe(samples).strip()
+                timings.mark("asr_complete")
                 if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set() or not text:
                     return
                 match = WAKE_PREFIX.match(text)
@@ -353,10 +442,12 @@ class VoiceLoop:
                 if match:
                     text = "Klippy " + text[match.end():]
                 self.listen_until = self.clock() + self.followup_seconds
-                self.on_text(VoiceInput(text, epoch, woke, confirmation_token))
+                self.on_text(VoiceInput(text, epoch, woke, confirmation_token, trace))
             except Exception:
                 self.on_state("Speech recognition unavailable; no request sent")
             finally:
+                self.session.finish(hold, refresh=epoch == self.epoch)
+                current.reset(context)
                 self.asr_slots.release()
         self.asr_pool.submit(run)
 
@@ -380,6 +471,7 @@ class VoiceLoop:
                 if abs(delay - self.delay_ms) > 20:
                     self.delay_ms = delay
                     self.echo.processor.stream_delay_ms = delay
+                self.capture_queue_delay = max(0, self.clock() - now)
                 self.process_frame(near, far, now, output_active=active)
             except Exception:
                 self.reset_session()

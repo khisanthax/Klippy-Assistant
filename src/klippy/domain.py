@@ -4,7 +4,7 @@ import hashlib
 import json
 import re
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -29,6 +29,7 @@ class Action(StrEnum):
 class Intent(StrictModel):
     action: Action
     printer_id: str
+    query_subject: Literal["nozzle", "bed"] | None = None
     macro: str | None = None
     params: dict[str, Annotated[float | int, Field(allow_inf_nan=False)]] = Field(default_factory=dict)
 
@@ -69,6 +70,8 @@ class Macro(StrictModel):
     name: str
     definition: str
     description: str = ""
+    previous_definition: str | None = None
+    review_notes: tuple[str, ...] = ()
     dependency_fingerprint: str = ""
     approved: bool = False
     enabled: bool = False
@@ -85,7 +88,7 @@ class Snapshot(StrictModel):
     connected: bool
     ready: bool = False
     state: str = "unknown"
-    progress: float = 0.0
+    progress: float | None = None
     temperatures: dict[str, float] = Field(default_factory=dict)
     message: str = ""
 

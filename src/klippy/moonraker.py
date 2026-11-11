@@ -9,6 +9,7 @@ from urllib.parse import urlencode, urlsplit
 import httpx
 from websockets.asyncio.client import connect
 
+from .diagnostics import timings
 from .domain import Printer, Snapshot
 
 
@@ -53,7 +54,8 @@ class Moonraker:
                 headers["X-Api-Key"] = self.api_key
             async with httpx.AsyncClient(timeout=6, trust_env=False, follow_redirects=False,
                                          transport=self.transport) as client:
-                response = await client.request(method, endpoint + path, json=payload, headers=headers)
+                with timings.span("moonraker"):
+                    response = await client.request(method, endpoint + path, json=payload, headers=headers)
                 response.raise_for_status()
                 value = response.json()
                 if "error" in value:
@@ -69,10 +71,19 @@ class Moonraker:
         web = status.get("webhooks", {})
         return Snapshot(connected=True, ready=web.get("state") == "ready",
                         state=str(status.get("print_stats", {}).get("state", "unknown")),
-                        progress=float(status.get("virtual_sdcard", {}).get("progress", 0.0)),
+                        progress=(float(status["virtual_sdcard"]["progress"])
+                                  if status.get("virtual_sdcard", {}).get("progress") is not None else None),
                         temperatures={name: float(status[name]["temperature"])
                                       for name in ("extruder", "heater_bed") if "temperature" in status.get(name, {})},
                         message=str(web.get("state_message", ""))[:500])
+
+    async def mmu_snapshot(self):
+        from .mmu import MmuStatus, normalize
+        objects = await self.request("GET", "/printer/objects/list")
+        if "mmu" not in objects.get("objects", []):
+            return MmuStatus()
+        value = await self.request("GET", "/printer/objects/query?mmu")
+        return normalize(value.get("status", {}).get("mmu"))
 
     async def macro_config(self):
         result = await self.request("GET", "/printer/objects/query?configfile")
