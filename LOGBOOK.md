@@ -1,5 +1,24 @@
 # Logbook
 
+## 2026-11-11 — Published private engineering preview
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.1.0-preview.1
+as a prerelease (not draft, not stable), targeting 237597f. Uploaded the 53.9 MiB unsigned
+installer, SHA-256 sidecar, release report and isolated UI preview. GitHub's uploaded
+asset digest matches local SHA256 b45d58b8f7b8048c7bd23cc4eedab679ac4d4bdab98084d20ab1c9e99c2e8971.
+
+Independent Windows CI test + installer pipeline passed (run 43022624225) and uploaded
+its preview-build artifact. Local installer lifecycle checks passed, including actual
+isolated SQLite preservation. Source tests: 78 passed. No live printer writes performed.
+
+Phase 1 is complete. Remaining phases and hardware/voice/redistribution gates stay open.
+Next work is software development in Phase 2: improve short Klippy wake accuracy, qualify
+model/lexicon redistribution, implement AEC/hands-free interruption and speaker enrollment,
+then finish remaining UI/monitoring and full clean-machine/offline qualification. Actual
+microphone calibration and consequential printer tests require the owner's supervised
+session. Do not mark stable v1.0 complete. Read RELEASE_REPORT.md and issue #2 to resume;
+experimental model files are in ignored local/model-research and never in Git/releases.
+
 ## 2026-11-11 — Preview acceptance evidence and publication preparation
 
 Final application suite: 78 passed locally; Ruff clean. Windows CI passed on aa5b30c

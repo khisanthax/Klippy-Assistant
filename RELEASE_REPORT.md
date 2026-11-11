@@ -11,6 +11,10 @@ remain partial in addition to hardware acceptance gates.
 Installer location after publication:
 https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.1.0-preview.1
 
+Published as a private prerelease. GitHub's installer asset digest matches the supplied
+SHA-256 sidecar. Independent Windows test+installer build also passed:
+https://github.com/khisanthax/Klippy-Assistant/actions/runs/43022624225
+
 Local artifact: dist/Klippy-Setup-0.1.0-preview.1.exe, with adjacent SHA-256 file.
 Run the installer as your normal Windows user, then open Klippy from the Start menu.
 Startup-with-Windows and desktop shortcuts are optional. Closing the panel hides it;
