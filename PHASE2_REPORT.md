@@ -71,3 +71,5 @@ Human microphone calibration can be conducted without enrolling a printer; missi
 clarification is spoken locally. Do not test consequential printer actions unattended.
 
 Release: https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.2.0-preview.1
+
+Published as a private prerelease. The uploaded installer digest matches the checksum above.

@@ -1,5 +1,21 @@
 # Logbook
 
+## 2026-11-11 — Published offline voice preview 0.2.0
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.2.0-preview.1
+as a private prerelease, not stable. Assets: complete-model Windows installer (1.39 GiB),
+SHA-256 sidecar, PHASE2_REPORT.md and the 57-file model manifest. GitHub's uploaded
+installer digest matches 1cd1ccb981b7e7539c42b717e008ef3531ec39d0c1054afc2be34ab1b78e96c7.
+The release targets e3eb3b1. Independent Windows build/test run 43062031011 passed and
+published its build artifact. All source/frozen/installed/default-audio evidence is recorded.
+
+Phase 2 core wake/pipeline/interruption/bundling work is implemented and packaged.
+Keep issue #2/milestone open for human wake/room calibration and optional speaker enrollment;
+clean-VM offline, cross-version upgrades and the 16 GB benchmark remain acceptance work.
+No live printer action or connection occurred in this Phase 2 session. Audio device tests
+saved neither microphone recordings nor transcripts. To resume, read PHASE2_REPORT.md,
+benchmarks/phase2-*.json and issue #2. Do not silently promote this preview to stable.
+
 ## 2026-11-11 — Independent complete-model Windows build passed
 
 Run 43062031011 passed both jobs: 99 tests and the complete-model installer build. The
