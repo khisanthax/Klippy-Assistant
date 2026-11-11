@@ -37,13 +37,14 @@ from PySide6.QtWidgets import (
 )
 
 from . import __version__
-from .conversation import Conversation, LocalLLM
+from .conversation import Conversation
 from .domain import Printer
 from .listening import listening_enabled
 from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
 from .monitor import Monitor
 from .moonraker import ConnectionFailure, Moonraker
+from .runtime import LlamaRuntime
 from .safety import Rejected, SafetyEngine
 from .storage import Credentials, Store, data_directory
 
@@ -140,6 +141,7 @@ class Window(QMainWindow):
         self.store = store
         self.smoke = smoke
         self.voice = None
+        self.runtime = LlamaRuntime()
         self.discovery = None
         self.speech_pool = ThreadPoolExecutor(max_workers=1)
         self.worker = Worker()
@@ -177,6 +179,7 @@ class Window(QMainWindow):
         self.timer.timeout.connect(self.tick)
         self.timer.start(1000)
         self.ticks = 0
+        self.last_session_until = 0.0
 
     def client(self, printer):
         return Moonraker(printer, Credentials.get(printer.id))
@@ -487,17 +490,21 @@ class Window(QMainWindow):
 
     def cancel(self):
         self.engine.cancel()
-        self.output.append("Pending action canceled.")
+        self.write_message("Pending action canceled.")
 
     def stop_speaking(self):
         if self.voice:
             self.voice.interrupt()
 
+    def write_message(self, text):
+        self.output.insertPlainText(str(text) + "\n")
+        self.output.ensureCursorVisible()
+
     def failure(self, text):
         self.command_busy = False
         self.send_button.setEnabled(True)
         self.polling = False
-        self.output.append(text)
+        self.write_message(text)
         self.sprite.announce(self.active_name() + " · Needs attention")
 
     def result(self, name, value):
@@ -505,20 +512,20 @@ class Window(QMainWindow):
             self.polling = False
             for printer_name, code in value:
                 text = f"{printer_name}: {code}. No corrective action taken."
-                self.output.append(text)
+                self.write_message(text)
                 self.sprite.announce(text)
                 self.tray.showMessage("Klippy · Printer alert", text, QSystemTrayIcon.MessageIcon.Warning, 10000)
                 self.say(text)
         elif name == "macros":
             self.reload_macros()
-            self.output.append("Macro registry refreshed. " + "; ".join(value))
+            self.write_message("Macro registry refreshed. " + "; ".join(value))
         elif name == "test":
-            self.output.append(f"Read-only connection test: connected={value.connected}, state={value.state}")
+            self.write_message(f"Read-only connection test: connected={value.connected}, state={value.state}")
         elif name == "voice_loaded":
             from .voice import VoiceLoop
             self.voice = VoiceLoop(value, self.voice_text, lambda text: self.worker.result.emit("voice_state", text))
             self.voice.start()
-            self.conversation.llm = LocalLLM()
+            self.conversation.llm = self.loaded_llm
             self.model_status.setText("Local speech pack loaded. Manual interruption available; hands-free barge-in disabled.")
         elif name == "voice_state":
             self.model_status.setText(value)
@@ -530,7 +537,7 @@ class Window(QMainWindow):
             self.command_busy = False
             self.send_button.setEnabled(True)
             if value and value != "speech_stopped":
-                self.output.append(value)
+                self.write_message(value)
                 self.sprite.announce(self.active_name() + " · Responding")
                 self.say(value)
             elif value == "speech_stopped":
@@ -551,7 +558,9 @@ class Window(QMainWindow):
                 from .voice import SherpaBackend
                 root = Path(path)
                 manifest = await asyncio.to_thread(verify_pack, root)
-                return await asyncio.to_thread(SherpaBackend, root, manifest["speech_config"])
+                backend = await asyncio.to_thread(SherpaBackend, root, manifest["speech_config"])
+                self.loaded_llm = await self.runtime.start(root)
+                return backend
             if self.voice:
                 self.voice.close()
                 self.voice = None
@@ -590,7 +599,7 @@ class Window(QMainWindow):
                 self.engine.cancel()
                 self.store.restore(Path(path))
                 self.reload_printers()
-                self.output.append("Restored. Printers and macros require reapproval; credentials were not imported.")
+                self.write_message("Restored. Printers and macros require reapproval; credentials were not imported.")
             except Exception:
                 self.failure("Backup invalid; configuration was not restored")
 
@@ -613,16 +622,19 @@ class Window(QMainWindow):
             self.engine.cancel()
             pending = None
         self.confirm_button.setEnabled(pending is not None and not self.command_busy)
+        if self.runtime.process and self.runtime.process.poll() is not None:
+            self.conversation.llm = None
+            self.runtime.close()
+            self.model_status.setText("Local language engine stopped; basic commands and monitoring remain available")
         if self.ticks % 5 == 0 and not self.polling and self.monitor_enabled.isChecked() and not self.smoke:
             self.polling = True
             self.worker.submit("poll", self.monitor.poll())
         if self.discovery:
             self.discovered.setText("\n".join(self.discovery.found.values()) or "No Moonraker advertisements found")
-        if self.ticks % 30 == 0 and not self.command_busy:
-            # The UI displays recent answers only for the active conversation.
-            if self.conversation.clock() >= self.conversation.until:
-                self.output.clear()
-                self.conversation.clear()
+        if (not self.command_busy and self.conversation.until and
+                self.conversation.clock() >= self.conversation.until):
+            self.output.clear()
+            self.conversation.clear()
 
     def summon(self):
         self.showNormal()
@@ -649,6 +661,7 @@ class Window(QMainWindow):
             self.discovery.close()
         self.speech_pool.shutdown(wait=False, cancel_futures=True)
         self.worker.close()
+        self.runtime.close()
         self.tray.hide()
         self.sprite.hide()
         QApplication.instance().quit()
@@ -658,6 +671,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--show", action="store_true", help="Open control panel on startup")
     parser.add_argument("--smoke-test", action="store_true", help="Launch/close UI using isolated temporary settings")
+    parser.add_argument("--smoke-report", type=Path, help="Write isolated startup diagnostic result")
     args = parser.parse_args()
     app = QApplication(sys.argv[:1])
     app.setQuitOnLastWindowClosed(False)
@@ -676,6 +690,13 @@ def main():
             store = Store(Path(temp) / "settings.sqlite" if args.smoke_test else data_directory() / "settings.sqlite")
             window = Window(store, smoke=args.smoke_test)
         except Exception:
+            if args.smoke_test:
+                import traceback
+                if args.smoke_report:
+                    args.smoke_report.write_text(traceback.format_exc(), encoding="utf-8")
+                elif sys.stderr:
+                    traceback.print_exc()
+                return 1
             QMessageBox.critical(None, "Klippy could not start", "Settings could not be opened. Existing data has been preserved.")
             return 1
         if args.show or args.smoke_test or not QSystemTrayIcon.isSystemTrayAvailable():
@@ -684,6 +705,8 @@ def main():
             QTimer.singleShot(1200, window.quit)
         result = app.exec()
         store.close()
+        if args.smoke_test and args.smoke_report:
+            args.smoke_report.write_text("Startup and shutdown completed successfully.\n", encoding="utf-8")
         return result
 
 

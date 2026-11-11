@@ -68,6 +68,21 @@ async def test_disconnect_alert_deduplicated(rig):
     assert not sim.writes
 
 
+async def test_reconnect_refreshes_macro_registry_readonly(rig):
+    store, sim, engine, _ = rig
+    monitor = Monitor(store, engine.clients)
+    await monitor.poll()
+    assert "LOAD_FILAMENT" in store.macros("sim")
+    sim.offline = True
+    await monitor.poll()
+    sim.offline = False
+    sim.config = {"gcode_macro REPLACEMENT": {"gcode": "M83"}}
+    await monitor.poll()
+    assert "LOAD_FILAMENT" not in store.macros("sim")
+    assert not store.macros("sim")["REPLACEMENT"].approved
+    assert not sim.writes
+
+
 def test_missing_models_fail_visibly(tmp_path):
     with pytest.raises(ModelUnavailable):
         verify_pack(tmp_path)

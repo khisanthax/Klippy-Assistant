@@ -89,8 +89,9 @@ class Conversation:
 class LocalLLM:
     """Loopback-only llama.cpp. Validates strict JSON even when server grammar is ineffective."""
 
-    def __init__(self, port=18765):
+    def __init__(self, port=18765, api_key=None):
         self.port = port
+        self.api_key = api_key
 
     async def interpret(self, text, printer_id, macros):
         import httpx
@@ -103,7 +104,8 @@ class LocalLLM:
                   + json.dumps({"printer_id": printer_id, "macros": allowed}))
         try:
             async with httpx.AsyncClient(timeout=20, trust_env=False) as client:
-                response = await client.post(f"http://127.0.0.1:{self.port}/v1/chat/completions", json={
+                headers = {"Authorization": "Bearer " + self.api_key} if self.api_key else {}
+                response = await client.post(f"http://127.0.0.1:{self.port}/v1/chat/completions", headers=headers, json={
                     "messages": [{"role": "system", "content": system}, {"role": "user", "content": text}],
                     "temperature": 0, "max_tokens": 200,
                     "response_format": {"type": "json_schema", "json_schema": {"name": "intent", "strict": True,

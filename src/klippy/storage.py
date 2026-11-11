@@ -3,9 +3,19 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import threading
+from functools import wraps
 from pathlib import Path
 
 from .domain import Macro, Printer
+
+
+def serialized(method):
+    @wraps(method)
+    def call(self, *args, **kwargs):
+        with self.lock:
+            return method(self, *args, **kwargs)
+    return call
 
 
 def data_directory() -> Path:
@@ -18,6 +28,7 @@ class Store:
     """Only settings/operational event codes are persisted. No utterance API exists."""
 
     def __init__(self, path: Path):
+        self.lock = threading.RLock()
         path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.execute("PRAGMA journal_mode=WAL")
@@ -31,24 +42,30 @@ class Store:
         """)
         self.db.commit()
 
+    @serialized
     def close(self):
         self.db.close()
 
+    @serialized
     def get(self, key, default=None):
         row = self.db.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
         return json.loads(row[0]) if row else default
 
+    @serialized
     def set(self, key, value):
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, json.dumps(value)))
 
+    @serialized
     def printers(self):
         return [Printer.model_validate_json(r[0]) for r in self.db.execute("SELECT value FROM printers")]
 
+    @serialized
     def save_printer(self, printer: Printer):
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO printers VALUES (?,?)", (printer.id, printer.model_dump_json()))
 
+    @serialized
     def remove_printer(self, printer_id):
         with self.db:
             self.db.execute("DELETE FROM macros WHERE printer=?", (printer_id,))
@@ -56,11 +73,13 @@ class Store:
             if self.get("selected") == printer_id:
                 self.db.execute("DELETE FROM settings WHERE key='selected'")
 
+    @serialized
     def macros(self, printer_id):
         return {m.name: m for (value,) in self.db.execute(
             "SELECT value FROM macros WHERE printer=?", (printer_id,)
         ) for m in [Macro.model_validate_json(value)]}
 
+    @serialized
     def replace_macros(self, printer_id, macros):
         with self.db:
             self.db.execute("DELETE FROM macros WHERE printer=?", (printer_id,))
@@ -68,6 +87,7 @@ class Store:
                 (printer_id, m.name, m.model_dump_json()) for m in macros.values()
             ])
 
+    @serialized
     def event(self, printer_id, code):
         allowed = {"disconnected", "connected", "fault", "paused", "command_sent", "outcome_unknown"}
         if code not in allowed:
@@ -76,6 +96,7 @@ class Store:
             self.db.execute("INSERT INTO events(printer,code) VALUES (?,?)", (printer_id, code))
             self.db.execute("DELETE FROM events WHERE id NOT IN (SELECT id FROM events ORDER BY id DESC LIMIT 1000)")
 
+    @serialized
     def export(self, path: Path):
         # Macros/addresses are private user configuration. Never export credentials.
         payload = {"version": 1, "printers": [p.model_dump(mode="json") for p in self.printers()],
@@ -84,6 +105,7 @@ class Store:
                               for p in self.printers()}}
         path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
+    @serialized
     def restore(self, path: Path):
         payload = json.loads(path.read_text(encoding="utf-8"))
         if payload.get("version") != 1:

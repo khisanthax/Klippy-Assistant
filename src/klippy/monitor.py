@@ -1,4 +1,5 @@
 from .domain import Snapshot
+from .macros import discover
 from .moonraker import ConnectionFailure
 
 
@@ -8,9 +9,11 @@ class Monitor:
     def __init__(self, store, clients):
         self.store, self.clients = store, clients
         self.previous = {}
+        self.cycles = 0
 
     async def poll(self):
         import asyncio
+        self.cycles += 1
         async def one(printer):
             try:
                 snapshot = await self.clients(printer).snapshot()
@@ -18,6 +21,15 @@ class Monitor:
                 snapshot = Snapshot(connected=False)
             previous = self.previous.get(printer.id)
             self.previous[printer.id] = snapshot
+            if snapshot.connected and snapshot.ready and (
+                previous is None or not previous.connected or not previous.ready or self.cycles % 12 == 0
+            ):
+                try:
+                    config = await self.clients(printer).macro_config()
+                    registry, _ = discover(config, self.store.macros(printer.id))
+                    self.store.replace_macros(printer.id, registry)
+                except (ConnectionFailure, KeyError, ValueError):
+                    pass  # Writes independently revalidate discovery; a failed refresh grants no rights.
             code = None
             if not snapshot.connected and (previous is None or previous.connected):
                 code = "disconnected"
