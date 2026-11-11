@@ -16,6 +16,12 @@ class Rejected(Exception):
     pass
 
 
+class NeedsParameter(Rejected):
+    def __init__(self, name):
+        self.name = name
+        super().__init__(f"Specify parameter {name}")
+
+
 READ_ONLY = {Action.STATUS, Action.TEMPERATURES, Action.MACROS}
 
 
@@ -103,7 +109,7 @@ class SafetyEngine:
                     raise Rejected("Invalid parameter schema")
                 if key not in intent.params:
                     if rule.required:
-                        raise Rejected(f"Specify parameter {key}")
+                        raise NeedsParameter(key)
                     continue
                 v = intent.params[key]
                 if not math.isfinite(v) or not rule.minimum <= v <= rule.maximum or (rule.integer and int(v) != v):

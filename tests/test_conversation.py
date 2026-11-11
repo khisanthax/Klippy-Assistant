@@ -34,7 +34,7 @@ async def test_stop_talking_does_not_cancel_print(rig):
     assert not sim.writes
 
 
-@pytest.mark.parametrize("text", ["no", "don't do that", "cancel that", "never mind"])
+@pytest.mark.parametrize("text", ["no", "don't do that", "cancel that", "never mind", "don't home", "do not pause"])
 async def test_negative_instruction_cancels_pending(rig, text):
     _, sim, engine, _ = rig
     c = Conversation(engine)

@@ -33,7 +33,9 @@ class Monitor:
             code = None
             if not snapshot.connected and (previous is None or previous.connected):
                 code = "disconnected"
-            elif snapshot.connected and not snapshot.ready and (previous is None or previous.ready):
+            elif snapshot.connected and (not snapshot.ready or snapshot.state == "error") and (
+                previous is None or previous.ready and previous.state != "error"
+            ):
                 code = "fault"
             elif snapshot.state == "paused" and (previous is None or previous.state != "paused"):
                 code = "paused"

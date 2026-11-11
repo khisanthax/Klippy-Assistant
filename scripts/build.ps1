@@ -17,10 +17,20 @@ if ($Stable) {
 Invoke-Checked $Python @('-m', 'pytest', '-q')
 Invoke-Checked $Python @('-m', 'ruff', 'check', 'src', 'tests', 'scripts')
 Invoke-Checked $Python @('scripts/collect_licenses.py', 'build/licenses')
-Invoke-Checked $Python @('-m', 'PyInstaller', '--noconfirm', '--clean', '--windowed', '--onedir',
-    '--name', 'Klippy', '--paths', 'src', '--collect-all', 'sherpa_onnx', '--collect-all', 'sounddevice',
-    '--hidden-import', 'keyring.backends.Windows', '--add-data', 'build/licenses;licenses',
-    '--add-data', 'models/manifest.json;models', 'scripts/launcher.py')
+$taskPythonExe = (Get-Command $Python).Source
+$taskPythonBase = & $taskPythonExe -c 'import sys; print(sys.base_prefix)'
+$taskPreviousPath = $env:PATH
+try {
+    # Ambient tools can contain incompatible DLLs (e.g. Poppler ICU). Never freeze them.
+    $env:PATH = @((Split-Path $taskPythonExe), $taskPythonBase, (Join-Path $taskPythonBase 'DLLs'),
+        (Join-Path $env:SystemRoot 'System32'), $env:SystemRoot) -join ';'
+    Invoke-Checked $taskPythonExe @('-m', 'PyInstaller', '--noconfirm', '--clean', '--windowed', '--onedir',
+        '--name', 'Klippy', '--paths', 'src', '--collect-all', 'sherpa_onnx', '--collect-all', 'sounddevice',
+        '--hidden-import', 'keyring.backends.Windows', '--add-data', 'build/licenses;licenses',
+        '--add-data', 'models/manifest.json;models', 'scripts/launcher.py')
+} finally {
+    $env:PATH = $taskPreviousPath
+}
 $smokeReport = Join-Path $PWD 'build\frozen-smoke.txt'
 $process = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--smoke-test', '--smoke-report', ('"' + $smokeReport + '"')) -WindowStyle Hidden -PassThru
 if (-not $process.WaitForExit(30000)) { $process.Kill(); throw 'Frozen application smoke test timed out' }

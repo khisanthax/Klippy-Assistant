@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-11",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "note": "Synthetic fixtures, CPU-only; no microphones/printers, not real-world accuracy",
+  "wake_probes": [
+    {
+      "synthetic_text": "Klippy",
+      "activated": false
+    },
+    {
+      "synthetic_text": "Hey Klippy",
+      "activated": true
+    },
+    {
+      "synthetic_text": "The printer is ready",
+      "activated": false
+    },
+    {
+      "synthetic_text": "clipper",
+      "activated": false
+    },
+    {
+      "synthetic_text": "clippy",
+      "activated": false
+    }
+  ],
+  "llm_probes": [
+    {
+      "synthetic_text": "What is the nozzle temperature?",
+      "result": {
+        "action": "temperatures",
+        "printer_id": "synthetic-printer",
+        "macro": null,
+        "params": {}
+      },
+      "elapsed_seconds": 3.165
+    },
+    {
+      "synthetic_text": "Would you pause it please?",
+      "result": {
+        "action": "pause",
+        "printer_id": "synthetic-printer",
+        "macro": null,
+        "params": {}
+      },
+      "elapsed_seconds": 1.987
+    },
+    {
+      "synthetic_text": "Do the thing",
+      "result": {
+        "clarification_or_failure": "Please clarify the intended printer operation; no action sent"
+      },
+      "elapsed_seconds": 1.552
+    }
+  ],
+  "speech_load_seconds": 4.303,
+  "tts_generate_seconds": 0.503,
+  "tts_audio_seconds": 1.261,
+  "asr_synthetic_text": "pause the test printer.",
+  "asr_seconds": 0.142,
+  "llm_start_seconds": 3.324
+}

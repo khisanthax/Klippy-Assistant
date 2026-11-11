@@ -19,8 +19,14 @@ license texts must accompany distribution. Model rights are independent of runti
 | llama.cpp candidate | MIT; not bundled until approved asset inventory exists |
 | Qwen3 1.7B GGUF candidate | Apache-2.0 according to official model card; not yet downloaded/qualified |
 
-No model is currently approved for redistribution. models/manifest.json intentionally has
+No model pack is currently approved for redistribution. models/manifest.json intentionally has
 an empty asset inventory. Stable build gates reject it. A package license collector copies
 installed distribution license files; final binary inventory/legal review remains a gate.
+
+GNU LGPLv3/GPLv3 texts and dynamic Qt replacement/source information are additionally
+included under packaging/licenses and copied into the installed license directory. The
+Qt source archive directory URLs were checked successfully on 2026-11-11.
+Experimental model cards/checksums are in models/candidates.json; the KWS card is
+Apache-2.0, VITS-LJS has a separate lexicon review gate, and no model weights ship in the preview.
 
 Project code is private. No public license grant is made by this repository.

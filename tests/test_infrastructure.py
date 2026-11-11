@@ -59,6 +59,13 @@ async def test_monitor_fault_is_notification_only_when_microphone_off(rig):
     assert store.db.execute("SELECT code FROM events").fetchone() == ("fault",)
 
 
+async def test_print_error_alerts_when_firmware_still_ready(rig):
+    store, sim, engine, _ = rig
+    sim.state = "error"
+    assert await Monitor(store, engine.clients).poll() == [("Test Printer", "fault")]
+    assert not sim.writes
+
+
 async def test_disconnect_alert_deduplicated(rig):
     store, sim, engine, _ = rig
     monitor = Monitor(store, engine.clients)

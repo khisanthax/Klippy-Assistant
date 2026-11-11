@@ -27,7 +27,7 @@ class LlamaRuntime:
             self.port = sock.getsockname()[1]
         binary = (root / manifest["runtime"]["binary"]).resolve()
         model = (root / manifest["runtime"]["model"]).resolve()
-        args = [str(binary), "--model", str(model), "--host", "127.0.0.1", "--port", str(self.port),
+        args = [str(binary), "--offline", "--model", str(model), "--host", "127.0.0.1", "--port", str(self.port),
                 "--ctx-size", "2048", "--threads", str(min(os.cpu_count() or 2, 4)),
                 "--parallel", "1", "--n-gpu-layers", "0", "--api-key", self.api_key]
         try:

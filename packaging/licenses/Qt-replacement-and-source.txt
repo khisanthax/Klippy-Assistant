@@ -1,0 +1,19 @@
+Klippy uses unmodified Qt for Python community binaries under the applicable LGPL terms.
+The application uses Qt Core, Gui, Widgets and Network as shared libraries. These libraries
+and their Python bindings remain separate files, not statically linked into Klippy.exe.
+
+You may replace the LGPL libraries with compatible modified versions for your own use,
+and debug such modifications. No Klippy restriction prevents reverse engineering for
+debugging changes to those libraries. Quit Klippy, back up the installation, and replace
+the corresponding DLL/PYD files under _internal/PySide6 and _internal/shiboken6 with
+ABI-compatible builds. Keep the matching Qt platform plugins. No signature enforcement
+or app checksum lock prevents such replacement.
+
+Upstream source for the exact initial binaries:
+https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.12.0-src/
+https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/
+
+Include the applicable LGPLv3/GPLv3 texts and notices with redistribution. The build's
+licenses/inventory.json lists installed dependency versions and collected notices.
+Model licenses are separate and the engineering preview does not distribute model weights.
+Final corresponding-source and binary-license completeness remains a stable release gate.

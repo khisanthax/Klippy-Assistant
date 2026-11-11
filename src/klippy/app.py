@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
+    QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
     QHBoxLayout,
@@ -82,18 +83,19 @@ class Worker(QObject):
         self.loop.close()
 
 
-def companion_icon():
+def companion_icon(state="idle", frame=0):
     pixmap = QPixmap(64, 64)
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    painter.setBrush(QColor("#61d6b0"))
+    painter.setBrush(QColor({"error": "#ef8b81", "muted": "#92a3ac", "thinking": "#b6a0e9"}.get(state, "#61d6b0")))
     painter.setPen(Qt.PenStyle.NoPen)
     painter.drawRoundedRect(5, 12, 54, 44, 14, 14)
     painter.setBrush(QColor("#102524"))
     painter.drawEllipse(18, 25, 7, 10)
     painter.drawEllipse(39, 25, 7, 10)
-    painter.drawRoundedRect(23, 43, 18, 3, 1, 1)
+    painter.drawRoundedRect(23, 40 if state == "speaking" and frame % 2 else 43, 18,
+                           9 if state == "speaking" and frame % 2 else 3, 2, 2)
     painter.end()
     return QIcon(pixmap)
 
@@ -104,12 +106,12 @@ class Sprite(QWidget):
                          Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         layout = QVBoxLayout(self)
-        icon = QLabel()
-        icon.setPixmap(companion_icon().pixmap(64, 64))
-        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.icon = QLabel()
+        self.icon.setPixmap(companion_icon().pixmap(64, 64))
+        self.icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label = QLabel("Klippy")
         self.label.setStyleSheet("background:#17352f;color:#c4f6e5;padding:8px;border-radius:8px")
-        layout.addWidget(icon)
+        layout.addWidget(self.icon)
         layout.addWidget(self.label)
         self.timer = QTimer(self)
         self.timer.setSingleShot(True)
@@ -117,8 +119,19 @@ class Sprite(QWidget):
         self.summon = summon
         self.offset = QPoint()
         self.move(60, 100)
+        self.state = "idle"
+        self.frame = 0
+        self.animation = QTimer(self)
+        self.animation.timeout.connect(self.animate)
+        self.animation.start(180)
 
-    def announce(self, text):
+    def animate(self):
+        if self.isVisible():
+            self.frame += 1
+            self.icon.setPixmap(companion_icon(self.state, self.frame).pixmap(64, 64))
+
+    def announce(self, text, state="idle"):
+        self.state = state
         self.label.setText(text[:100])
         self.adjustSize()
         self.show()
@@ -271,6 +284,13 @@ class Window(QMainWindow):
         self.model_status.setWordWrap(True)
         layout.addWidget(self.model_status)
         layout.addWidget(self.button("Load local voice pack", self.load_voice))
+        self.sensitivity = QDoubleSpinBox()
+        self.sensitivity.setRange(0.01, 1.0)
+        self.sensitivity.setSingleStep(0.01)
+        self.sensitivity.setValue(self.store.get("wake_threshold", 0.25))
+        self.sensitivity.valueChanged.connect(lambda v: self.store.set("wake_threshold", v))
+        layout.addWidget(QLabel("Wake detection threshold (lower is more sensitive; reload pack after changing)"))
+        layout.addWidget(self.sensitivity)
         self.listening = QComboBox()
         self.listening.addItems(["manual", "scheduled", "always"])
         self.listening.setCurrentText(self.store.get("listening", {}).get("mode", "manual"))
@@ -505,7 +525,7 @@ class Window(QMainWindow):
         self.send_button.setEnabled(True)
         self.polling = False
         self.write_message(text)
-        self.sprite.announce(self.active_name() + " · Needs attention")
+        self.sprite.announce(self.active_name() + " · Needs attention", "error")
 
     def result(self, name, value):
         if name == "poll":
@@ -513,7 +533,7 @@ class Window(QMainWindow):
             for printer_name, code in value:
                 text = f"{printer_name}: {code}. No corrective action taken."
                 self.write_message(text)
-                self.sprite.announce(text)
+                self.sprite.announce(text, "error")
                 self.tray.showMessage("Klippy · Printer alert", text, QSystemTrayIcon.MessageIcon.Warning, 10000)
                 self.say(text)
         elif name == "macros":
@@ -529,6 +549,10 @@ class Window(QMainWindow):
             self.model_status.setText("Local speech pack loaded. Manual interruption available; hands-free barge-in disabled.")
         elif name == "voice_state":
             self.model_status.setText(value)
+            if value == "Listening":
+                self.sprite.announce(self.active_name() + " · Listening", "listening")
+            elif value == "Speaking":
+                self.sprite.state = "speaking"
         elif name == "voice_input":
             if not self.command_busy:
                 self.command_busy = True
@@ -538,7 +562,7 @@ class Window(QMainWindow):
             self.send_button.setEnabled(True)
             if value and value != "speech_stopped":
                 self.write_message(value)
-                self.sprite.announce(self.active_name() + " · Responding")
+                self.sprite.announce(self.active_name() + " · Responding", "speaking")
                 self.say(value)
             elif value == "speech_stopped":
                 self.stop_speaking()
@@ -549,7 +573,16 @@ class Window(QMainWindow):
 
     def say(self, text):
         if self.voice and self.spoken.isChecked():
-            self.speech_pool.submit(self.voice.speak, text)
+            voice = self.voice
+            def speak():
+                self.worker.result.emit("voice_state", "Speaking")
+                try:
+                    voice.speak(text)
+                except Exception:
+                    self.worker.result.emit("voice_state", "Speaker unavailable; text response remains accessible")
+                finally:
+                    self.worker.result.emit("voice_state", "Speech finished")
+            self.speech_pool.submit(speak)
 
     def load_voice(self):
         path = QFileDialog.getExistingDirectory(self, "Select verified local model pack")
@@ -558,7 +591,8 @@ class Window(QMainWindow):
                 from .voice import SherpaBackend
                 root = Path(path)
                 manifest = await asyncio.to_thread(verify_pack, root)
-                backend = await asyncio.to_thread(SherpaBackend, root, manifest["speech_config"])
+                backend = await asyncio.to_thread(SherpaBackend, root, manifest["speech_config"],
+                                                  self.store.get("wake_threshold", 0.25))
                 self.loaded_llm = await self.runtime.start(root)
                 return backend
             if self.voice:
@@ -676,18 +710,15 @@ def main():
     app = QApplication(sys.argv[:1])
     app.setQuitOnLastWindowClosed(False)
     app.setStyle("Fusion")
-    app.setStyleSheet("""
-        QWidget { background:#101c24; color:#e0e9ee; font-family:'Segoe UI'; font-size:13px; }
-        QLineEdit,QTextEdit,QTableWidget,QComboBox { background:#182934; border:1px solid #354a58; padding:8px; }
-        QPushButton { background:#20483f; border:1px solid #3b7361; padding:9px; border-radius:5px; }
-        QPushButton:hover { background:#2d5d50; } QPushButton:disabled { color:#667b84; background:#1b2a32; }
-        QTabBar::tab { padding:12px 24px; } QTabBar::tab:selected { color:#70dfbd; }
-        QHeaderView::section { background:#233b49; padding:8px; border:0; }
-    """)
+    from .theme import STYLE
+    app.setStyleSheet(STYLE)
     import tempfile
     with tempfile.TemporaryDirectory(prefix="klippy-smoke-") as temp:
         try:
             store = Store(Path(temp) / "settings.sqlite" if args.smoke_test else data_directory() / "settings.sqlite")
+            if args.smoke_test:
+                import sherpa_onnx  # noqa: F401
+                import sounddevice  # noqa: F401
             window = Window(store, smoke=args.smoke_test)
         except Exception:
             if args.smoke_test:

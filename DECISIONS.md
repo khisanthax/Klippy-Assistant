@@ -31,8 +31,31 @@
 - [llama.cpp server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [Official Qwen GGUF candidate](https://huggingface.co/Qwen/Qwen3-1.7B-GGUF)
 
-## Measurements
+## Measured candidate probes
 
-No acoustic accuracy, idle memory/CPU, LLM latency, model memory or clean-machine results
-are claimed. Record hardware, tools, settings, samples, measurements and date before adding
-performance claims. Synthetic safety tests are not real-printer validation.
+See benchmarks/ for actual CPU-only synthetic probe results. VITS generated speech and
+Whisper tiny.en transcribed the generated pause request. Qwen3 1.7B Q4_K_M returned
+temperatures/pause and clarification after prompt/schema changes. Initially it invented
+a macro on a vague request: this motivated the independent evidence gate and regressions.
+
+The KWS archive includes an Apache-2.0 model card. See the
+[maintainer's clarification](https://github.com/k2-fsa/sherpa-onnx/issues/3802#issuecomment-6415898531).
+Actual KWS accepted BPE tokens for Klippy/Hey Klippy and rejected two seconds of silence.
+Synthetic Hey Klippy activated; synthetic short Klippy did not at threshold 0.25. This
+is a failing primary wake requirement, not a reason to substitute a different wake word.
+
+VITS-LJS includes an Apache-2.0 model card but its CMU-in-IPA lexicon provenance needs
+complete redistribution review. The first lessac candidate referred to a separate dataset
+license and was not selected. Model and binary asset checksums are in models/candidates.json;
+these are experimental inputs, not the qualified distribution manifest.
+
+Source-shell idle and synthetic inference timings are scoped to the recorded developer
+host (Ryzen 7 5800X, 63.9 GiB, Windows 11 build 26200), not the requested typical 16 GB
+baseline. Microphone accuracy, full-pipeline latency, model memory and clean-machine
+results are unmeasured. Synthetic tests are not real-printer or acoustic validation.
+
+## Packaging defect found and fixed
+
+PyInstaller initially bundled Poppler's incompatible ICU from the developer PATH, causing
+QtCore import failure. Controlled PATH collection fixed it. Console diagnosis and frozen
+startup/shutdown checks verified the fix. Installer testing is isolated from actual settings.

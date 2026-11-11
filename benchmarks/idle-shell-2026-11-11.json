@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-11",
+  "scope": "Source desktop shell, hidden, no models/devices/printers",
+  "host": "Windows 11 build 26200; Ryzen 7 5800X; 63.9 GiB RAM",
+  "elapsed_seconds": 14.992,
+  "cpu_seconds": 0.0156,
+  "cpu_percent_of_one_core": 0.104,
+  "working_set_mib": 89.3,
+  "peak_working_set_mib": 89.3
+}

@@ -24,6 +24,10 @@ Macro definitions are untrusted data. Every macro configuration snapshot is fing
 conservatively; changes to any configuration section revoke approvals, including callers
 whose helper macros or printer settings changed. Immediately before a macro write the
 configuration and printer state are fetched again. Renames never transfer approval.
+Any configuration snapshot change is also detected on reconnect and through a periodic
+read-only refresh. Schema-valid model hallucinations face an additional explicit-action
+evidence gate. Missing macro parameters can be supplied in a short, expiring follow-up
+bound to the same printer and draft intent.
 
 HTTP endpoints resolve to local/private IPs and connections pin the validated address.
 Ambient HTTP proxies and redirects are disabled. Public endpoints and the common cloud
@@ -31,6 +35,8 @@ metadata address are rejected. HTTPS hostnames currently require a certificate v
 the pinned IP; hostname-aware TLS/SNI is an outstanding compatibility improvement.
 
 WebSocket subscription support exists in the transport but the UI currently polls every
-five seconds. Full per-object/MMU fault subscriptions, reconnect-triggered macro refresh,
-sleep/resume handling and performance qualification remain open. Missing models leave
+five seconds. Full per-object/MMU fault subscriptions,
+sleep/resume handling and full performance qualification remain open. Missing models leave
 manual read-only commands and monitoring available. A failed model never grants write access.
+LlamaRuntime owns a CPU-only child process with --offline, a random loopback port and
+ephemeral API key. It checks local asset integrity before launch and terminates on exit.

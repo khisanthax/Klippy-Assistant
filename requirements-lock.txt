@@ -34,6 +34,7 @@ pytest==9.2.0
 pytest-asyncio==1.4.1.post1
 pywin32-ctypes==0.2.3
 ruff==0.17.4
+sentencepiece==0.2.3
 setuptools==84.2.1
 sherpa-onnx-core==2.0.1
 sherpa_onnx==2.0.1

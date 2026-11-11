@@ -1,5 +1,50 @@
 # Logbook
 
+## 2026-11-11 — Windows preview packaging and real local engine probes
+
+Completed: source pushed to private repository; eight GitHub milestones/issues created;
+Windows test CI passed for the earlier packaging milestone. Local suite now passes 78
+tests, including model hallucinations, parameter clarification, cancellation races and
+Qt clean shutdown. Implemented managed loopback-only --offline llama.cpp runtime,
+animated companion states, wake sensitivity, periodic/reconnect read-only macro refresh,
+serialized SQLite access, strict model reference integrity and plain-text response rendering.
+
+Packaging: PyInstaller initially picked up an incompatible Poppler ICU DLL from ambient
+PATH. Diagnosed QtCore DLL import failure in a console build; controlled PATH fixed it.
+Frozen app now starts/closes and imports actual speech/audio native modules. Inno Setup
+7.1.1 compiler installer Authenticode signature verified as valid (Pyrsys B.V.). Built an
+unsigned 53.8 MiB engineering preview installer. Initial per-user install, same-version
+reinstall with isolated data, installed-app smoke and uninstall passed on development host.
+Extended SQLite preservation test and final license/docs repackaging are next.
+
+Actual model tests: downloaded official KWS, Whisper tiny.en, VITS-LJS, llama.cpp b12110,
+and pinned Qwen3 1.7B Q4_K_M into ignored local/model-research. Qwen model SHA matches HF
+LFS hash; llama binary archive SHA matches GitHub asset digest. Other archive/local file
+hashes recorded; no upstream digest claim where unavailable. Candidate manifest is
+experimental, separate from empty qualified production manifest. KWS card is Apache-2.0;
+VITS lexicon and complete converted-model redistribution review remain open.
+
+Results: synthetic Hey Klippy wakes; short Klippy fails at threshold 0.25. Actual VITS
+generated a pause request and Whisper transcribed it. Initial LLM test invented a macro
+on vague input; fixed prompt/schema plus independent lexical action evidence gate, with
+regressions. Updated probes return temperatures, pause and clarification respectively.
+Detailed scoped CPU-only timings are in benchmarks/. Source idle shell measured on a
+63.9 GiB Ryzen 7 5800X host; not the requested typical 16 GB baseline. No microphone
+accuracy or full-pipeline performance claim. No personal audio or conversation saved.
+
+Files: app/conversation/runtime/safety/storage/models/monitor modules, tests, packaging,
+scripts, CI, candidate checksums, benchmark evidence and documentation.
+
+Open work: primary wake-word tuning/qualification, AEC and hands-free barge-in, optional
+speaker enrollment, complete licensed bundled model payload, full MMU/subscription flows,
+remaining desktop preferences, clean VM/cross-version install qualification, CPU baseline,
+sleep/device tests, complete fleet read-only and supervised consequential hardware tests.
+No live printer writes or modifications performed. Stable v1.0 remains blocked.
+
+Resume: read this file, inspect git/release/CI status and RELEASE_REPORT.md. Finish final
+preview repackaging and evidence commit, verify latest CI, publish accurately labeled
+prerelease only; then continue the open software work before supervised hardware acceptance.
+
 ## 2026-11-11 — Initial implementation and safety regressions
 
 Work completed: created private khisanthax/Klippy-Assistant; installed a project-local Python

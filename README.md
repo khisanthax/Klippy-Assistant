@@ -7,6 +7,11 @@ coverage and a tray UI are implemented. Offline speech adapters exist, but a qua
 redistributable model pack, acoustic barge-in and supervised hardware validation are
 release blockers. Do not treat this build as a validated voice assistant.
 
+Real CPU-only candidate probes generated TTS, transcribed a synthetic request, and ran
+Qwen3 1.7B through an owned llama.cpp process. Synthetic Hey Klippy activated KWS; short
+Klippy failed at the tested threshold. These results are not microphone qualification.
+See [RELEASE_REPORT.md](RELEASE_REPORT.md) for the tested preview and remaining work.
+
 ## Run from source (Windows)
 
 ```powershell

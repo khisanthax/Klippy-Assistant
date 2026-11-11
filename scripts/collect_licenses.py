@@ -33,6 +33,7 @@ def main():
     (destination / "inventory.json").write_text(json.dumps(inventory, indent=2), encoding="utf-8")
     shutil.copy2(Path(sys.base_prefix) / "LICENSE.txt", destination / "PYTHON-LICENSE.txt")
     shutil.copy2("THIRD_PARTY_LICENSES.md", destination / "THIRD_PARTY_LICENSES.md")
+    shutil.copytree("packaging/licenses", destination / "additional", dirs_exist_ok=True)
 
 
 if __name__ == "__main__":
