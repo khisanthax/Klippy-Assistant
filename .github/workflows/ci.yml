@@ -42,6 +42,14 @@ jobs:
       - shell: pwsh
         run: ./scripts/build.ps1 -Python python -Iscc 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
       - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frozen-qualification-diagnostics
+          path: |
+            build/frozen-smoke.txt
+            build/frozen-voice.json
+            build/Klippy/warn-Klippy.txt
+      - uses: actions/upload-artifact@v4
         with:
           name: klippy-engineering-preview
           path: |

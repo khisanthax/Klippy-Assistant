@@ -42,7 +42,10 @@ if ($process.ExitCode -ne 0) { throw 'Frozen application smoke test failed' }
 $voiceReport = Join-Path $PWD 'build\frozen-voice.json'
 $voiceProcess = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--voice-self-test', '--smoke-report', ('"' + $voiceReport + '"')) -WindowStyle Hidden -PassThru
 if (-not $voiceProcess.WaitForExit(180000)) { $voiceProcess.Kill(); throw 'Frozen offline voice self-test timed out' }
-if ($voiceProcess.ExitCode -ne 0) { throw "Frozen offline voice self-test failed; see $voiceReport" }
+if ($voiceProcess.ExitCode -ne 0) {
+    if (Test-Path -LiteralPath $voiceReport) { Get-Content -LiteralPath $voiceReport -Raw | Write-Output }
+    throw "Frozen offline voice self-test failed; see $voiceReport"
+}
 if (-not $Iscc) {
     $candidates = @(
         (Join-Path $PWD 'local\inno\ISCC.exe'),
