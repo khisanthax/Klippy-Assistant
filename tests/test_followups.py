@@ -211,3 +211,50 @@ def test_streaming_cache_does_not_reload_or_replay_cancelled_generation():
     assert len(calls) == 1 and chunks[-1] == 320
     backend.synthesize("Ready.", cancelled=lambda: True, on_chunk=lambda *args: pytest.fail("stale PCM"))
     assert backend.cache_bytes == 320 * 4
+
+
+def test_speech_failure_clears_speaking_and_reports_failed_delivery():
+    delivered = threading.Event()
+    values = []
+    class Backend:
+        def synthesize(self, *args, **kwargs):
+            raise RuntimeError("synthetic model failure")
+    voice = VoiceLoop(Backend(), lambda v: None, lambda v: None,
+                      on_delivery=lambda *v: (values.append(v), delivered.set()))
+    worker = threading.Thread(target=voice._speak)
+    worker.start()
+    try:
+        voice.say("test", token="specific")
+        assert delivered.wait(2)
+        assert values == [("specific", False)]
+        assert not voice.speaking.is_set() and not voice.playback.remaining
+        assert not voice.session.holds
+    finally:
+        voice.close()
+        worker.join(3)
+
+
+async def test_concurrent_cancel_cannot_be_undone_by_delivery_completion(rig, monkeypatch):
+    from dataclasses import replace
+
+    _, sim, engine, _ = rig
+    await engine.propose(Intent(action=Action.HOME, printer_id="sim"), defer_confirmation=True)
+    token = engine.pending.token
+    entered, release, canceled = threading.Event(), threading.Event(), threading.Event()
+    def delayed_replace(*args, **kwargs):
+        entered.set()
+        assert release.wait(2)
+        return replace(*args, **kwargs)
+    monkeypatch.setattr("klippy.safety.replace", delayed_replace)
+    delivery = threading.Thread(target=engine.delivery_finished, args=(token, True))
+    cancellation = threading.Thread(target=lambda: (engine.cancel(), canceled.set()))
+    delivery.start()
+    assert entered.wait(2)
+    cancellation.start()
+    try:
+        assert not canceled.wait(.05)
+    finally:
+        release.set()
+        delivery.join(3)
+        cancellation.join(3)
+    assert engine.pending is None and not sim.writes

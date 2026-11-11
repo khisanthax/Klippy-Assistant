@@ -250,7 +250,7 @@ class VoiceLoop:
                 success = not cancelled()
                 timings.mark("playback_complete")
             except Exception:
-                self.playback.interrupt()
+                self.interrupt()
                 self.on_state("Speaker or speech model unavailable; text remains accessible")
             finally:
                 if epoch == self.epoch:

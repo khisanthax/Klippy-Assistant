@@ -4,6 +4,7 @@ import asyncio
 import math
 import re
 import secrets
+import threading
 import time
 from dataclasses import dataclass, replace
 
@@ -40,24 +41,28 @@ class SafetyEngine:
 
     def __init__(self, store, clients, clock=time.monotonic):
         self.store, self.clients, self.clock = store, clients, clock
+        self.state_lock = threading.RLock()
         self.pending: Pending | None = None
         self.lock = asyncio.Lock()
         self.generation = 0
         self.confirmation_seconds = 25
 
     def cancel(self):
-        self.generation += 1
-        self.pending = None
+        with self.state_lock:
+            self.generation += 1
+            self.pending = None
 
     def delivery_finished(self, token, success):
-        pending = self.pending
-        if pending is None or pending.token != token or pending.ready:
-            return
-        if not success or self.clock() >= pending.hard_expires:
-            self.cancel()
-        else:
-            self.pending = replace(pending, ready=True,
-                                   expires=min(pending.hard_expires, self.clock() + self.confirmation_seconds))
+        with self.state_lock:
+            pending = self.pending
+            if pending is None or pending.token != token or pending.ready:
+                return
+            if not success or self.clock() >= pending.hard_expires:
+                self.cancel()
+            else:
+                self.pending = replace(pending, ready=True,
+                                       expires=min(pending.hard_expires, self.clock() + self.confirmation_seconds))
+
 
     def select(self, printer_id):
         self.cancel()
@@ -170,12 +175,20 @@ class SafetyEngine:
                     return "Macros: " + ", ".join(current) + (". " + "; ".join(notices) if notices else "")
                 progress = f"{state.progress:.0%} complete" if state.progress is not None else "Progress unavailable"
                 return f"{state.state}; {progress}"
-            self.pending = Pending(secrets.token_urlsafe(24), intent.model_dump_json(), self.clock() + (180 if defer_confirmation else self.confirmation_seconds), binding,
-                                   not defer_confirmation, self.clock() + 180)
+            with self.state_lock:
+                if generation != self.generation:
+                    raise Rejected("Request was canceled during validation")
+                self.pending = Pending(secrets.token_urlsafe(24), intent.model_dump_json(),
+                                       self.clock() + (180 if defer_confirmation else self.confirmation_seconds),
+                                       binding, not defer_confirmation, self.clock() + 180)
             configurable = {Action.PAUSE, Action.RESUME, Action.CANCEL, Action.HOME, Action.HEAT}
             if intent.action in configurable and self.store.get("confirmations", {}).get(intent.action.value) is False:
-                self.pending = replace(self.pending, ready=True)
-                return await self._confirm_locked(self.pending.token)
+                with self.state_lock:
+                    if self.pending is None or generation != self.generation:
+                        raise Rejected("Request was canceled")
+                    self.pending = replace(self.pending, ready=True)
+                    token = self.pending.token
+                return await self._confirm_locked(token)
             printer = next(p for p in self.store.printers() if p.id == intent.printer_id)
             warning = " Check the bed and toolhead path are clear." if intent.action in (Action.HOME, Action.MACRO) else ""
             return f"Confirm {intent.action.value} on {printer.name}?{warning} Say exactly 'confirm' or choose Confirm within {self.confirmation_seconds} seconds after the prompt finishes."
@@ -185,9 +198,10 @@ class SafetyEngine:
             return await self._confirm_locked(token)
 
     async def _confirm_locked(self, token):
-        pending = self.pending
-        self.cancel()  # Single use, including failure. Never retry a consequential request.
-        generation = self.generation
+        with self.state_lock:
+            pending = self.pending
+            self.cancel()  # Single use, including failure. Never retry a consequential request.
+            generation = self.generation
         if pending is None or not pending.ready or not secrets.compare_digest(token, pending.token) or self.clock() >= pending.expires:
             raise Rejected("Confirmation is missing or expired")
         intent = Intent.model_validate_json(pending.intent_json)
