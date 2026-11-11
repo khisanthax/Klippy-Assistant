@@ -138,7 +138,7 @@ class SafetyEngine:
             from .macros import inferred_parameters
             if set(inferred_parameters(macro.definition)) - set(macro.parameters):
                 raise Rejected("Macro parameter schema needs review")
-            if re.search(r"params\s*\[|params\s*\||rawparams", macro.definition):
+            if re.search(r"params\s*\[|params\s*\||params\s*\.\s*\w+\s*\(|rawparams", macro.definition):
                 raise Rejected("Dynamic macro parameters require additional review; voice execution blocked")
             script = macro.name + "".join(f" {key}={value:g}" for key, value in sorted(intent.params.items()))
             policy = macro.model_dump(mode="json")

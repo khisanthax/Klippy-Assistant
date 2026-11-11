@@ -13,7 +13,9 @@ Expanded phases 3–8 software: bounded fleet polling and Happy Hare notificatio
 macro warnings/rename diffs/synonyms/explicit numeric parameters; configurable operational
 confirmations with fresh mandatory validation; scrollable settings and companion preferences;
 validated backups with pre-restore SQLite online backup, revoked approvals and mic-off recovery.
-Original 99 tests remain unchanged; 141 tests and Ruff passed, including notification/prompt
+Added explicit per-printer verified heater-limit review in Settings and rejection of method-style
+dynamic parameter access, including whitespace variants. All execution tests remain simulated.
+Original 99 tests remain unchanged; 146 tests and Ruff passed, including notification/prompt
 isolation, muted delivery, cache streaming and unknown-parameter regressions. Real-model source synthetic integration passed; zero printer writes.
 Numeric artifacts and qualification scope are in PREVIEW3_REPORT.md and benchmarks/preview3-*.
 

@@ -1,0 +1,46 @@
+name: Qualify existing preview installer
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful Windows build run containing the preview artifact
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-upgrade-memory:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install pydantic==2.14.3
+      - run: python -m pip install -e . --no-deps
+      - uses: actions/download-artifact@v4
+        with:
+          name: klippy-engineering-preview
+          path: dist
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+      - shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v0.2.0-preview.1 --pattern 'Klippy-Setup-0.2.0-preview.1.exe' --dir local/previous
+      - shell: pwsh
+        env:
+          KLIPPY_QUALIFIED_BUILD_RUN: ${{ inputs.build_run_id }}
+        run: ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.2.0-preview.1.exe' -BlockExternalNetwork -MeasurePerformance
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: offline-upgrade-memory-evidence
+          path: |
+            local/installer-qa/results.json
+            local/installer-qa/installed-voice.json
+            local/installer-qa/installed-smoke.txt
+            local/installer-qa/*.log
+            local/performance-budget.json
+            local/performance-voice.json

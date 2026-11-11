@@ -307,6 +307,7 @@ class Window(QMainWindow):
         self.model_status.setWordWrap(True)
         layout.addWidget(self.model_status)
         layout.addWidget(self.button("Load local voice pack", self.load_voice))
+        layout.addWidget(self.button("Review selected printer heater limits", self.review_heater_limits))
         self.sensitivity = QDoubleSpinBox()
         self.sensitivity.setRange(0.01, 1.0)
         self.sensitivity.setSingleStep(0.01)
@@ -380,6 +381,43 @@ class Window(QMainWindow):
         for label in layout.parentWidget().findChildren(QLabel):
             label.setWordWrap(True)
         layout.addStretch()
+
+    def review_heater_limits(self):
+        printer = self.target()
+        if not printer or not printer.approved:
+            self.failure("Select an approved printer before reviewing heater limits")
+            return
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Review heater limits for " + printer.name)
+        form = QFormLayout(dialog)
+        notice = QLabel("Enter maximum temperatures verified against this printer's configuration/specification. "
+                        "Unknown limits block heating. Saving changes only local permissions.")
+        notice.setWordWrap(True)
+        form.addRow(notice)
+        limits = self.store.get("heater_limits", {}).get(printer.id, {})
+        controls = {}
+        for key, label in (("0", "Nozzle maximum Celsius"), ("1", "Bed maximum Celsius")):
+            control = QDoubleSpinBox()
+            control.setRange(0, 1000)
+            control.setValue(limits.get(key, 0))
+            controls[key] = control
+            form.addRow(label, control)
+        verified = QCheckBox("I verified these limits for " + printer.name)
+        form.addRow(verified)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        form.addRow(buttons)
+        if dialog.exec() == QDialog.DialogCode.Accepted and verified.isChecked():
+            current_printer = self.target()
+            if current_printer != printer:
+                self.failure("Printer changed during review; review its limits again")
+                return
+            values = self.store.get("heater_limits", {})
+            values[printer.id] = {key: control.value() for key, control in controls.items()}
+            self.engine.cancel()
+            self.store.set("heater_limits", values)
+            self.write_message("Locally reviewed heater limits saved for " + printer.name)
 
     def reaction_test(self):
         from .reaction_probe import run

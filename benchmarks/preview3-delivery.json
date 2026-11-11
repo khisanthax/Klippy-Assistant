@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "scope": "Real TTS with simulated 10 ms playback and printer; no devices or live actions.",
+  "printer_writes": 0,
+  "rows": [
+    {
+      "run": 1,
+      "cached": false,
+      "first_render_seconds": 2.608,
+      "delivery_seconds": 19.614,
+      "confirmation_window_seconds": 30.0,
+      "confirmation_armed_early": false
+    },
+    {
+      "run": 2,
+      "cached": true,
+      "first_render_seconds": 0.011,
+      "delivery_seconds": 11.487,
+      "confirmation_window_seconds": 30.0,
+      "confirmation_armed_early": false
+    }
+  ],
+  "timings": [
+    {
+      "reaction": 1,
+      "milliseconds": {
+        "deterministic_intent": 0.35,
+        "intent_and_validation": 1.24,
+        "tts_queue": 0.2,
+        "normalization": 0.27,
+        "tts_first_pcm": 2598.7,
+        "first_audio_render": 2609.11,
+        "playback_queue": 10.41,
+        "first_audible_estimate": 2609.12,
+        "tts_generation": 13478.65,
+        "playback_complete": 19615.29
+      }
+    },
+    {
+      "reaction": 2,
+      "milliseconds": {
+        "deterministic_intent": 0.03,
+        "intent_and_validation": 0.41,
+        "tts_queue": 0.1,
+        "normalization": 0.06,
+        "tts_cache_hit": 0,
+        "tts_first_pcm": 0.63,
+        "first_audio_render": 11.35,
+        "playback_queue": 10.72,
+        "first_audible_estimate": 11.36,
+        "playback_complete": 11487.02
+      }
+    }
+  ]
+}

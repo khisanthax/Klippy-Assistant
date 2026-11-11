@@ -31,7 +31,8 @@ remain open. No physical printer commands were used for development or qualifica
 - Confirmation prompts for pause/resume/cancel/home/heat can be disabled individually,
   with warnings and fresh validation immediately before a single transmission. Enrollment,
   selection, state, heater limits and policy bindings remain mandatory. Macros and critical
-  operations always require confirmation. Defaults enable every confirmation.
+  operations always require confirmation. Defaults enable every confirmation. Settings
+  supports explicit per-printer verified heater-limit review; unknown bounds block heating.
 - Scrollable settings, companion visibility/duration and remembered position, validated
   schedules, versioned preference backup and transactional recovery are implemented.
   Restore first creates an online SQLite backup, revokes device/macro approvals, resets
@@ -55,6 +56,11 @@ establish microphone accuracy or a latency percentile across different computers
 Repeat with `python scripts/latency_probe.py --output local/latency-after.json`.
 The baseline was captured from the original `SherpaBackend.synthesize` before modifications.
 Raw numeric evidence is in `benchmarks/preview3-latency-*.json`.
+The real-model delivery probe additionally passed uncached/cached prompt playback into a
+simulated PCM sink: neither token armed early; both received a full 30-second response
+window after delivery. See `benchmarks/preview3-delivery.json`; repeat with
+`python scripts/delivery_probe.py`. That sink includes OS scheduling overhead and does
+not measure a physical speaker.
 
 ## Qualification and remaining gates
 

@@ -57,3 +57,18 @@ async def test_muting_inflight_prompt_cancels_and_text_only_prompt_arms(window, 
     prompt = await engine.propose(intent, defer_confirmation=True)
     window.say(prompt, confirmation=True)
     assert engine.pending.ready and not sim.writes
+
+
+@pytest.mark.parametrize("verified", [False, True])
+def test_local_heater_limit_review_requires_explicit_verified_checkbox(window, rig, monkeypatch, verified):
+    from PySide6.QtWidgets import QCheckBox, QDialog, QDoubleSpinBox
+    store, sim, _, _ = rig
+    def review(dialog):
+        for spin in dialog.findChildren(QDoubleSpinBox):
+            spin.setValue(180)
+        dialog.findChild(QCheckBox).setChecked(verified)
+        return QDialog.DialogCode.Accepted
+    monkeypatch.setattr(QDialog, "exec", review)
+    window.review_heater_limits()
+    assert store.get("heater_limits", {}) == ({"sim": {"0": 180.0, "1": 180.0}} if verified else {})
+    assert not sim.writes

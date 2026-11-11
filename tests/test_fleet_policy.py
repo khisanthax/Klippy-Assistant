@@ -128,3 +128,24 @@ async def test_unreviewed_natural_parameter_never_silently_uses_macro_defaults(r
     with pytest.raises(Rejected, match="unknown parameters"):
         await Conversation(engine).hear("feed filament speed 9999")
     assert engine.pending is None and not sim.writes
+
+
+@pytest.mark.parametrize("access", ["params . get('DISTANCE', 500)", "params.get('DISTANCE', 500)"])
+async def test_method_style_dynamic_parameters_are_blocked(rig, access):
+    store, sim, engine, _ = rig
+    sim.config = {"gcode_macro LOAD_FILAMENT": {"gcode": "G1 E{" + access + "}"}}
+    registry, _ = discover(sim.config, {})
+    store.replace_macros("sim", {k: v.model_copy(update={"approved": True, "enabled": True, "reviewed": True})
+                                for k, v in registry.items()})
+    with pytest.raises(Rejected):
+        await engine.propose(Intent(action=Action.MACRO, printer_id="sim", macro="LOAD_FILAMENT"))
+    assert engine.pending is None and not sim.writes
+
+
+async def test_disabled_heat_prompt_cannot_bypass_reviewed_limits(rig):
+    store, sim, engine, _ = rig
+    store.set("confirmations", {"heat": False})
+    store.set("heater_limits", {"sim": {"0": 200}})
+    with pytest.raises(Rejected, match="limits"):
+        await engine.propose(Intent(action=Action.HEAT, printer_id="sim", params={"heater": 0, "temperature": 250}))
+    assert not sim.writes

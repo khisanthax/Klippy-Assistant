@@ -67,7 +67,10 @@ try {
     if (Test-Path -LiteralPath (Join-Path $taskInstallDir 'Klippy.exe')) { throw 'Application executable remains after uninstall' }
     if (-not (Test-Path -LiteralPath $taskSentinel)) { throw 'Uninstall removed preserved user data' }
     @{
-        status='passed'; environment='Development host, not a clean VM';
+        status='passed'; environment=$(if ($env:GITHUB_ACTIONS -eq 'true') { 'Fresh Windows CI runner; not a clean Windows desktop VM' } else { 'Development host; not a clean VM' });
+        host_ram_bytes=(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory;
+        os=[Environment]::OSVersion.VersionString; build_run=$env:KLIPPY_QUALIFIED_BUILD_RUN;
+        installer_sha256=(Get-FileHash -LiteralPath (Resolve-Path -LiteralPath $Installer).Path -Algorithm SHA256).Hash.ToLowerInvariant();
         cross_version_upgrade=[bool]$PreviousInstaller; external_network_blocked=[bool]$BlockExternalNetwork;
         performance_budget_test=[bool]$MeasurePerformance;
         installers=$taskInstallers; tests=@('per-user install','same-version reinstall preserving isolated data','installed application smoke test',
