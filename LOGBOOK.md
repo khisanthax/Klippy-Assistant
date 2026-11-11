@@ -1,5 +1,18 @@
 # Logbook
 
+## 2026-11-11 — Independent complete-model Windows build passed
+
+Run 43062031011 passed both jobs: 99 tests and the complete-model installer build. The
+independent runner downloaded checksum-pinned sources, reproduced the committed 57-file
+manifest, passed frozen offline voice integration and produced the full installer.
+Models are cached for builds only; the installed app never downloads them. All local
+frozen/installed and default-device smoke evidence remains green. No live printer action.
+
+Preparing v0.2.0-preview.1 publication with the tested local installer, checksum, model
+manifest and PHASE2_REPORT.md. Core Phase 2 software is implemented; human wake/room
+calibration, unplug/replug, clean VM offline qualification and optional speaker enrollment
+remain explicitly open. After publication, verify uploaded checksum and record the URL.
+
 ## 2026-11-11 — Phase 2 frozen and installed-model gates passed
 
 99 source tests and Ruff passed, as did Windows test CI. Built one unsigned 0.2.0-preview.1

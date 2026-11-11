@@ -1,6 +1,6 @@
 # Phase 2 — offline voice integration
 
-Engineering preview 0.2.0; independent build CI in progress. This is not stable v1.0.
+Engineering preview 0.2.0. This is not stable v1.0.
 
 Implemented local KWS, Whisper tiny.en ONNX, Kokoro v1.0 ONNX speech, Qwen3 1.7B
 Q4_K_M through an owned offline llama.cpp process, and Windows full-duplex capture/render.
@@ -49,7 +49,8 @@ install, reinstall with isolated SQLite preservation, installed startup, install
 complete-model voice gate and uninstall/data preservation passed on the developer host.
 The installed voice test used the installation files and made zero printer writes; its
 synthetic interruption was detected at 1.23 s. Independent complete-model Windows build
-CI is being followed to completion. Source, frozen, installed and device evidence is
+CI passed: [run 43062031011](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43062031011).
+Source, frozen, installed and device evidence is
 under benchmarks/.
 Optional speaker enrollment remains deferred.
 Microphone wake accuracy, unplug/replug, room echo behavior and supervised hardware
@@ -68,3 +69,5 @@ The setup is unsigned. SHA256:
 Models load from the installation; no separate Ollama/Python/developer tool is required.
 Human microphone calibration can be conducted without enrolling a printer; missing-printer
 clarification is spoken locally. Do not test consequential printer actions unattended.
+
+Release: https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.2.0-preview.1
