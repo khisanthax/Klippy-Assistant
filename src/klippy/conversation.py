@@ -8,6 +8,8 @@ import time
 from .diagnostics import timings
 from .domain import Action, Intent, StrictModel
 from .macros import candidates, words
+from .moonraker import ConnectionFailure
+from .queries import QueryRequest, QueryService, QueryUnavailable, information_request, match_query
 from .safety import NeedsParameter, Rejected
 from .session import Session
 
@@ -20,12 +22,15 @@ class Interpretation(StrictModel):
 class Conversation:
     """Ephemeral context. Input text is never sent to Store or event logging."""
 
-    def __init__(self, engine, llm=None, clock=time.monotonic, timeout=30):
+    def __init__(self, engine, llm=None, clock=time.monotonic, timeout=30, queries=None):
         self.engine, self.llm, self.clock, self.timeout = engine, llm, clock, timeout
         self.session = Session(clock, timeout)
         self.draft = None
         self.generation = 0
         self.interpretation_task = None
+        self.queries = queries
+        self.query_fallback = QueryService(engine.store, engine.clients, clock)
+        self.last_query = None
 
     @property
     def until(self):
@@ -45,6 +50,7 @@ class Conversation:
         self._cancel_interpretation()
         self.session.clear()
         self.draft = None
+        self.last_query = None
         self.engine.cancel()
 
     def interrupt(self, *, activate=True):
@@ -63,6 +69,7 @@ class Conversation:
             return None
         if self.clock() >= self.until:
             self.draft = None
+            self.last_query = None
             if source == "voice":
                 self.engine.cancel()
         hold = self.session.begin()
@@ -95,8 +102,9 @@ class Conversation:
         self.until = self.clock() + self.timeout
         if text in {"stop talking", "be quiet"}:
             return "speech_stopped"
+        is_query = information_request(text)
         if (text in {"no", "cancel", "don't do that", "do not do that", "never mind", "cancel that"}
-                or re.search(r"\b(?:don't|do not|never|not)\b", text)):
+                or not is_query and re.search(r"\b(?:don't|do not|never|not)\b", text)):
             self.engine.cancel()
             self.draft = None
             return "Pending action canceled."
@@ -106,18 +114,35 @@ class Conversation:
             return await self.engine.confirm(token)
         # Any other utterance cancels the prior action before interpretation, including failures.
         self.engine.cancel()
-        printers = [p for p in self.engine.store.printers() if p.approved]
-        mentioned = [p for p in printers if re.search(r"(?<!\w)" + re.escape(p.name.lower()) + r"(?!\w)", text)]
+        printers = self.engine.store.printers()
+        mentioned = [p for p in printers if any(re.search(r"(?<!\w)" + re.escape(name.lower()) + r"(?!\w)", text)
+                                               for name in (p.name, *p.aliases))]
         if len(mentioned) > 1:
             raise Rejected("Which single printer do you mean?")
+        if mentioned and not mentioned[0].approved:
+            raise Rejected("The named printer is not approved")
         if mentioned:
             self.engine.select(mentioned[0].id)
-            text = re.sub(re.escape(mentioned[0].name.lower()), "", text).strip()
+            for name in sorted((mentioned[0].name, *mentioned[0].aliases), key=len, reverse=True):
+                text = re.sub(r"(?<!\w)" + re.escape(name.lower()) + r"(?!\w)", "", text).strip()
         selected = self.engine.store.get("selected")
         if not selected:
             raise Rejected("Select an approved printer first")
         if text in {"select", "use", "switch to", ""} and mentioned:
             return f"{mentioned[0].name} selected."
+        try:
+            query = match_query(text, self.last_query)
+        except QueryUnavailable as exc:
+            raise Rejected(str(exc)) from None
+        if text.startswith("what about") and query is None:
+            raise Rejected("Please identify an enrolled printer and a previous information query")
+        basic = self.basic(text, selected)
+        # Keep the snapshot-only embedded Conversation API compatible. The desktop
+        # supplies QueryService and routes all catalog reads through verified discovery.
+        legacy_read = self.queries is None and basic and basic.action in {Action.STATUS, Action.TEMPERATURES}
+        if (query is not None and not legacy_read) or (is_query and basic is None):
+            return await self._answer_query(text, selected, query, generation)
+        self.last_query = None
         intent = None
         interpreted = False
         if self.draft and self.draft.printer_id == selected:
@@ -131,7 +156,7 @@ class Conversation:
                         intent = self.draft.model_copy(update={"params": params})
         self.draft = None
         with timings.span("deterministic_intent"):
-            intent = intent or self.basic(text, selected)
+            intent = intent or basic
         if intent is None:
             matches = candidates(text, self.engine.store.macros(selected))
             if len(matches) > 1:
@@ -173,6 +198,35 @@ class Conversation:
             self.draft = intent
             raise
 
+    async def _answer_query(self, text, selected, query, generation):
+        if query is None:
+            interpret = getattr(self.llm, "interpret_query", None)
+            if interpret is None:
+                raise Rejected("Which printer information do you want? Use Queries & Commands to browse supported questions; no action sent")
+            task = asyncio.create_task(interpret(text))
+            self.interpretation_task = task
+            try:
+                query = await task
+            except asyncio.CancelledError:
+                if generation != self.generation:
+                    return None
+                raise
+            finally:
+                if self.interpretation_task is task:
+                    self.interpretation_task = None
+        if generation != self.generation:
+            return None
+        if not isinstance(query, QueryRequest):
+            raise Rejected("Please clarify the information query; no action sent")
+        try:
+            answer = await (self.queries or self.query_fallback).answer(selected, query)
+        except (QueryUnavailable, ConnectionFailure) as exc:
+            raise Rejected(str(exc)) from None
+        if generation != self.generation or self.engine.store.get("selected") != selected:
+            return None
+        self.last_query = query
+        return answer
+
     @staticmethod
     def basic(text, printer_id):
         query = " ".join(text.lower().replace("what's", "what is").split())
@@ -211,6 +265,40 @@ class LocalLLM:
         self.api_key = api_key
         import asyncio
         self.lock = asyncio.Lock()
+
+    async def interpret_query(self, text):
+        """Only selects a catalog identifier. Cannot emit an Action or endpoint."""
+        import httpx
+
+        from .query_catalog import CATALOG
+        schema = QueryRequest.model_json_schema()
+        schema["properties"]["query_id"] = {"enum": [None, *CATALOG]}
+        schema["properties"]["subject"] = {"enum": [None, "bed", "nozzle"]}
+        system = ("Select ONE read-only printer information query from the inventory. Return schema JSON only. "
+                  "No actions, commands, URLs, G-code or invented facts. If ambiguous/unsupported, query_id=null. "
+                  "Whether axes have an established/zeroed reference is homing. Numeric location is position. "
+                  "A question about homing readiness is not asking for numeric position. "
+                  "subject is bed/nozzle only when asked, otherwise null. /no_think\n" +
+                  json.dumps({q.id: q.description for q in CATALOG.values()}))
+        try:
+            async with self.lock:
+                with timings.span("query_llm"):
+                    async with httpx.AsyncClient(timeout=20, trust_env=False) as client:
+                        response = await client.post(f"http://127.0.0.1:{self.port}/v1/chat/completions",
+                            headers={"Authorization": "Bearer " + self.api_key} if self.api_key else {},
+                            json={"messages": [{"role": "system", "content": system},
+                                               {"role": "user", "content": text}],
+                                  "temperature": 0, "max_tokens": 80,
+                                  "chat_template_kwargs": {"enable_thinking": False},
+                                  "response_format": {"type": "json_schema", "json_schema": {
+                                      "name": "read_query", "strict": True, "schema": schema}}})
+                        response.raise_for_status()
+                        request = QueryRequest.model_validate_json(response.json()["choices"][0]["message"]["content"])
+                        if request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle"}:
+                            raise ValueError("Invalid catalog selection")
+                        return request
+        except (httpx.HTTPError, ValueError, KeyError, IndexError):
+            raise Rejected("Please clarify the information query; no action sent") from None
 
     async def interpret(self, text, printer_id, macros):
         import time

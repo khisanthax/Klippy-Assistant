@@ -13,9 +13,20 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 | 7. Stabilization | In progress | Expanded simulated regressions, crash/WAL recovery, validated backup/restore and monotonic reaction diagnostics; fresh-runner offline upgrade and 16 GiB process-budget probes passed; actual 16 GB VM/audio/sleep/fleet gates open |
 | 8. Distribution | Partial | Unsigned preview installer builds; install/reinstall/settings preservation/installed launch/uninstall passed on development host; complete licensed model payload, fresh Windows CI cross-version upgrade/reinstall/SQLite preservation/offline-model/uninstall qualification passed; clean Windows desktop VM and stable release gates remain open |
 
+## Moonraker query expansion (0.4 preview)
+
+Implemented 41 built-in read-only query types, per-printer object/field/component discovery,
+strict endpoint/parameter allowlist, deterministic common questions and isolated query-only
+local LLM fallback. Added printer aliases, query/subject follow-ups, two-second field-aware
+cache reuse with explicit stale labels, reconnect/configuration invalidation and searchable
+Queries & Commands inventory. Original 179 tests preserved; 355 tests and Ruff pass.
+Actual local-model query probe passed after correcting a semantic category confusion;
+failed and corrected evidence is retained. Complete frozen/installed upgrade qualification
+is next. All physical and clean-machine gates remain open.
+
 ## Next priority
 
-1. Preserve the 179 passing regressions, including the original 99 cases, and qualify the
+1. Preserve the 355 passing regressions, including the original 99 cases, and qualify the
    exact preview installer through frozen/offline, cross-version upgrade and recovery checks.
 2. Extend the macro semantic benchmark and fleet authentication/subscription qualification;
    use simulated services for software work independently of hardware availability.

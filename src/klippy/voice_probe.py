@@ -178,6 +178,8 @@ def run(pack):
             model = await runtime.start(pack)
             value = await model.interpret("What is the nozzle temperature?", "synthetic-printer", {})
             report["llm_intent"] = value.model_dump(mode="json")
+            from .query_probe import run as query_probe
+            report["query_catalog"] = await query_probe(model)
         finally:
             runtime.close()
     asyncio.run(language_probe())
@@ -204,6 +206,7 @@ def run(pack):
         report["printer_writes"] = len(writes)
         store.close()
     qualify_report(report)
+    report["passed"] = report["passed"] and report["query_catalog"]["passed"]
     report["homophone_note"] = "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
     return report
 

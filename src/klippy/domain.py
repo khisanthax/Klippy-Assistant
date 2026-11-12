@@ -39,6 +39,17 @@ class Printer(StrictModel):
     name: str
     url: str
     approved: bool = False
+    aliases: tuple[str, ...] = ()
+
+    @field_validator("aliases")
+    @classmethod
+    def valid_aliases(cls, value):
+        if len(value) > 12:
+            raise ValueError("Use at most twelve printer aliases")
+        result = tuple(cls.valid_name(alias) for alias in value)
+        if len({alias.casefold() for alias in result}) != len(result):
+            raise ValueError("Duplicate printer aliases")
+        return result
 
     @field_validator("id", "name")
     @classmethod

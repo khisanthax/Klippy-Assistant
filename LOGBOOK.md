@@ -1,5 +1,33 @@
 # Logbook
 
+## 2026-11-12 — Moonraker read-only query catalog implementation
+
+Resumed latest main (44c8a8a); reviewed official current Moonraker printer/server/history,
+file/metadata, host, accessory and queue APIs plus Klipper's current status reference.
+Implemented 41 built-in query types and 13 individually allowlisted GET paths. Discovery
+records actual objects/fields/components per printer; optional features are never guessed.
+Homing reads toolhead.homed_axes only. Query-only interpretation has no action/G-code/path
+schema and never invokes the safety engine. Existing command behavior and Phase 2 remain.
+
+Added named/aliased printer and subject follow-ups, capability refresh/invalidation,
+field-scoped two-second cache reuse, stale labels/age, runtime clock reset handling,
+unknown/malformed data handling and searchable read/action/macro manager with voice status.
+No owner data, microphone or physical printer connection/actions used. All simulated
+transports reject writes. API research inventory and exclusions: docs/MOONRAKER_QUERIES.md.
+
+355 tests and Ruff pass (original 179 preserved). Local real-model query probe initially
+selected numeric position for an established-reference question. Retained that failed
+result; clarified conceptual homing vs numeric-position definitions in the inventory and
+query prompt. Corrected native probe passed seven cases, including the unfamiliar local
+LLM selection, zero writes and no pending action. Common simulated reads took 0.3–9 ms;
+unfamiliar local-model query about 6 s. These are not LAN/acoustic latency measurements.
+
+Preparing 0.4.0-preview.1 qualification with unchanged license-reviewed model payload.
+Frozen/installed voice self-tests now include the native query probe; cross-version test
+will upgrade 0.3 to 0.4. Next: qualify exact source, archive installed/offline/memory evidence,
+update issues and publish only the qualified engineering preview. Hardware, human acoustics,
+actual 16 GB host, clean desktop VM and extended soak remain open.
+
 ## 2026-11-11 — Published v0.3.0-preview.1
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.3.0-preview.1 at qualified application source 69e5bf7. The SSH-created annotated tag

@@ -38,6 +38,7 @@ class Moonraker:
         self.printer = printer
         self.api_key = api_key
         self.transport = transport  # Injected simulator; no real DNS/network in unit tests.
+        self.status_observer = None
 
     async def request(self, method, path, payload=None):
         try:
@@ -58,7 +59,7 @@ class Moonraker:
                     response = await client.request(method, endpoint + path, json=payload, headers=headers)
                 response.raise_for_status()
                 value = response.json()
-                if "error" in value:
+                if not isinstance(value, dict) or "error" in value or "result" not in value:
                     raise ConnectionFailure("Printer rejected request")
                 return value["result"]
         except (httpx.HTTPError, ValueError, KeyError, OSError):
@@ -66,7 +67,11 @@ class Moonraker:
             raise ConnectionFailure("Printer unavailable, unauthorized, or response invalid") from None
 
     async def snapshot(self):
+        import time
+        acquired = time.monotonic()
         value = await self.request("GET", "/printer/objects/query?webhooks&print_stats&virtual_sdcard&extruder&heater_bed")
+        if self.status_observer:
+            self.status_observer(value, acquired)
         status = value["status"]
         web = status.get("webhooks", {})
         return Snapshot(connected=True, ready=web.get("state") == "ready",

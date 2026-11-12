@@ -6,12 +6,13 @@ from .moonraker import ConnectionFailure
 class Monitor:
     """Notification-only; deliberately has no reference to SafetyEngine or execute."""
 
-    def __init__(self, store, clients):
+    def __init__(self, store, clients, queries=None):
         self.store, self.clients = store, clients
         self.previous = {}
         self.cycles = 0
         self.mmu = {}
         self.semaphore = None
+        self.queries = queries
 
     async def poll(self):
         import asyncio
@@ -28,6 +29,13 @@ class Monitor:
                 snapshot = Snapshot(connected=False)
             previous = self.previous.get(printer.id)
             self.previous[printer.id] = snapshot
+            reconnect = snapshot.connected and snapshot.ready and (
+                previous is None or not previous.connected or not previous.ready)
+            if self.queries:
+                if not snapshot.connected or not snapshot.ready:
+                    self.queries.invalidate(printer.id)
+                else:
+                    await self.queries.refresh(printer, force=reconnect or self.cycles % 12 == 0)
             if snapshot.connected and snapshot.ready and (
                 previous is None or not previous.connected or not previous.ready or self.cycles % 12 == 0
             ):

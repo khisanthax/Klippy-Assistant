@@ -1,0 +1,1185 @@
+{
+  "reviewed_on": "2026-11-12",
+  "authority": "Built-in Python catalog; this JSON is a documentation export, not loaded as permissions",
+  "queries": [
+    {
+      "id": "homing",
+      "description": "Whether Cartesian axes have been homed/zeroed and have an established coordinate reference",
+      "objects": [
+        [
+          "toolhead",
+          [
+            "homed_axes"
+          ]
+        ]
+      ],
+      "examples": [
+        "Is my printer homed?",
+        "Have all axes been homed?",
+        "Which axes are not homed?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "toolhead.homed_axes"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Distinct lowercase x/y/z characters; empty string means no axes homed; absent/invalid is unknown",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "temperatures",
+      "description": "Measured heater and sensor temperatures in Celsius",
+      "objects": [
+        [
+          "extruder",
+          [
+            "temperature",
+            "target"
+          ]
+        ],
+        [
+          "heater_bed",
+          [
+            "temperature",
+            "target"
+          ]
+        ]
+      ],
+      "examples": [
+        "How hot is the bed?",
+        "What is the nozzle temperature?",
+        "Read temperatures"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "extruder.temperature",
+        "extruder.target",
+        "heater_bed.temperature",
+        "heater_bed.target"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite numeric Celsius >= -273.15; sensors and targets distinguished",
+      "fallback_endpoints": [],
+      "object_families": {
+        "heater_generic": [
+          "temperature",
+          "target"
+        ],
+        "temperature_sensor": [
+          "temperature"
+        ],
+        "temperature_fan": [
+          "temperature",
+          "target"
+        ]
+      }
+    },
+    {
+      "id": "targets",
+      "description": "Requested heater setpoints, not a request to heat",
+      "objects": [
+        [
+          "extruder",
+          [
+            "target"
+          ]
+        ],
+        [
+          "heater_bed",
+          [
+            "target"
+          ]
+        ]
+      ],
+      "examples": [
+        "What's the target temperature?",
+        "What is the bed set to?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "extruder.target",
+        "heater_bed.target"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite numeric Celsius >= 0; setpoint only, never request heating",
+      "fallback_endpoints": [],
+      "object_families": {
+        "heater_generic": [
+          "target"
+        ],
+        "temperature_fan": [
+          "target"
+        ]
+      }
+    },
+    {
+      "id": "heater_power",
+      "description": "Current heater output fraction as percent",
+      "objects": [
+        [
+          "extruder",
+          [
+            "power"
+          ]
+        ],
+        [
+          "heater_bed",
+          [
+            "power"
+          ]
+        ]
+      ],
+      "examples": [
+        "How much heater power is being used?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "extruder.power",
+        "heater_bed.power"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite fraction 0..1, formatted as percent",
+      "fallback_endpoints": [],
+      "object_families": {
+        "heater_generic": [
+          "power"
+        ]
+      }
+    },
+    {
+      "id": "position",
+      "description": "Last commanded machine position, not measured physical position",
+      "objects": [
+        [
+          "toolhead",
+          [
+            "position",
+            "homed_axes"
+          ]
+        ]
+      ],
+      "examples": [
+        "Where's the nozzle?",
+        "What is the toolhead position?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "toolhead.position",
+        "toolhead.homed_axes"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "At least three finite Cartesian coordinates in mm; last commanded, not measured; homing uncertainty labeled",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "gcode_position",
+      "description": "G-code coordinates and origin offsets",
+      "objects": [
+        [
+          "gcode_move",
+          [
+            "gcode_position",
+            "homing_origin"
+          ]
+        ]
+      ],
+      "examples": [
+        "What are the G-code coordinates?",
+        "What is my Z offset?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "gcode_move.gcode_position",
+        "gcode_move.homing_origin"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite XYZ values in mm; G-code origin and configured coordinates distinguished",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "motion",
+      "description": "Requested interpolated motion, not encoder-measured motion",
+      "objects": [
+        [
+          "motion_report",
+          [
+            "live_position",
+            "live_velocity",
+            "live_extruder_velocity"
+          ]
+        ]
+      ],
+      "examples": [
+        "Is the printer moving?",
+        "How fast is the toolhead moving?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "motion_report.live_position",
+        "motion_report.live_velocity",
+        "motion_report.live_extruder_velocity"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite requested interpolated coordinates/velocity; no encoder or physical motion claim",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "limits",
+      "description": "Runtime velocity, acceleration and cornering limits",
+      "objects": [
+        [
+          "toolhead",
+          [
+            "max_velocity",
+            "max_accel",
+            "square_corner_velocity",
+            "minimum_cruise_ratio"
+          ]
+        ]
+      ],
+      "examples": [
+        "What's the acceleration?",
+        "What are the velocity limits?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "toolhead.max_velocity",
+        "toolhead.max_accel",
+        "toolhead.square_corner_velocity",
+        "toolhead.minimum_cruise_ratio"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "speed",
+      "description": "Last commanded feedrate and speed/flow overrides",
+      "objects": [
+        [
+          "gcode_move",
+          [
+            "speed",
+            "speed_factor",
+            "extrude_factor"
+          ]
+        ]
+      ],
+      "examples": [
+        "What's the speed?",
+        "What is the flow override?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "gcode_move.speed",
+        "gcode_move.speed_factor",
+        "gcode_move.extrude_factor"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "progress",
+      "description": "Print progress fraction and state",
+      "objects": [
+        [
+          "virtual_sdcard",
+          [
+            "progress"
+          ]
+        ],
+        [
+          "display_status",
+          [
+            "progress"
+          ]
+        ],
+        [
+          "print_stats",
+          [
+            "state"
+          ]
+        ]
+      ],
+      "examples": [
+        "How far along is my print?",
+        "What percent is done?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "virtual_sdcard.progress",
+        "display_status.progress",
+        "print_stats.state"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite fraction 0..1, display/M73 preferred with virtual SD fallback; reported job state included",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "job",
+      "description": "Current or most recently reported filename and print state",
+      "objects": [
+        [
+          "print_stats",
+          [
+            "filename",
+            "state",
+            "message"
+          ]
+        ],
+        [
+          "pause_resume",
+          [
+            "is_paused"
+          ]
+        ]
+      ],
+      "examples": [
+        "What is printing?",
+        "What is the current job?",
+        "Is it paused?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "print_stats.filename",
+        "print_stats.state",
+        "print_stats.message",
+        "pause_resume.is_paused"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "layers",
+      "description": "Slicer-reported layer counters; may not be supplied",
+      "objects": [
+        [
+          "print_stats",
+          [
+            "info",
+            "state"
+          ]
+        ]
+      ],
+      "examples": [
+        "What layer am I on?",
+        "How many layers?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "print_stats.info",
+        "print_stats.state"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Positive integral counters; missing/null/zero means unavailable; no layer inferred from Z",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "duration",
+      "description": "Active print time and total elapsed job duration",
+      "objects": [
+        [
+          "print_stats",
+          [
+            "print_duration",
+            "total_duration",
+            "state"
+          ]
+        ]
+      ],
+      "examples": [
+        "How long has it been printing?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "print_stats.print_duration",
+        "print_stats.total_duration",
+        "print_stats.state"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "filament",
+      "description": "Extruded filament length in millimetres for the reported job",
+      "objects": [
+        [
+          "print_stats",
+          [
+            "filament_used",
+            "state"
+          ]
+        ]
+      ],
+      "examples": [
+        "How much filament have I used?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "print_stats.filament_used",
+        "print_stats.state"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "fans",
+      "description": "Available fan duty cycles and optional tachometer RPM",
+      "objects": [
+        [
+          "fan",
+          [
+            "speed",
+            "rpm"
+          ]
+        ]
+      ],
+      "examples": [
+        "Are the fans running?",
+        "What's the fan speed?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "fan.speed",
+        "fan.rpm"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite duty cycle 0..1; optional finite nonnegative RPM; absence is not zero",
+      "fallback_endpoints": [],
+      "object_families": {
+        "heater_fan": [
+          "speed",
+          "rpm"
+        ],
+        "controller_fan": [
+          "speed",
+          "rpm"
+        ],
+        "fan_generic": [
+          "speed",
+          "rpm"
+        ],
+        "temperature_fan": [
+          "speed",
+          "rpm"
+        ]
+      }
+    },
+    {
+      "id": "filament_sensors",
+      "description": "Filament presence and sensor enable state",
+      "objects": [],
+      "examples": [
+        "Is filament detected?",
+        "Are the runout sensors enabled?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "filament_switch_sensor *.enabled",
+        "filament_switch_sensor *.filament_detected",
+        "filament_motion_sensor *.enabled",
+        "filament_motion_sensor *.filament_detected"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Strict boolean enabled and filament_detected; unknown does not mean no filament",
+      "fallback_endpoints": [],
+      "object_families": {
+        "filament_switch_sensor": [
+          "enabled",
+          "filament_detected"
+        ],
+        "filament_motion_sensor": [
+          "enabled",
+          "filament_detected"
+        ]
+      }
+    },
+    {
+      "id": "errors",
+      "description": "Reported Klipper/print error messages; no diagnosis inferred",
+      "objects": [
+        [
+          "webhooks",
+          [
+            "state",
+            "state_message"
+          ]
+        ],
+        [
+          "print_stats",
+          [
+            "state",
+            "message"
+          ]
+        ]
+      ],
+      "examples": [
+        "Does the printer have an error?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "webhooks.state",
+        "webhooks.state_message",
+        "print_stats.state",
+        "print_stats.message"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [
+        "/server/info",
+        "/printer/info"
+      ],
+      "object_families": {}
+    },
+    {
+      "id": "status",
+      "description": "Klipper readiness and reported print state",
+      "objects": [
+        [
+          "webhooks",
+          [
+            "state",
+            "state_message"
+          ]
+        ],
+        [
+          "print_stats",
+          [
+            "state"
+          ]
+        ]
+      ],
+      "examples": [
+        "Is the printer ready?",
+        "Printer status"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "webhooks.state",
+        "webhooks.state_message",
+        "print_stats.state"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [
+        "/server/info",
+        "/printer/info"
+      ],
+      "object_families": {}
+    },
+    {
+      "id": "configuration",
+      "description": "Configured axis bounds and pending-save/warning status",
+      "objects": [
+        [
+          "toolhead",
+          [
+            "axis_minimum",
+            "axis_maximum"
+          ]
+        ],
+        [
+          "configfile",
+          [
+            "save_config_pending",
+            "warnings"
+          ]
+        ]
+      ],
+      "examples": [
+        "What are the printer configuration warnings?",
+        "What is the build volume?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "toolhead.axis_minimum",
+        "toolhead.axis_maximum",
+        "configfile.save_config_pending",
+        "configfile.warnings"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Finite XYZ bounds, strict pending-save flag, bounded warning messages; no raw config/secrets exposed",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "bed_mesh",
+      "description": "Already-loaded mesh profile; never probe or calibrate",
+      "objects": [
+        [
+          "bed_mesh",
+          [
+            "profile_name",
+            "mesh_min",
+            "mesh_max"
+          ]
+        ]
+      ],
+      "examples": [
+        "Which bed mesh is loaded?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "bed_mesh.profile_name",
+        "bed_mesh.mesh_min",
+        "bed_mesh.mesh_max"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "leveling",
+      "description": "Previously reported gantry/Z tilt application status",
+      "objects": [
+        [
+          "quad_gantry_level",
+          [
+            "applied"
+          ]
+        ],
+        [
+          "z_tilt",
+          [
+            "applied"
+          ]
+        ]
+      ],
+      "examples": [
+        "Is the gantry leveled?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "quad_gantry_level.applied",
+        "z_tilt.applied"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "endstops",
+      "description": "Last recorded endstop result, not a fresh hardware sample",
+      "objects": [
+        [
+          "query_endstops",
+          [
+            "last_query"
+          ]
+        ]
+      ],
+      "examples": [
+        "What are the endstop states?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "query_endstops.last_query"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Previously sampled strict booleans only; never query hardware through a G-code action",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "probe",
+      "description": "Last recorded probe result, not a fresh probe action",
+      "objects": [
+        [
+          "probe",
+          [
+            "name",
+            "last_query"
+          ]
+        ]
+      ],
+      "examples": [
+        "Is the probe triggered?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "probe.name",
+        "probe.last_query"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Previously sampled strict boolean only; never probe hardware",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "pressure_advance",
+      "description": "Current pressure advance and smoothing time",
+      "objects": [
+        [
+          "extruder",
+          [
+            "pressure_advance",
+            "smooth_time"
+          ]
+        ]
+      ],
+      "examples": [
+        "What's the pressure advance?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "extruder.pressure_advance",
+        "extruder.smooth_time"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "retraction",
+      "description": "Current firmware retraction settings",
+      "objects": [
+        [
+          "firmware_retraction",
+          [
+            "retract_length",
+            "retract_speed",
+            "unretract_extra_length",
+            "unretract_speed"
+          ]
+        ]
+      ],
+      "examples": [
+        "What is the retraction length?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "firmware_retraction.retract_length",
+        "firmware_retraction.retract_speed",
+        "firmware_retraction.unretract_extra_length",
+        "firmware_retraction.unretract_speed"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "extrusion",
+      "description": "Extrusion eligibility and active extruder",
+      "objects": [
+        [
+          "extruder",
+          [
+            "can_extrude"
+          ]
+        ],
+        [
+          "toolhead",
+          [
+            "extruder"
+          ]
+        ]
+      ],
+      "examples": [
+        "Can it extrude?",
+        "Which extruder is active?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "extruder.can_extrude",
+        "toolhead.extruder"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "mmu",
+      "description": "Exposed Happy Hare state/tool/gate; notification-only",
+      "objects": [
+        [
+          "mmu",
+          [
+            "print_state",
+            "print_job_state",
+            "tool",
+            "gate",
+            "is_locked"
+          ]
+        ]
+      ],
+      "examples": [
+        "What's the MMU state?",
+        "Which filament gate is selected?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "mmu.print_state",
+        "mmu.print_job_state",
+        "mmu.tool",
+        "mmu.gate",
+        "mmu.is_locked"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "mcu",
+      "description": "Controller firmware and communication statistics",
+      "objects": [
+        [
+          "mcu",
+          [
+            "mcu_version",
+            "last_stats"
+          ]
+        ]
+      ],
+      "examples": [
+        "What firmware is on the MCU?"
+      ],
+      "endpoint": "/printer/objects/query",
+      "component": null,
+      "response_fields": [
+        "mcu.mcu_version",
+        "mcu.last_stats"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {
+        "mcu": [
+          "mcu_version",
+          "last_stats"
+        ]
+      }
+    },
+    {
+      "id": "server",
+      "description": "Moonraker version, Klipper connection and failed components",
+      "objects": [],
+      "examples": [
+        "What Moonraker version is running?"
+      ],
+      "endpoint": "/server/info",
+      "component": null,
+      "response_fields": [
+        "moonraker_version",
+        "klippy_connected",
+        "klippy_state",
+        "failed_components",
+        "warnings"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "printer_info",
+      "description": "Klipper version/readiness even during startup or error",
+      "objects": [],
+      "examples": [
+        "What Klipper version is running?"
+      ],
+      "endpoint": "/printer/info",
+      "component": null,
+      "response_fields": [
+        "state",
+        "state_message",
+        "software_version"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "history",
+      "description": "Most recent five recorded jobs",
+      "objects": [],
+      "examples": [
+        "Show print history",
+        "What was my last print?"
+      ],
+      "endpoint": "/server/history/list",
+      "component": "history",
+      "response_fields": [
+        "jobs",
+        "count"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "last_failure",
+      "description": "Last recorded unsuccessful job and its recorded status, not an invented cause",
+      "objects": [],
+      "examples": [
+        "Why did my last print fail?"
+      ],
+      "endpoint": "/server/history/list",
+      "component": "history",
+      "response_fields": [
+        "jobs",
+        "count"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Newest-first bounded history scan; reported failure classification only; physical root cause unknown",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "totals",
+      "description": "Recorded job totals since history totals were last reset",
+      "objects": [],
+      "examples": [
+        "How many prints have I done?"
+      ],
+      "endpoint": "/server/history/totals",
+      "component": "history",
+      "response_fields": [
+        "job_totals"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "metadata",
+      "description": "Current file's existing slicer metadata",
+      "objects": [],
+      "examples": [
+        "What material is this file sliced for?"
+      ],
+      "endpoint": "/server/files/metadata",
+      "component": "file_manager",
+      "response_fields": [
+        "filename",
+        "slicer",
+        "layer_height",
+        "filament_type",
+        "estimated_time",
+        "filament_total"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "remaining",
+      "description": "Slicer-estimated total less active time; estimate only",
+      "objects": [],
+      "examples": [
+        "How much time is left?",
+        "When will the print finish?"
+      ],
+      "endpoint": "/server/files/metadata",
+      "component": "file_manager",
+      "response_fields": [
+        "estimated_time"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Active printing/paused state plus finite nonnegative slicer estimate and active duration; label as estimate",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "files",
+      "description": "Up to five G-code file names; no reads of arbitrary host paths",
+      "objects": [],
+      "examples": [
+        "What files are available?"
+      ],
+      "endpoint": "/server/files/list",
+      "component": "file_manager",
+      "response_fields": [
+        "path",
+        "size",
+        "modified"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "host",
+      "description": "Host platform/CPU/memory summary",
+      "objects": [],
+      "examples": [
+        "What host is the printer running on?"
+      ],
+      "endpoint": "/machine/system_info",
+      "component": "machine",
+      "response_fields": [
+        "system_info"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "host_stats",
+      "description": "CPU load, temperature, uptime and throttling telemetry",
+      "objects": [],
+      "examples": [
+        "How hot is the host CPU?",
+        "Is the host throttling?"
+      ],
+      "endpoint": "/machine/proc_stats",
+      "component": "proc_stats",
+      "response_fields": [
+        "system_cpu_usage",
+        "cpu_temp",
+        "system_uptime",
+        "throttled_state"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "power_devices",
+      "description": "Reported power accessory states, never power switching",
+      "objects": [],
+      "examples": [
+        "What power devices are connected?"
+      ],
+      "endpoint": "/machine/device_power/devices",
+      "component": "power",
+      "response_fields": [
+        "devices"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "queue",
+      "description": "Queued jobs and queue state; never enqueue/start",
+      "objects": [],
+      "examples": [
+        "What jobs are queued?"
+      ],
+      "endpoint": "/server/job_queue/status",
+      "component": "job_queue",
+      "response_fields": [
+        "queued_jobs",
+        "queue_state"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    },
+    {
+      "id": "webcams",
+      "description": "Configured camera names; no streaming or recording",
+      "objects": [],
+      "examples": [
+        "What cameras are connected?"
+      ],
+      "endpoint": "/server/webcams/list",
+      "component": "webcam",
+      "response_fields": [
+        "webcams"
+      ],
+      "classification": "read-only information; no printer actuation",
+      "missing": "Report unavailable/unsupported; never invent values or run a command",
+      "validation": "Typed finite values, bounded strings/lists; units and provenance retained",
+      "fallback_endpoints": [],
+      "object_families": {}
+    }
+  ]
+}

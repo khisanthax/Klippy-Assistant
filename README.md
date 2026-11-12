@@ -2,13 +2,13 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
-[Download the 0.3.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.3.0-preview.1)
+[Download the 0.4.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.4.0-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.
 The repository is private: sign in to GitHub with an account that has access before
 opening the download link. GitHub can show 404 when you are signed out or lack access.
 
-**0.3.0.dev1 — offline voice and fleet engineering preview, not stable v1.0.** The installer includes
+**0.4.0.dev1 — offline voice and fleet engineering preview, not stable v1.0.** The installer includes
 local wake-word, ASR, TTS and language models. Enable the microphone in the tray or
 Settings to load them. No post-install model download, Python, Ollama or cloud AI is needed.
 Microphone/room accuracy and supervised printer safety acceptance remain open.
@@ -19,6 +19,8 @@ echo cancellation and local wake verification support interruption. Synthetic do
 tests pass; the Windows default audio path also passed a capture/render smoke test.
 Clippy is a homophone and cannot be excluded by spelling. These are not broad acoustic
 accuracy results. See [PHASE2_REPORT.md](PHASE2_REPORT.md).
+
+See [docs/MOONRAKER_QUERIES.md](docs/MOONRAKER_QUERIES.md) for the 41-query catalog, capabilities, freshness and safety boundaries. Open **Queries & Commands** to search queries, operations and discovered macros, refresh capabilities, or edit printer voice aliases. Ask “Klippy, is my M1 printer homed?”, “What about the SV08?”, “How hot is the bed?” or “What layer am I on?”. Information queries never run homing/heating actions.
 
 See [PREVIEW3_REPORT.md](PREVIEW3_REPORT.md) for voice latency fixes, fleet/MMU monitoring,
 macro review improvements, confirmation settings, recovery and qualification limits.

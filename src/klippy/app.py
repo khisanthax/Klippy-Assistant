@@ -46,6 +46,8 @@ from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
 from .monitor import Monitor
 from .moonraker import ConnectionFailure, Moonraker
+from .queries import QueryService
+from .query_manager import QueryManager
 from .runtime import LlamaRuntime
 from .safety import Rejected, SafetyEngine
 from .storage import Credentials, Store, data_directory
@@ -175,11 +177,13 @@ class Window(QMainWindow):
         self.worker = Worker()
         self.worker.result.connect(self.result)
         self.worker.error.connect(self.failure)
+        self.client_cache = {}
+        self.queries = QueryService(store, self.client)
         self.engine = SafetyEngine(store, self.client)
-        self.conversation = Conversation(self.engine)
+        self.conversation = Conversation(self.engine, queries=self.queries)
         self.engine.confirmation_seconds = self.store.get("confirmation_seconds", 30)
         self.conversation.timeout = self.conversation.session.timeout = self.store.get("followup_seconds", 30)
-        self.monitor = Monitor(store, self.client)
+        self.monitor = Monitor(store, self.client, queries=self.queries)
         self.polling = False
         self.command_busy = False
         self.quitting = False
@@ -192,6 +196,10 @@ class Window(QMainWindow):
         self.make_console()
         self.make_fleet()
         self.make_macros()
+        self.query_manager = QueryManager(store, self.queries, self.refresh_capabilities,
+                                         self.voice_availability,
+                                         self.edit_printer_aliases)
+        self.tabs.addTab(self.query_manager, "Queries && Commands")
         self.make_settings()
         self.tray = QSystemTrayIcon(companion_icon(), self)
         menu = QMenu()
@@ -212,7 +220,45 @@ class Window(QMainWindow):
         self.last_session_until = 0.0
 
     def client(self, printer):
-        return Moonraker(printer, Credentials.get(printer.id))
+        key = Credentials.get(printer.id)
+        client = self.client_cache.get(printer.id)
+        if client is None or client.printer != printer or client.api_key != key:
+            client = Moonraker(printer, key)
+            client.status_observer = lambda value, acquired: self.queries.observe(printer.id, value, acquired)
+            self.client_cache[printer.id] = client
+        return client
+
+    def voice_availability(self):
+        enabled = getattr(self.voice, "enabled", None)
+        if enabled and enabled.is_set():
+            return "Voice enabled; models loaded"
+        return "Models loaded; microphone off" if self.voice else "Typed available; load models for voice"
+
+    def refresh_capabilities(self):
+        async def refresh():
+            semaphore = asyncio.Semaphore(4)
+            async def one(printer):
+                async with semaphore:
+                    await self.queries.refresh(printer, force=True)
+            await asyncio.gather(*(one(p) for p in self.store.printers() if p.approved))
+        self.worker.submit("capabilities", refresh())
+
+    def edit_printer_aliases(self):
+        from PySide6.QtWidgets import QInputDialog
+        printer = self.target()
+        if printer is None:
+            self.failure("Select an approved printer first")
+            return
+        text, accepted = QInputDialog.getText(self, "Printer voice aliases", "Comma-separated alternate names", text=", ".join(printer.aliases))
+        if accepted:
+            try:
+                updated = printer.model_copy(update={"aliases": tuple(a.strip() for a in text.split(",") if a.strip())})
+                updated = Printer.model_validate(updated.model_dump())
+                self.engine.cancel()
+                self.store.save_printer(updated)
+                self.reload_printers()
+            except ValueError:
+                self.failure("Use up to twelve short, distinct aliases")
 
     def page(self, title):
         widget = QWidget()
@@ -470,6 +516,8 @@ class Window(QMainWindow):
                 self.fleet.setItem(row, col, item)
         self.fleet.resizeColumnsToContents()
         self.reload_macros()
+        if hasattr(self, "query_manager"):
+            self.query_manager.reload()
 
     def select_printer(self):
         printer_id = self.selected.currentData()
@@ -499,8 +547,10 @@ class Window(QMainWindow):
         dialog.setWindowTitle("Enroll a printer")
         form = QFormLayout(dialog)
         name, url, secret = QLineEdit(), QLineEdit("http://"), QLineEdit()
+        aliases = QLineEdit()
         secret.setEchoMode(QLineEdit.EchoMode.Password)
         form.addRow("Friendly name", name)
+        form.addRow("Voice aliases (comma-separated)", aliases)
         form.addRow("LAN Moonraker URL", url)
         form.addRow("API key (optional; OS vault)", secret)
         approve = QCheckBox("I approve this printer for control after reviewing commands")
@@ -513,17 +563,23 @@ class Window(QMainWindow):
             try:
                 if any(p.name.casefold() == name.text().strip().casefold() for p in self.store.printers()):
                     raise ValueError("Duplicate name")
-                printer = Printer(id=uuid.uuid4().hex, name=name.text(), url=url.text(), approved=approve.isChecked())
+                printer = Printer(id=uuid.uuid4().hex, name=name.text(), url=url.text(), approved=approve.isChecked(),
+                                  aliases=tuple(a.strip() for a in aliases.text().split(",") if a.strip()))
                 Credentials.set(printer.id, secret.text())
                 self.store.save_printer(printer)
                 self.reload_printers()
+                self.worker.submit("capabilities", self.queries.refresh(printer, force=True))
             except Exception:
                 self.failure("Printer not saved. Check the name, URL and Windows credential vault.")
 
     def test_printer(self):
         printer = self.fleet_target()
         if printer:
-            self.worker.submit("test", self.client(printer).snapshot())
+            async def test():
+                snapshot = await self.client(printer).snapshot()
+                await self.queries.refresh(printer, force=True)
+                return snapshot
+            self.worker.submit("test", test())
 
     def approve_printer(self):
         printer = self.fleet_target()
@@ -531,11 +587,14 @@ class Window(QMainWindow):
             self.engine.cancel()
             self.store.save_printer(printer.model_copy(update={"approved": True}))
             self.reload_printers()
+            self.worker.submit("capabilities", self.queries.refresh(printer, force=True))
 
     def remove_printer(self):
         printer = self.fleet_target()
         if printer:
             self.engine.cancel()
+            self.queries.invalidate(printer.id)
+            self.client_cache.pop(printer.id, None)
             Credentials.set(printer.id, "")
             self.store.remove_printer(printer.id)
             self.reload_printers()
@@ -702,7 +761,9 @@ class Window(QMainWindow):
         self.say(text)
 
     def result(self, name, value):
-        if name == "reaction":
+        if name == "capabilities":
+            self.query_manager.reload()
+        elif name == "reaction":
             trace, text = value
             if self.voice and self.spoken.isChecked() and self.engine.pending is None:
                 self.voice.say(text, trace=trace)
