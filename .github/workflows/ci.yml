@@ -76,7 +76,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release download v0.2.0-preview.1 --pattern 'Klippy-Setup-0.2.0-preview.1.exe' --dir local/previous
       - shell: pwsh
-        run: ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.2.0-preview.1.exe' -BlockExternalNetwork
+        run: |
+          if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
+            Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True
+          }
+          ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.2.0-preview.1.exe' -BlockExternalNetwork -MeasurePerformance
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -86,3 +90,5 @@ jobs:
             local/installer-qa/installed-smoke.txt
             local/installer-qa/installed-voice.json
             local/installer-qa/*.log
+            local/performance-budget.json
+            local/performance-voice.json
