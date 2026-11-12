@@ -5,6 +5,8 @@ Fully local Windows desktop companion for explicitly approved Klipper/Moonraker 
 [Download the 0.3.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.3.0-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.
+The repository is private: sign in to GitHub with an account that has access before
+opening the download link. GitHub can show 404 when you are signed out or lack access.
 
 **0.3.0.dev1 — offline voice and fleet engineering preview, not stable v1.0.** The installer includes
 local wake-word, ASR, TTS and language models. Enable the microphone in the tray or

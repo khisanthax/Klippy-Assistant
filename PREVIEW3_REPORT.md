@@ -107,14 +107,29 @@ cancellation stop stale playback; reaction measurement cannot speak over a pendi
 
 ## Qualification and remaining gates
 
-Source tests preserve the original 99 cases and add follow-up, slow inference/playback,
+All 179 source tests and Ruff pass, preserving the original 99 cases and adding follow-up, slow inference/playback,
 confirmation lifecycle, multiple-printer MMU, policy-toggle, macro and recovery regressions.
 The complete real-model synthetic integration probe passed with zero simulated printer writes.
 Build tooling runs Ruff, tests, frozen startup and frozen real-model integration before
 creating an installer. The installer harness supports an actual 0.2 → 0.3 upgrade,
 reinstall and preservation of isolated SQLite data, installed voice checks and uninstall.
 The dedicated CI job repeats installation on a fresh Windows runner with executable-specific
-external-egress firewall blocks. Final run IDs and artifact checksums belong in LOGBOOK/release notes.
+external-egress firewall blocks.
+
+Final [qualification run 43136945820](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43136945820) passed every job on source `69e5bf70fef73159606273498790ae1b15a5f2c7`.
+Frozen, installed and memory-budget real-model probes passed every mandatory gate, each
+with zero printer writes. The exact installer passed 0.2 upgrade, reinstall, SQLite/legacy
+fixture preservation, installed startup and uninstall preserving data. All three Windows
+firewall profiles were enabled during executable-specific external-egress blocking.
+
+Installer: `Klippy-Setup-0.3.0-preview.1.exe`, 1,489,710,686 bytes.
+SHA-256: `a711e0744d7f089eab1747c6a41c191b1c9fc3fd6ec06abdcf6267609ad00442`.
+Self-contained evidence: `benchmarks/preview3-release-qualification.json`.
+
+The final memory-budget run on Windows 10.0.26100 / AMD EPYC 7763 / 8,584,425,472 bytes
+host RAM measured peak process-tree commit of 1,922,932,736 bytes, three active processes,
+114.380 seconds wall time and 181.016 seconds CPU time. It passed a 16 GiB commit cap.
+This synthetic workload is not an idle-CPU, microphone or physical printer benchmark.
 
 `scripts/performance_probe.ps1` applies a 16 GiB Windows Job Object commit limit to the
 frozen app and inherited language runtime, measuring peak memory, CPU time and wall time.

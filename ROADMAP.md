@@ -8,20 +8,22 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 | 2. Local voice and AI | Core implemented; hardware gate open | Klippy/Hey Klippy synthetic detection fixed, actual Whisper/Kokoro/Qwen pipeline, duplex AEC/interruption, Windows capture/render smoke, 57-file license-reviewed payload; human wake/room accuracy and optional speaker enrollment remain open |
 | 3. Connectivity | Partial | Bounded concurrent fleet polling, per-printer status/MMU view, Happy Hare v3/v4 fault notifications, enrollment/vault/discovery/client implemented; simulated multi-printer isolation verified; actual fleet/auth/subscription qualification open |
 | 4. Macro intelligence | Partial | Discovery/reapproval, deterministic synonyms and numeric parameters, body similarity, rename warnings and review diffs implemented; extended semantic and actual fleet acceptance open |
-| 5. Safe execution | Partial | Central engine with mandatory fresh checks, configurable operational prompts, exact playback-bound confirmation windows, single-use tokens and uncertain outcomes; supervised hardware tests open |
+| 5. Safe execution | Partial | Central engine with mandatory fresh checks, configurable operational prompts, exact playback-bound confirmation windows, exact action/value review, mandatory model-write review, single-use tokens and uncertain outcomes; supervised hardware tests open |
 | 6. Companion/monitoring | Partial | Hidden tray launch, movable animated companion, auto-hide, active banner, schedule, fault alerts, read-only reconnect macro refresh; Happy Hare fault notifications, persisted companion position/visibility/duration and scrollable settings added; desktop/sleep acceptance open |
-| 7. Stabilization | In progress | Expanded simulated regressions, crash/WAL recovery, validated backup/restore and monotonic reaction diagnostics; memory-budget probe prepared; actual 16 GB VM/audio/sleep/fleet gates open |
-| 8. Distribution | Partial | Unsigned preview installer builds; install/reinstall/settings preservation/installed launch/uninstall passed on development host; complete licensed model payload, cross-version and external-egress installer qualification automated; clean Windows desktop VM and stable release gates remain open |
+| 7. Stabilization | In progress | Expanded simulated regressions, crash/WAL recovery, validated backup/restore and monotonic reaction diagnostics; fresh-runner offline upgrade and 16 GiB process-budget probes passed; actual 16 GB VM/audio/sleep/fleet gates open |
+| 8. Distribution | Partial | Unsigned preview installer builds; install/reinstall/settings preservation/installed launch/uninstall passed on development host; complete licensed model payload, fresh Windows CI cross-version upgrade/reinstall/SQLite preservation/offline-model/uninstall qualification passed; clean Windows desktop VM and stable release gates remain open |
 
 ## Next priority
 
-1. Keep safety regressions passing; exercise Windows build/installer and remote CI.
-2. Finish frozen/installed verification of the complete voice payload, then calibrate
-   microphone-qualified Klippy detection and room interruption with labeled human samples.
-3. Validate on a microphone with labeled recordings (Klippy, Hey Klippy, Klipper, Clippy,
-   silence, own TTS, interruptions). Do not claim transcript tests validate acoustics.
-4. Supervised printer movement/heating/cancellation tests require the owner present.
-5. Complete qualification, then publish stable v1.0 only when every release gate passes.
+1. Preserve the 179 passing regressions, including the original 99 cases, and qualify the
+   exact preview installer through frozen/offline, cross-version upgrade and recovery checks.
+2. Extend the macro semantic benchmark and fleet authentication/subscription qualification;
+   use simulated services for software work independently of hardware availability.
+3. Obtain a clean Windows desktop VM without development dependencies and a 16 GB total-RAM
+   environment for offline installation, performance, sleep/resume and desktop acceptance.
+4. Separately validate microphone samples (Klippy, Hey Klippy, Klipper, Clippy, silence,
+   own TTS, interruptions). Supervised consequential printer tests require the owner present.
+5. Publish accurately scoped previews; stable v1.0 requires every release gate to pass.
 
 ## 0.3 preview software work
 

@@ -1,5 +1,32 @@
 # Logbook
 
+## 2026-11-11 — Exact 0.3 preview artifact qualified
+
+Windows CI run 43136945820 passed test/build/installer-qualification on source 69e5bf70fef73159606273498790ae1b15a5f2c7.
+All 179 tests and Ruff pass; original 99 cases remain unchanged. Frozen and both installed
+real-model synthetic probes passed all mandatory gates and reported zero printer writes.
+Actual 0.2→0.3 upgrade, same-version reinstall, legacy SQLite fixtures, installed startup
+and uninstall preserving data passed on a fresh Windows runner with app/runtime external
+egress blocked and Domain/Private/Public firewall profiles enabled.
+
+Exact installer: Klippy-Setup-0.3.0-preview.1.exe, 1,489,710,686 bytes.
+SHA-256: a711e0744d7f089eab1747c6a41c191b1c9fc3fd6ec06abdcf6267609ad00442.
+Downloaded artifact and distribution copy were independently hashed and match the CI
+installer report. Source, installed, memory and complete qualification JSON are committed
+under benchmarks/preview3-release-*.json; PREVIEW3_REPORT.md records scope and limitations.
+
+Memory result: Windows 10.0.26100, AMD EPYC 7763, 8,584,425,472 host RAM bytes;
+16 GiB inherited job commit cap, peak commit 1,922,932,736 bytes, three active processes,
+114.380 s wall / 181.016 s CPU. This is not actual 16 GB total-RAM or clean desktop VM
+qualification. Human acoustics, physical fleet/accessories, supervised actuation,
+clean desktop/no-development-tools, idle CPU and extended device/sleep/soak gates stay open.
+GitHub Phase 2–7 issue bodies now distinguish implemented work from remaining acceptance.
+No physical printer connection/action, recordings, private configuration or credentials used.
+
+Next: publish this exact artifact as v0.3.0-preview.1, then record its verified release assets.
+Continue extended semantic/authentication/subscription software qualification independently
+of human microphone and separately supervised hardware acceptance.
+
 ## 2026-11-11 — Exact action review and numeric safety
 
 Before publishing confirmation opt-outs, closed additional review gaps: prompts now name
