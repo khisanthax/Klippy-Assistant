@@ -1,0 +1,17 @@
+{
+  "cpu": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+  "passed": true,
+  "wall_seconds": 155.854,
+  "memory_budget_gib": 16,
+  "host_ram_bytes": 8584425472,
+  "scope": "Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM",
+  "limitations": [
+    "Total VM RAM/cache is not controlled by the process-tree commit budget",
+    "No human microphone accuracy",
+    "No real printer connections"
+  ],
+  "cpu_seconds": 249.719,
+  "peak_active_processes": 3,
+  "peak_job_commit_bytes": 1953230848,
+  "os": "Microsoft Windows NT 10.0.26100.0"
+}

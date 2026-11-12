@@ -93,8 +93,12 @@ The local full/composite development probe passed; its report is
 `benchmarks/preview4-composite-source.json`. Unknown human/continuous-speech accuracy
 still requires separate evidence. See the final evidence for the recommended Hey-Klippy run.
 
-Exact final preview build/installer qualification and artifact identity will be recorded here
-after all required engineering-preview jobs pass. Earlier source/artifacts e775c64 and
+Qualified exact source `643b9493f3bd3c67009657b2b01376f67fdc0233` in [Windows run 43260616461, attempt 1](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43260616461/attempts/1). All 370 tests and Ruff passed, followed by complete-model build/frozen startup, frozen native voice/query probes, actual 0.3-to-0.4 upgrade, reinstall/SQLite fixture preservation, installed offline voice/query probes, process-tree memory accounting and uninstall preserving data. Installed app/runtime external egress was blocked with all three firewall profiles enabled. Every probe met the explicit engineering-preview gates, reported zero writes, passed seven query cases and accepted no negative input. Full continuous/raw-KWS voice results remain separate and are not broad acoustic qualification. Full result flags (frozen/installed/memory): True, True, False.
+
+Installer: `Klippy-Setup-0.4.0-preview.1.exe`, 1,489,696,655 bytes.
+SHA-256: `5e3d9d8d4221620772df89ee38eb8495b770a35e9cb70efa5b003ed6d3caafac`.
+
+Final synthetic memory result: Microsoft Windows NT 10.0.26100.0, Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz, 8,584,425,472 host RAM bytes; peak process-tree commit 1,953,230,848 bytes, 3 active processes, 155.854 s wall / 249.719 s CPU under a 16 GiB process commit cap. This is not an actual 16 GB total-RAM machine or clean desktop VM qualification. Self-contained final evidence: `benchmarks/preview4-release-qualification.json`. Earlier source/artifacts e775c64 and
 8ba42ab are superseded by the explicit qualification/probe changes and are not for release.
 
 The b3a04b9 frozen unfamiliar-query call also rejected before the probe could retain a
@@ -102,6 +106,11 @@ complete report. Its trace is preserved in `benchmarks/preview4-frozen-query-rej
 Read-only model requests now have a 45-second budget (prior CI samples took 10–17 seconds
 against 20); action inference remains 20 seconds. Safe failure classifications and complete
 per-case results now survive rejection. Common deterministic queries do not invoke this model.
+
+The budgeted installed process specifically failed continuous wake-plus-sentence status
+capture, while its required Hey-Klippy acknowledgement/follow-up and all query/negative-input
+safety gates passed. Its original full-voice `passed` remains **false** in
+`benchmarks/preview4-release-memory-voice.json`; that failure is not closed or hidden.
 
 ## Remaining limits
 

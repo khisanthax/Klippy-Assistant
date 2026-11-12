@@ -15,9 +15,9 @@ Stable release is blocked until every applicable item has evidence.
 - [ ] Safety suite and supervised hazardous operation tests pass.
 - [ ] Fault monitoring never controls hardware; Happy Hare faults tested where available.
 - [ ] Companion visibility/animation/tray and listening schedule verified.
-- [x] CPU-only synthetic benchmark results with host specifications (0.3 preview evidence);
+- [x] CPU-only synthetic benchmark results with host specifications (0.4 preview evidence);
       actual 16 GB host / idle CPU acceptance remains open.
-- [x] Single installer with all required runtime/model assets; no post-install downloads (0.3.0 preview).
+- [x] Single installer with all required runtime/model assets; no post-install downloads (0.4.0 preview).
 - [ ] Clean-machine install/upgrade/uninstall and offline runtime verified.
 - [ ] No critical/high defects; limitations documented; release artifact checksums.
 - [x] Digital signing status accurate (currently unsigned).

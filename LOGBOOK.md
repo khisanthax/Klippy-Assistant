@@ -1,5 +1,30 @@
 # Logbook
 
+## 2026-11-12 — Exact 0.4 preview qualification
+
+Source 643b9493f3bd3c67009657b2b01376f67fdc0233, CI run 43260616461 attempt 1 passed every required job.
+370 tests/Ruff, frozen and both installed native voice/query probes, actual 0.3 upgrade,
+reinstall/legacy SQLite preservation, offline runtime, memory accounting and uninstall
+preserving data passed. All firewall profiles enabled; app/runtime external egress blocked.
+Every engineering-preview probe passed seven query cases, actual Hey-wake/follow-up ASR-to-catalog status, zero accepted negative inputs, zero writes and no pending query action. Full voice metrics remain separate.
+Installer Klippy-Setup-0.4.0-preview.1.exe: 1,489,696,655 bytes.
+SHA-256: 5e3d9d8d4221620772df89ee38eb8495b770a35e9cb70efa5b003ed6d3caafac.
+CI report, downloaded artifact, sidecar and local distribution copy agree.
+
+Earlier e775c64 frozen/installed attempts failed quiet whole-utterance wake capture; all new
+query cases passed. The original report is retained in benchmarks/preview4-frozen-attempt1-failure.json.
+Current source passed the explicit engineering-preview envelope in all three processes.
+Original full-voice results (frozen/installed/memory): True, True, False.
+Original full-voice gates/results remain intact. Production voice thresholds/models/capture/
+interruption are unchanged; full acoustic acceptance remains open. The initial local-model semantic-category failure is also retained.
+
+Peak commit 1,953,230,848 bytes / 3 active processes;
+155.854 s wall / 249.719 s CPU; host RAM 8,584,425,472 bytes.
+This process cap is not actual 16 GB or clean desktop VM acceptance. Evidence is committed
+under benchmarks/preview4-release-*.json and summarized in PREVIEW4_REPORT.md. No physical
+printer connections/actions, owner installation changes or microphone recordings used.
+Next: publish only this exact qualified artifact, retaining all documented limitations.
+
 ## 2026-11-12 — Read-only local-model budget and failure diagnostics
 
 Candidate b3a04b9 passed all 368 Windows tests but its frozen unfamiliar-query model call
@@ -57,7 +82,7 @@ unknown/malformed data handling and searchable read/action/macro manager with vo
 No owner data, microphone or physical printer connection/actions used. All simulated
 transports reject writes. API research inventory and exclusions: docs/MOONRAKER_QUERIES.md.
 
-368 tests and Ruff pass (original 179 preserved). Local real-model query probe initially
+355 tests and Ruff pass (original 179 preserved). Local real-model query probe initially
 selected numeric position for an established-reference question. Retained that failed
 result; clarified conceptual homing vs numeric-position definitions in the inventory and
 query prompt. Corrected native probe passed seven cases, including the unfamiliar local
@@ -68,7 +93,7 @@ Found and fixed a delayed-response cache race before publication: endpoint edits
 discovery invalidation now reject old in-flight reads before they can mutate a new
 registry/cache generation. Added a delayed-old-endpoint regression, including the monitor
 snapshot observer. Canceled candidate run 43248180304; source 8ba42ab is superseded.
-368 tests and Ruff pass on the correction.
+356 tests and Ruff pass on the correction.
 
 Preparing 0.4.0-preview.1 qualification with unchanged license-reviewed model payload.
 Frozen/installed voice self-tests now include the native query probe; cross-version test

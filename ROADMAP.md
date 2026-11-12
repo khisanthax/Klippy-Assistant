@@ -21,8 +21,9 @@ local LLM fallback. Added printer aliases, query/subject follow-ups, two-second 
 cache reuse with explicit stale labels, reconnect/configuration invalidation and searchable
 Queries & Commands inventory. Original 179 tests preserved; 370 tests and Ruff pass.
 Actual local-model query probe passed after correcting a semantic category confusion;
-failed and corrected evidence is retained. Complete frozen/installed upgrade qualification
-is next. All physical and clean-machine gates remain open.
+failed and corrected evidence is retained. Exact-source run 43260616461 attempt 1 passed frozen/installed/offline
+0.3-to-0.4 upgrade/reinstall/recovery and memory-budget qualification. A prior same-source
+frozen wake-capture failure is retained; it remains an acoustic reliability limitation. All physical and clean-machine gates remain open.
 
 ## Next priority
 
