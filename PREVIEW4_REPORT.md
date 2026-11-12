@@ -45,7 +45,7 @@ are never exported to a cloud service or written by the query engine.
 
 ## Tests and measurements
 
-368 tests and Ruff pass; the original 179 tests remain unchanged. New simulated tests cover
+370 tests and Ruff pass; the original 179 tests remain unchanged. New simulated tests cover
 every catalog entry and advertised example, ordinary variations, aliases/follow-ups, absent
 objects/components/fields, invalid values, missing layers, fresh/stale cache behavior,
 configuration/reconnect/clock changes, two-printer and delayed-old-endpoint isolation,
@@ -96,6 +96,12 @@ still requires separate evidence. See the final evidence for the recommended Hey
 Exact final preview build/installer qualification and artifact identity will be recorded here
 after all required engineering-preview jobs pass. Earlier source/artifacts e775c64 and
 8ba42ab are superseded by the explicit qualification/probe changes and are not for release.
+
+The b3a04b9 frozen unfamiliar-query call also rejected before the probe could retain a
+complete report. Its trace is preserved in `benchmarks/preview4-frozen-query-rejection.txt`.
+Read-only model requests now have a 45-second budget (prior CI samples took 10–17 seconds
+against 20); action inference remains 20 seconds. Safe failure classifications and complete
+per-case results now survive rejection. Common deterministic queries do not invoke this model.
 
 ## Remaining limits
 

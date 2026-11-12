@@ -11,7 +11,7 @@ from .domain import Printer
 from .moonraker import Moonraker
 from .queries import QueryService
 from .query_catalog import CATALOG
-from .safety import SafetyEngine
+from .safety import Rejected, SafetyEngine
 from .storage import Store
 
 
@@ -62,13 +62,19 @@ async def run(model):
                 token = current.set(trace)
                 start = time.perf_counter()
                 count = len(calls)
+                error = None
                 try:
-                    answer = await conversation.hear(text)
+                    try:
+                        answer = await conversation.hear(text)
+                    except Rejected as exc:
+                        answer = None
+                        error = getattr(exc, "code", "Rejected")
                 finally:
                     current.reset(token)
                 cases.append({"synthetic_question": text, "answer": answer,
                               "milliseconds": round((time.perf_counter()-start)*1000, 3),
-                              "http_reads": len(calls)-count, "passed": isinstance(answer, str) and expected in answer})
+                              "http_reads": len(calls)-count, "error_code": error,
+                              "passed": isinstance(answer, str) and expected in answer})
             return {"scope": "Real local query LLM, deterministic parser and injected simulated printers; no hardware/network APIs",
                     "catalog_queries": len(CATALOG), "cases": cases, "printer_writes": len(writes),
                     "pending_write": engine.pending is not None,

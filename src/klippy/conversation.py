@@ -283,7 +283,7 @@ class LocalLLM:
         try:
             async with self.lock:
                 with timings.span("query_llm"):
-                    async with httpx.AsyncClient(timeout=20, trust_env=False) as client:
+                    async with httpx.AsyncClient(timeout=45, trust_env=False) as client:
                         response = await client.post(f"http://127.0.0.1:{self.port}/v1/chat/completions",
                             headers={"Authorization": "Bearer " + self.api_key} if self.api_key else {},
                             json={"messages": [{"role": "system", "content": system},
@@ -297,8 +297,13 @@ class LocalLLM:
                         if request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle"}:
                             raise ValueError("Invalid catalog selection")
                         return request
-        except (httpx.HTTPError, ValueError, KeyError, IndexError):
-            raise Rejected("Please clarify the information query; no action sent") from None
+        except (httpx.HTTPError, ValueError, KeyError, IndexError) as exc:
+            rejection = Rejected("Please clarify the information query; no action sent")
+            # Safe classification only: no endpoint, response body, headers or utterance.
+            rejection.code = type(exc).__name__
+            if isinstance(exc, httpx.HTTPStatusError):
+                rejection.code += f"_{exc.response.status_code}"
+            raise rejection from None
 
     async def interpret(self, text, printer_id, macros):
         import time

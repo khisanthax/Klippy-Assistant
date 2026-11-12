@@ -1,5 +1,22 @@
 # Logbook
 
+## 2026-11-12 — Read-only local-model budget and failure diagnostics
+
+Candidate b3a04b9 passed all 368 Windows tests but its frozen unfamiliar-query model call
+rejected without distinguishing timeout, malformed output or ambiguity. Trace retained in
+benchmarks/preview4-frozen-query-rejection.txt. Prior CI query inference samples took
+10–17 seconds against a 20-second request timeout. Increased only the read-only query
+budget to 45 seconds; action interpretation remains at 20 seconds and no write retry/policy
+changed. Rejections now carry a safe exception-class/status diagnostic without endpoint,
+headers, response content or utterance. The native query probe retains all seven case
+results and error codes instead of replacing the entire report with a traceback.
+
+Added timeout-redaction and retained-failure-report regressions. Full suite is now 370
+cases including original 179 unchanged; Ruff passes. No further app feature changes planned:
+qualify exact corrected source, archive preview/full-voice results separately, publish an
+accurately labeled query engineering preview. Human acoustics and all physical/clean VM/
+actual 16 GB acceptance gates stay open. No physical printer connection/action used.
+
 ## 2026-11-12 — Separated query-preview qualification from open acoustic gates
 
 Installed e775c64 reproduced the frozen quiet continuous wake-capture miss; seven native

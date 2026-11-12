@@ -567,3 +567,34 @@ def test_full_voice_and_preview_qualification_modes_cannot_be_combined():
     result = subprocess.run([sys.executable, "-m", "klippy.app", "--voice-self-test", "--preview-self-test"],
                             capture_output=True, text=True, timeout=15)
     assert result.returncode == 2 and "not allowed with argument" in result.stderr
+
+
+async def test_read_only_model_timeout_has_safe_diagnostic_code(monkeypatch):
+    class Client:
+        def __init__(self, **kwargs):
+            pass
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *args):
+            pass
+        async def post(self, *args, **kwargs):
+            raise httpx.ReadTimeout("private endpoint and response details")
+    monkeypatch.setattr(httpx, "AsyncClient", Client)
+    with pytest.raises(Rejected) as caught:
+        await LocalLLM().interpret_query("Has the machine established a reference?")
+    assert caught.value.code == "ReadTimeout"
+    assert "private" not in str(caught.value)
+
+
+async def test_native_query_probe_retains_all_cases_when_model_rejects():
+    from klippy.query_probe import run
+    class Model:
+        async def interpret_query(self, text):
+            rejection = Rejected("private details must not enter the report")
+            rejection.code = "ReadTimeout"
+            raise rejection
+    report = await run(Model())
+    assert not report["passed"] and len(report["cases"]) == 7
+    assert all(row["passed"] for row in report["cases"][:-1])
+    assert report["cases"][-1]["error_code"] == "ReadTimeout"
+    assert "private details" not in json.dumps(report)

@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "klippy\app.py", line 1021, in main
+  File "klippy\voice_probe.py", line 234, in run
+  File "asyncio\runners.py", line 196, in run
+  File "asyncio\runners.py", line 119, in run
+  File "asyncio\base_events.py", line 726, in run_until_complete
+  File "klippy\voice_probe.py", line 231, in language_probe
+  File "klippy\query_probe.py", line 66, in run
+  File "klippy\conversation.py", line 78, in hear
+  File "klippy\conversation.py", line 144, in _hear
+  File "klippy\conversation.py", line 209, in _answer_query
+  File "klippy\conversation.py", line 301, in interpret_query
+klippy.safety.Rejected: Please clarify the information query; no action sent

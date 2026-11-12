@@ -19,14 +19,14 @@ Implemented 41 built-in read-only query types, per-printer object/field/componen
 strict endpoint/parameter allowlist, deterministic common questions and isolated query-only
 local LLM fallback. Added printer aliases, query/subject follow-ups, two-second field-aware
 cache reuse with explicit stale labels, reconnect/configuration invalidation and searchable
-Queries & Commands inventory. Original 179 tests preserved; 368 tests and Ruff pass.
+Queries & Commands inventory. Original 179 tests preserved; 370 tests and Ruff pass.
 Actual local-model query probe passed after correcting a semantic category confusion;
 failed and corrected evidence is retained. Complete frozen/installed upgrade qualification
 is next. All physical and clean-machine gates remain open.
 
 ## Next priority
 
-1. Preserve the 368 passing regressions, including the original 99 cases, and qualify the
+1. Preserve the 370 passing regressions, including the original 99 cases, and qualify the
    exact preview installer through frozen/offline, cross-version upgrade and recovery checks.
 2. Extend the macro semantic benchmark and fleet authentication/subscription qualification;
    use simulated services for software work independently of hardware availability.
