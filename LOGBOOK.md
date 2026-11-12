@@ -1,5 +1,21 @@
 # Logbook
 
+## 2026-11-11 — Published v0.3.0-preview.1
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.3.0-preview.1 at qualified application source 69e5bf7. The SSH-created annotated tag
+resolves to the exact CI build source. All five assets uploaded before publication; GitHub's
+installer digest equals a711e0744d7f089eab1747c6a41c191b1c9fc3fd6ec06abdcf6267609ad00442.
+Release is published, prerelease=true, unsigned, not marked latest/stable. Assets include
+installer/checksum, final report, model manifest and self-contained qualification JSON.
+The documentation/evidence commit 77fe629 also passed Windows CI; source-tag CI passed.
+GitHub issues 2–8 updated with software progress, passed qualification and still-open gates.
+Working distribution installer matches the release; no owner installation was changed.
+
+Next: extended semantic macro cases, fleet authentication/subscription/reconnect qualification
+and remaining event-history/animation review using simulated services. Obtain a clean desktop
+VM/actual 16 GB host separately. Microphone and all consequential physical-printer acceptance
+remain separate supervised work; no hardware gate was closed by synthetic evidence.
+
 ## 2026-11-11 — Exact 0.3 preview artifact qualified
 
 Windows CI run 43136945820 passed test/build/installer-qualification on source 69e5bf70fef73159606273498790ae1b15a5f2c7.

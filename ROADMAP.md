@@ -27,6 +27,9 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 
 ## 0.3 preview software work
 
+Published [v0.3.0-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.3.0-preview.1) after exact Windows qualification run 43136945820
+passed all jobs. The source tag is `69e5bf7`; final artifact and scope are in PREVIEW3_REPORT.md.
+
 Shared processing/playback follow-up sessions, streamed/cached TTS, post-playback confirmation
 windows and deterministic natural temperature/progress queries address the owner usability report.
 See PREVIEW3_REPORT.md and benchmarks/preview3-*.json for measured scope. Hardware calibration
