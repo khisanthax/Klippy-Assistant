@@ -7,6 +7,7 @@ import secrets
 import threading
 import time
 from dataclasses import dataclass, replace
+from decimal import Decimal
 
 from .domain import Action, Intent, Snapshot, digest, safe_macro_name
 from .macros import discover
@@ -21,6 +22,26 @@ class NeedsParameter(Rejected):
     def __init__(self, name):
         self.name = name
         super().__init__(f"Specify parameter {name}")
+
+
+def numeric_text(value):
+    """Round-trip the validated decimal without rounding or G-code exponent syntax."""
+    text = format(Decimal(str(value)), "f")
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
+def action_details(intent):
+    if intent.action in (Action.PAUSE, Action.RESUME, Action.CANCEL):
+        return intent.action.value + " print"
+    if intent.action == Action.HOME:
+        return "home all axes"
+    if intent.action == Action.HEAT:
+        heater = "bed" if intent.params["heater"] == 1 else "nozzle"
+        return f"heat {heater} to {numeric_text(intent.params['temperature'])} degrees Celsius"
+    if intent.action == Action.MACRO:
+        values = ", ".join(f"{key}={numeric_text(value)}" for key, value in sorted(intent.params.items()))
+        return f"macro {intent.macro}" + (f" with {values}" if values else "")
+    return intent.action.value.replace("_", " ")
 
 
 READ_ONLY = {Action.STATUS, Action.TEMPERATURES, Action.MACROS}
@@ -111,7 +132,7 @@ class SafetyEngine:
             if maximum is None or not 0 <= temperature <= maximum:
                 raise Rejected("Temperature is outside locally reviewed heater limits")
             policy = {"maximum": maximum}
-            script = f"{'M104' if heater == 0 else 'M140'} S{temperature:g}"
+            script = f"{'M104' if heater == 0 else 'M140'} S{numeric_text(temperature)}"
         if intent.action == Action.MACRO:
             if not intent.macro or not safe_macro_name(intent.macro):
                 raise Rejected("Invalid macro")
@@ -125,6 +146,8 @@ class SafetyEngine:
             if set(intent.params) - set(macro.parameters):
                 raise Rejected("Unknown macro parameter")
             for key, rule in macro.parameters.items():
+                if not math.isfinite(rule.minimum) or not math.isfinite(rule.maximum) or rule.minimum > rule.maximum:
+                    raise Rejected("Macro parameter bounds need review")
                 if not re.fullmatch(r"[A-Z_][A-Z_0-9]*", key):
                     raise Rejected("Invalid parameter schema")
                 if key not in intent.params:
@@ -140,7 +163,7 @@ class SafetyEngine:
                 raise Rejected("Macro parameter schema needs review")
             if re.search(r"params\s*\[|params\s*\||params\s*\.\s*\w+\s*\(|rawparams", macro.definition):
                 raise Rejected("Dynamic macro parameters require additional review; voice execution blocked")
-            script = macro.name + "".join(f" {key}={value:g}" for key, value in sorted(intent.params.items()))
+            script = macro.name + "".join(f" {key}={numeric_text(value)}" for key, value in sorted(intent.params.items()))
             policy = macro.model_dump(mode="json")
             # Discovery can take time. Recheck printer readiness immediately after it.
             fresh = await client.snapshot()
@@ -152,7 +175,7 @@ class SafetyEngine:
                           "confirmations": self.store.get("confirmations", {})})
         return client, state, script, binding
 
-    async def propose(self, intent: Intent, *, defer_confirmation=False):
+    async def propose(self, intent: Intent, *, defer_confirmation=False, force_confirmation=False):
         async with self.lock:
             self.cancel()
             generation = self.generation
@@ -175,6 +198,13 @@ class SafetyEngine:
                     return "Macros: " + ", ".join(current) + (". " + "; ".join(notices) if notices else "")
                 progress = f"{state.progress:.0%} complete" if state.progress is not None else "Progress unavailable"
                 return f"{state.state}; {progress}"
+            printer = next(p for p in self.store.printers() if p.id == intent.printer_id)
+            warning = " Check the bed and toolhead path are clear." if intent.action in (Action.HOME, Action.MACRO) else ""
+            provenance = "Model interpretation requires explicit review. " if force_confirmation else ""
+            review = (f"{provenance}Confirm {action_details(intent)} on {printer.name}?{warning} "
+                      f"Say exactly 'confirm' or choose Confirm within {self.confirmation_seconds} seconds after the prompt finishes.")
+            if len(review) > 550:
+                raise Rejected("Action details exceed the complete voice review limit; use printer controls")
             with self.state_lock:
                 if generation != self.generation:
                     raise Rejected("Request was canceled during validation")
@@ -182,16 +212,14 @@ class SafetyEngine:
                                        self.clock() + (180 if defer_confirmation else self.confirmation_seconds),
                                        binding, not defer_confirmation, self.clock() + 180)
             configurable = {Action.PAUSE, Action.RESUME, Action.CANCEL, Action.HOME, Action.HEAT}
-            if intent.action in configurable and self.store.get("confirmations", {}).get(intent.action.value) is False:
+            if not force_confirmation and intent.action in configurable and self.store.get("confirmations", {}).get(intent.action.value) is False:
                 with self.state_lock:
                     if self.pending is None or generation != self.generation:
                         raise Rejected("Request was canceled")
                     self.pending = replace(self.pending, ready=True)
                     token = self.pending.token
                 return await self._confirm_locked(token)
-            printer = next(p for p in self.store.printers() if p.id == intent.printer_id)
-            warning = " Check the bed and toolhead path are clear." if intent.action in (Action.HOME, Action.MACRO) else ""
-            return f"Confirm {intent.action.value} on {printer.name}?{warning} Say exactly 'confirm' or choose Confirm within {self.confirmation_seconds} seconds after the prompt finishes."
+            return review
 
     async def confirm(self, token):
         async with self.lock:

@@ -1,5 +1,25 @@
 # Logbook
 
+## 2026-11-11 — Exact action review and numeric safety
+
+Before publishing confirmation opt-outs, closed additional review gaps: prompts now name
+all-axes homing, heater/temperature, macro and every supplied numeric value. Model-interpreted
+writes always require explicit review even when an operational prompt is disabled; explicit
+supported heat syntax is parsed deterministically and still checked against reviewed limits.
+Bare cancel is a dialogue/request cancellation; cancel print explicitly addresses a print job.
+
+Replaced six-significant-digit G-code formatting, which could change an already-validated
+value or emit exponent syntax, with exact fixed-decimal round-trip serialization. Macro
+parameter bounds must be finite and ordered. Reviews beyond the complete speech budget
+are rejected before a token is created. Added regressions for precision/ranges, heater and
+macro echoes, forced model review, explicit heat opt-outs, oversized reviews and cancel
+ambiguity. Original 99 tests unchanged; all 179 tests and Ruff passed. All writes simulated.
+
+Run 43132829101 passed the previous source's complete build and combined offline upgrade,
+installed-model and memory checks. Its artifact is superseded by these safety corrections.
+Next: build/qualify this exact source once, record its artifact identity and publish the preview.
+No physical printer connections, commands, recordings or personal transcripts were involved.
+
 ## 2026-11-11 — Confirmation overlap and composite model qualification
 
 Corrected-source run 43126897339 passed its 156 tests, complete-model build and stricter

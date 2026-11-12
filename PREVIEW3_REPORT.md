@@ -31,8 +31,12 @@ remain open. No physical printer commands were used for development or qualifica
 - Confirmation prompts for pause/resume/cancel/home/heat can be disabled individually,
   with warnings and fresh validation immediately before a single transmission. Enrollment,
   selection, state, heater limits and policy bindings remain mandatory. Macros and critical
-  operations always require confirmation. Defaults enable every confirmation. Settings
+  operations and model-interpreted writes always require confirmation. Defaults enable every confirmation. Settings
   supports explicit per-printer verified heater-limit review; unknown bounds block heating.
+  Reviews echo the heater, exact temperature, macro name/values and all-axes homing scope.
+  Numeric serialization preserves the validated value without rounding or G-code exponent
+  syntax; parameter bounds must be finite and ordered. Oversized reviews are rejected.
+  Bare `cancel` cancels the pending request; `cancel print` explicitly addresses the print job.
 - Scrollable settings, companion visibility/duration and remembered position, validated
   schedules, versioned preference backup and transactional recovery are implemented.
   Restore first creates an online SQLite backup, revokes device/macro approvals, resets

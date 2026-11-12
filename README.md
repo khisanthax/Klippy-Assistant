@@ -41,11 +41,12 @@ hides it. Choose Quit in the tray menu to exit. `--show` opens the panel immedia
 4. Refresh Macros, inspect actual definitions and callees, then explicitly review any
    macro you want to enable. All approvals are per printer. Parameters need reviewed
    numeric bounds; dynamic/raw parameter access is blocked in this preview.
-5. Requests such as `pause`, `resume`, `cancel` and `home` require a confirmation
+5. Requests such as `pause`, `resume`, `cancel print` and `home` require a confirmation
    bound to the exact target/action. The default response window is 30 seconds after
    spoken playback finishes; interrupted/failed prompts cancel. Settings can change the
-   window or disable selected operational prompts. Mandatory checks always apply; macros
-   and critical operations retain confirmation. No transmission retry.
+   window or disable selected operational prompts. Mandatory checks always apply; macros,
+   critical operations and model-interpreted writes retain confirmation. Bare `cancel`
+   cancels the pending request; use `cancel print` for a print job. No transmission retry.
 
 For voice, enable listening and wait for the local model status to become ready. Say
 "Klippy, status" or "Hey Klippy, what's the temperature?". Follow-up listening lasts

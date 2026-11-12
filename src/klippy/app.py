@@ -326,7 +326,7 @@ class Window(QMainWindow):
             layout.addWidget(QLabel(label))
             layout.addWidget(spin)
         layout.addWidget(QLabel("Confirmations are enabled by default. Disabling a prompt below allows an explicit request to act immediately. "
-                                "Enrollment, state, limits and fresh validation always apply. Macros and critical operations always require confirmation."))
+                                "Enrollment, state, limits and fresh validation always apply. Macros, critical operations and model interpretations always require confirmation."))
         for action in ("pause", "resume", "cancel", "home", "heat"):
             check = QCheckBox("Confirm " + action)
             check.setChecked(self.store.get("confirmations", {}).get(action, True) is not False)

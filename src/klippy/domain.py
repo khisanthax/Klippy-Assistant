@@ -6,7 +6,7 @@ import re
 from enum import StrEnum
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class StrictModel(BaseModel):
@@ -60,10 +60,16 @@ class Printer(StrictModel):
 
 
 class Parameter(StrictModel):
-    minimum: float
-    maximum: float
+    minimum: Annotated[float, Field(allow_inf_nan=False)]
+    maximum: Annotated[float, Field(allow_inf_nan=False)]
     integer: bool = False
     required: bool = True
+
+    @model_validator(mode="after")
+    def ordered_bounds(self):
+        if self.minimum > self.maximum:
+            raise ValueError("Minimum must not exceed maximum")
+        return self
 
 
 class Macro(StrictModel):

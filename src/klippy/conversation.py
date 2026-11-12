@@ -95,7 +95,7 @@ class Conversation:
         self.until = self.clock() + self.timeout
         if text in {"stop talking", "be quiet"}:
             return "speech_stopped"
-        if (text in {"no", "don't do that", "do not do that", "never mind", "cancel that"}
+        if (text in {"no", "cancel", "don't do that", "do not do that", "never mind", "cancel that"}
                 or re.search(r"\b(?:don't|do not|never|not)\b", text)):
             self.engine.cancel()
             self.draft = None
@@ -119,6 +119,7 @@ class Conversation:
         if text in {"select", "use", "switch to", ""} and mentioned:
             return f"{mentioned[0].name} selected."
         intent = None
+        interpreted = False
         if self.draft and self.draft.printer_id == selected:
             macro = self.engine.store.macros(selected).get(self.draft.macro)
             if macro:
@@ -148,6 +149,7 @@ class Conversation:
                         parameters[key] = float(match[1])
                 intent = Intent(action=Action.MACRO, printer_id=selected, macro=matches[0], params=parameters)
         if intent is None and self.llm:
+            interpreted = True
             # The model cannot grant permissions, produce code, choose an unselected printer or confirm.
             task = asyncio.create_task(self.llm.interpret(text, selected, self.engine.store.macros(selected)))
             self.interpretation_task = task
@@ -166,7 +168,7 @@ class Conversation:
         if generation != self.generation:
             return None  # A wake/correction/cancel superseded inference while it was awaited.
         try:
-            return await self.engine.propose(intent, defer_confirmation=defer_confirmation)
+            return await self.engine.propose(intent, defer_confirmation=defer_confirmation, force_confirmation=interpreted)
         except NeedsParameter:
             self.draft = intent
             raise
@@ -184,8 +186,12 @@ class Conversation:
             return Intent(action=Action.STATUS, printer_id=printer_id)
         normalized = re.sub(r"\b(please|can|could|you|the|it|that|printer|print|on|for|me|to)\b", " ", text)
         normalized = " ".join(normalized.split())
+        heat = re.fullmatch(r"(?:heat|warm|set) (nozzle|extruder|bed)(?: temperature)? (-?\d+(?:\.\d+)?)(?: (?:degrees(?: celsius)?|celsius|c))?", normalized)
+        if heat:
+            return Intent(action=Action.HEAT, printer_id=printer_id,
+                          params={"heater": 1 if heat[1] == "bed" else 0, "temperature": float(heat[2])})
         phrases = {"pause": Action.PAUSE, "resume": Action.RESUME, "cancel": Action.CANCEL,
-                   "home": Action.HOME, "home axes": Action.HOME, "emergency stop": Action.EMERGENCY,
+                   "home": Action.HOME, "home axes": Action.HOME, "home all axes": Action.HOME, "emergency stop": Action.EMERGENCY,
                    "status": Action.STATUS, "what is status of": Action.STATUS, "what's status of": Action.STATUS,
                    "what is status": Action.STATUS, "what's status": Action.STATUS,
                    "what's happening with": Action.STATUS,
