@@ -15,6 +15,11 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 
 ## Moonraker query expansion (0.4 preview)
 
+Published [v0.4.0-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.4.0-preview.1) at source `643b949` after exact
+run 43260616461 passed all required engineering-preview jobs. Full continuous/raw-KWS
+acceptance is separate and remains open; the budgeted diagnostic missed continuous wake.
+
+
 Implemented 41 built-in read-only query types, per-printer object/field/component discovery,
 strict endpoint/parameter allowlist, deterministic common questions and isolated query-only
 local LLM fallback. Added printer aliases, query/subject follow-ups, two-second field-aware
@@ -27,8 +32,8 @@ frozen wake-capture failure is retained; it remains an acoustic reliability limi
 
 ## Next priority
 
-1. Preserve the 370 passing regressions, including the original 99 cases, and qualify the
-   exact preview installer through frozen/offline, cross-version upgrade and recovery checks.
+1. Preserve the 370 passing regressions (original 179/99 cases unchanged); extend unfamiliar
+   query semantic coverage and supported field/accessory cases without granting write authority.
 2. Extend the macro semantic benchmark and fleet authentication/subscription qualification;
    use simulated services for software work independently of hardware availability.
 3. Obtain a clean Windows desktop VM without development dependencies and a 16 GB total-RAM

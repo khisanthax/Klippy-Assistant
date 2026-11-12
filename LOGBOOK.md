@@ -1,5 +1,23 @@
 # Logbook
 
+## 2026-11-12 — Published v0.4.0-preview.1 query engineering preview
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.4.0-preview.1 at exact qualified application source 643b949.
+Annotated source tag verified; all seven assets uploaded before publication and each GitHub
+digest/size checked against the local files. Installer digest matches CI, sidecar and local
+distribution: 5e3d9d8d4221620772df89ee38eb8495b770a35e9cb70efa5b003ed6d3caafac.
+Release is published, prerelease=true, unsigned and not latest/stable. Includes installer,
+checksum, report, official API inventory, catalog JSON, model manifest and complete evidence.
+Issue #9 and phase issues updated; all hardware/room/VM/16 GB/soak gates remain open.
+The budgeted process's original continuous-wake full-voice result remains false in evidence;
+publication qualifies only the explicit supported query engineering-preview envelope.
+No physical printer connection/action, microphone recording or owner installation change.
+
+Next: actual approved-fleet read-only/authentication/accessory validation; broader unfamiliar
+query semantic benchmarks; remaining catalog extensions and raw/continuous wake calibration.
+Obtain a clean desktop VM/actual 16 GB host separately. Consequential physical-printer
+acceptance requires supervised authorization. Preserve 370 regressions and original 179 cases.
+
 ## 2026-11-12 — Exact 0.4 preview qualification
 
 Source 643b9493f3bd3c67009657b2b01376f67fdc0233, CI run 43260616461 attempt 1 passed every required job.
