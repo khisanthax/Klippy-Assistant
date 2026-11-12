@@ -30,6 +30,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release download v0.2.0-preview.1 --pattern 'Klippy-Setup-0.2.0-preview.1.exe' --dir local/previous
       - shell: pwsh
+        run: |
+          if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
+            Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True
+          }
+      - shell: pwsh
         env:
           KLIPPY_QUALIFIED_BUILD_RUN: ${{ inputs.build_run_id }}
         run: ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.2.0-preview.1.exe' -BlockExternalNetwork -MeasurePerformance

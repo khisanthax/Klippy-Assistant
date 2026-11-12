@@ -41,6 +41,9 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'SQLite settings were not preserved' }
     }
     if ($BlockExternalNetwork) {
+        if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
+            throw 'Offline qualification requires enabled Windows firewall profiles'
+        }
         $taskExternalAddresses = @('0.0.0.0-126.255.255.255','128.0.0.0-255.255.255.255',
                                   '::2-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')
         $taskPrograms = @((Join-Path $taskInstallDir 'Klippy.exe')) + @(Get-ChildItem -LiteralPath $taskInstallDir -Recurse -Filter 'llama-server.exe' | ForEach-Object FullName)
@@ -73,6 +76,7 @@ try {
         installer_sha256=(Get-FileHash -LiteralPath (Resolve-Path -LiteralPath $Installer).Path -Algorithm SHA256).Hash.ToLowerInvariant();
         cross_version_upgrade=[bool]$PreviousInstaller; external_network_blocked=[bool]$BlockExternalNetwork;
         performance_budget_test=[bool]$MeasurePerformance;
+        firewall_profiles=$(if ($BlockExternalNetwork) { @(Get-NetFirewallProfile | Select-Object Name,Enabled) } else { @() });
         installers=$taskInstallers; tests=@('per-user install','same-version reinstall preserving isolated data','installed application smoke test',
                 'installed complete-model offline voice integration',
                 'uninstall removes executable','uninstall preserves isolated user data');
