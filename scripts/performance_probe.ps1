@@ -65,7 +65,7 @@ try {
         host_ram_bytes=(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory;
         cpu=(Get-CimInstance Win32_Processor | Select-Object -First 1).Name;
         os=[Environment]::OSVersion.VersionString;
-        limitations=@('Host has additional RAM/cache','No human microphone accuracy','No real printer connections')
+        limitations=@('Total VM RAM/cache is not controlled by the process-tree commit budget','No human microphone accuracy','No real printer connections')
     } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath 'local\performance-budget.json' -Encoding utf8
     if (-not $taskPassed) { throw 'Voice integration or child-process accounting failed under budget' }
 } finally {

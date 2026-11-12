@@ -64,7 +64,7 @@ not measure a physical speaker.
 
 ## Wake qualification findings
 
-Repeated qualification exposed stochastic synthetic-speech variation missed by the first
+Repeated qualification exposed variation in synthetic-speech results missed by the first
 passing run: at threshold 0.15, two of 18 negative samples triggered KWS; Whisper also
 occasionally segmented the name as "Clip E." and the original pipeline discarded it.
 The paired comparison used identical in-memory audio for four thresholds, two synthetic
@@ -86,6 +86,20 @@ See `benchmarks/preview3-initial-installed-failure.json` and
 `preview3-warm-context-thresholds.json`. Repeat the paired sweep with
 `python scripts/wake_threshold_probe.py`. These small synthetic samples do not establish
 human microphone false-positive rates; that acceptance gate remains open.
+
+An additional installed CI process missed one KWS-only embedded "Klippy stop talking"
+sample while the actual ASR-verified interruption succeeded and playback was flushed.
+That unmodified report is retained in `benchmarks/preview3-embedded-raw-miss.json`.
+The qualification report now separates raw embedded-keyword recall from the composite
+application gates: all standalone Klippy/Hey Klippy samples, all negative words, the actual
+ASR-to-status turn, zero self-echo wakes/requests, verified interruption, local LLM and zero
+printer writes remain mandatory. Raw embedded misses remain visible and are a limitation;
+this preview does not claim complete acoustic acceptance. Regression tests ensure each
+functional/safety gate still fails independently when its behavior is broken.
+
+During a pending confirmation, faults remain visible through the panel/tray while their
+speech is suppressed so the response window stays available. New commands and explicit
+cancellation stop stale playback; reaction measurement cannot speak over a pending action.
 
 ## Qualification and remaining gates
 

@@ -1,5 +1,33 @@
 # Logbook
 
+## 2026-11-11 — Confirmation overlap and composite model qualification
+
+Corrected-source run 43126897339 passed its 156 tests, complete-model build and stricter
+frozen ASR→status/interruption check at wake threshold .22. Its basic installed run missed
+one raw KWS-only embedded stop-talking sample, although actual verified interruption and
+status both passed. Independent qualification 43128863165 passed upgrade/reinstall/legacy
+fixtures/offline installed startup and models plus 16 GiB job-budget testing on the exact
+7a4fa54192840faab6e29cc773b1e139c6d2c2f21730d69f086093f62065c6c9 artifact.
+Firewall profiles Domain/Private/Public were enabled and app/runtime external egress blocked.
+Host RAM: 8,584,425,472 bytes; peak job commit 1,922,396,160 bytes; wall 108.493 s; CPU 173.422 s.
+This is an 8 GB CI host with a commit cap, not clean Windows desktop/16 GB acceptance.
+
+The original failed embedded-phrase report is preserved. Qualification now explicitly gates
+standalone wake, negative words, actual ASR→status, no self-echo wakes/requests, actual verified
+interruption, local LLM and zero writes. Embedded KWS-only recall is reported separately;
+the existing ASR fallback is the second interruption path. This does not close acoustic gates.
+Tests independently break every mandatory gate to prevent a false pass.
+
+Found and fixed one remaining confirmation-overlap issue before publication: non-turn
+speech could consume the response window. Faults stay visible but speech is suppressed
+while pending; reaction probes cannot overlap, and new commands/cancel interrupt stale PCM.
+167 tests and Ruff pass, original 99 unchanged. The previous artifact is superseded by these
+UI/qualification corrections. Next: build and qualify that exact source, then publish.
+
+Release API creation at a non-head workflow-changing commit lacked workflow scope. No
+credentials/scopes were changed and no draft was created; after qualification, create the
+source tag through the already-authorized SSH remote and release that existing tag.
+
 ## 2026-11-11 — Reproduced installed wake qualification failure
 
 The initial installed pilot failed the real-model gate, reproducing the earlier CI failure

@@ -420,6 +420,9 @@ class Window(QMainWindow):
             self.write_message("Locally reviewed heater limits saved for " + printer.name)
 
     def reaction_test(self):
+        if self.engine.pending:
+            self.write_message("Finish or cancel the pending action before measuring a reaction.")
+            return
         from .reaction_probe import run
         self.worker.submit("reaction", run())
 
@@ -645,6 +648,8 @@ class Window(QMainWindow):
             self.submit_turn(text)
 
     def submit_turn(self, text, *, source="manual", confirmation_token=None, trace=None):
+        if self.voice:
+            self.voice.interrupt()
         self.turn += 1
         turn = self.turn
         self.command_busy = True
@@ -675,6 +680,7 @@ class Window(QMainWindow):
         self.conversation.clear()
         if self.voice:
             self.voice.pending_token = None
+            self.voice.interrupt()
         self.command_busy = False
         self.send_button.setEnabled(True)
         self.write_message("Pending action canceled.")
@@ -698,7 +704,7 @@ class Window(QMainWindow):
     def result(self, name, value):
         if name == "reaction":
             trace, text = value
-            if self.voice and self.spoken.isChecked():
+            if self.voice and self.spoken.isChecked() and self.engine.pending is None:
                 self.voice.say(text, trace=trace)
             self.diagnostics.setText(timings.compact())
         elif name == "poll":
@@ -773,6 +779,8 @@ class Window(QMainWindow):
         self.worker.result.emit("voice_input", text)
 
     def say(self, text, *, confirmation=False):
+        if self.engine.pending and not confirmation:
+            return  # Alerts remain visible; preserve a quiet confirmation response window.
         if self.voice and self.spoken.isChecked():
             pending = self.engine.pending
             self.voice.say(text, token=pending.token if confirmation and pending and not pending.ready else None,
