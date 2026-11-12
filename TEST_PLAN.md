@@ -52,3 +52,21 @@ files. Capture installer hash, build environment, signatures and actual results.
 - Fresh Windows CI installer job provides independent offline/upgrade evidence. An actual
   clean Windows desktop VM without Python, disabled networking, 16 GB total RAM and extended
   sleep/resume/audio soak remains a separate gate; unavailable on this development host.
+
+## 0.4 query qualification
+
+Run `python -m pytest tests/test_queries.py -q` for every catalog ID/example, missing or
+malformed objects/fields/components, aliases and two-printer follow-ups, query/action
+separation, current/stale/cache-delta behavior, reset/configuration changes, bounded object
+batches and delayed old-endpoint response isolation. Query transports assert GET and the
+independent endpoint/field/parameter allowlist rejects control and arbitrary API paths.
+
+The complete real-model `--voice-self-test` now also requires query_probe's seven-case
+simulated-printer/native-query-LLM report to pass. Both frozen and installed probes must
+include it; it cannot be substituted by an unrelated hardcoded status request. Inspect
+`query_catalog` in each JSON report. Every probe must report zero printer writes.
+
+Cross-version installer qualification upgrades 0.3 to 0.4 while preserving private SQLite
+fixtures. Hardware, acoustics, real fleet/authentication, clean desktop VM and actual 16 GB
+host gates remain open regardless of synthetic passes. API coverage/exclusions and expected
+fields: docs/MOONRAKER_QUERIES.md and docs/query_catalog.json.

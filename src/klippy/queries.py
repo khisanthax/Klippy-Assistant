@@ -91,8 +91,12 @@ class QueryService:
         self.cache = {}  # Per printer, endpoint/field; never persisted or supplied to the LLM.
         self.events = {}
         self.locks = {}
+        self.generations = {}
+        self.invalidated_at = {}
 
     def invalidate(self, printer_id):
+        self.generations[printer_id] = self.generations.get(printer_id, 0) + 1
+        self.invalidated_at[printer_id] = self.clock()
         self.capabilities.pop(printer_id, None)
         self.events.pop(printer_id, None)
         for key in list(self.cache):
@@ -105,8 +109,15 @@ class QueryService:
             raise QueryUnavailable("Select an enrolled, approved printer for information queries")
         return printer
 
-    def observe(self, printer_id, value, received=None, *, delta=False):
+    def observe(self, printer_id, value, received=None, *, delta=False, identity=None):
         """Ingest GET or subscription status; a delta refreshes only fields actually sent."""
+        if identity is not None:
+            current = next((p for p in self.store.printers() if p.id == printer_id), None)
+            if current is None or current.url != identity:
+                return
+        cap = self.capabilities.get(printer_id)
+        if received is not None and received < max(self.invalidated_at.get(printer_id, 0), cap.checked if cap else 0):
+            return  # Snapshot started before a restart/configuration/endpoint invalidation.
         status = mapping(mapping(value).get("status"))
         event = value.get("eventtime") if isinstance(value, dict) else None
         if event is not None and numeric(event, 0) is None:
@@ -194,15 +205,19 @@ class QueryService:
                 combined.update(result["status"])
             return {"status": combined}
         started = self.clock()
+        generation = self.generations.get(printer.id, 0)
         result = await read(self.clients(printer), "/printer/objects/query",
                             {name: ",".join(sorted(keys)) for name, keys in fields.items()})
+        current = next((p for p in self.store.printers() if p.id == printer.id), None)
+        if current is None or current.url != printer.url or generation != self.generations.get(printer.id, 0):
+            raise ConnectionFailure("Printer discovery changed during the read")
         if not isinstance(result.get("status"), dict):
             raise ConnectionFailure("Invalid object query response")
         # A complete requested-field read supersedes absent old attributes too.
         for name, keys in fields.items():
             for key in keys:
                 self.cache[(printer.id, name, key)] = (MISSING, started)
-        self.observe(printer.id, result, started)
+        self.observe(printer.id, result, started, identity=printer.url)
         cap = self.capabilities.get(printer.id)
         if cap:
             for name, keys in fields.items():
@@ -303,8 +318,11 @@ class QueryService:
                     result, acquired = cached
                 else:
                     acquired = self.clock()
+                    generation = self.generations.get(printer_id, 0)
                     try:
                         result = await read(self.clients(printer), spec.endpoint, params)
+                        if self.printer(printer_id) != printer or generation != self.generations.get(printer_id, 0):
+                            raise QueryUnavailable("Printer discovery changed during the read")
                         self.cache[cache_key] = result, acquired
                     except ConnectionFailure:
                         if cached is None:

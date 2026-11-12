@@ -15,12 +15,18 @@ unknown/malformed data handling and searchable read/action/macro manager with vo
 No owner data, microphone or physical printer connection/actions used. All simulated
 transports reject writes. API research inventory and exclusions: docs/MOONRAKER_QUERIES.md.
 
-355 tests and Ruff pass (original 179 preserved). Local real-model query probe initially
+356 tests and Ruff pass (original 179 preserved). Local real-model query probe initially
 selected numeric position for an established-reference question. Retained that failed
 result; clarified conceptual homing vs numeric-position definitions in the inventory and
 query prompt. Corrected native probe passed seven cases, including the unfamiliar local
 LLM selection, zero writes and no pending action. Common simulated reads took 0.3–9 ms;
 unfamiliar local-model query about 6 s. These are not LAN/acoustic latency measurements.
+
+Found and fixed a delayed-response cache race before publication: endpoint edits or
+discovery invalidation now reject old in-flight reads before they can mutate a new
+registry/cache generation. Added a delayed-old-endpoint regression, including the monitor
+snapshot observer. Canceled candidate run 43248180304; source 8ba42ab is superseded.
+356 tests and Ruff pass on the correction.
 
 Preparing 0.4.0-preview.1 qualification with unchanged license-reviewed model payload.
 Frozen/installed voice self-tests now include the native query probe; cross-version test

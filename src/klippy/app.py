@@ -224,7 +224,7 @@ class Window(QMainWindow):
         client = self.client_cache.get(printer.id)
         if client is None or client.printer != printer or client.api_key != key:
             client = Moonraker(printer, key)
-            client.status_observer = lambda value, acquired: self.queries.observe(printer.id, value, acquired)
+            client.status_observer = lambda value, acquired: self.queries.observe(printer.id, value, acquired, identity=printer.url)
             self.client_cache[printer.id] = client
         return client
 

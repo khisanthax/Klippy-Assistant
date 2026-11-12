@@ -22,6 +22,8 @@ accuracy results. See [PHASE2_REPORT.md](PHASE2_REPORT.md).
 
 See [docs/MOONRAKER_QUERIES.md](docs/MOONRAKER_QUERIES.md) for the 41-query catalog, capabilities, freshness and safety boundaries. Open **Queries & Commands** to search queries, operations and discovered macros, refresh capabilities, or edit printer voice aliases. Ask “Klippy, is my M1 printer homed?”, “What about the SV08?”, “How hot is the bed?” or “What layer am I on?”. Information queries never run homing/heating actions.
 
+See [PREVIEW4_REPORT.md](PREVIEW4_REPORT.md) for query qualification and remaining gaps.
+
 See [PREVIEW3_REPORT.md](PREVIEW3_REPORT.md) for voice latency fixes, fleet/MMU monitoring,
 macro review improvements, confirmation settings, recovery and qualification limits.
 

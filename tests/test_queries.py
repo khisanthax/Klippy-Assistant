@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import httpx
@@ -499,3 +500,35 @@ async def test_query_probe_cannot_pass_when_model_selects_wrong_information(quer
         async def interpret_query(self, text):
             return QueryRequest(query_id="position")
     assert not (await run(Wrong()))["passed"]
+
+
+async def test_delayed_old_endpoint_response_cannot_poison_new_printer_cache(queries):
+    sim, service, engine, clock = queries
+    request = QueryRequest(query_id="homing")
+    await service.answer("sim", request)
+    entered, release = asyncio.Event(), asyncio.Event()
+    factory = service.clients
+    class Delayed:
+        def __init__(self, printer):
+            self.printer = printer
+        async def request(self, method, path):
+            result = await factory(self.printer).request(method, path)
+            if self.printer.url.endswith(":7125") and path.startswith("/printer/objects/query"):
+                entered.set()
+                await release.wait()
+            return result
+    service.clients = lambda p: Delayed(p)
+    clock[0] += 3
+    old = asyncio.create_task(service.answer("sim", request))
+    await asyncio.wait_for(entered.wait(), 2)
+    printer = engine.store.printers()[0]
+    engine.store.save_printer(printer.model_copy(update={"url": "http://127.0.0.1:7128"}))
+    clock[0] += 1
+    sim.status["toolhead"]["homed_axes"] = "xyz"
+    assert "Not homed: none" in await service.answer("sim", request)
+    release.set()
+    with pytest.raises(QueryUnavailable):
+        await old
+    assert "Not homed: none" in await service.answer("sim", request)
+    service.observe("sim", {"status": {"toolhead": {"homed_axes": ""}}}, clock[0], identity=printer.url)
+    assert "Not homed: none" in await service.answer("sim", request)
