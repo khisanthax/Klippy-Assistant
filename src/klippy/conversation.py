@@ -47,12 +47,13 @@ class Conversation:
         self.draft = None
         self.engine.cancel()
 
-    def interrupt(self):
+    def interrupt(self, *, activate=True):
         """Stop stale interpretation without changing an already-reviewed pending action."""
+        deadline = self.session.deadline
         self.generation += 1
         self._cancel_interpretation()
         self.session.clear()
-        self.until = self.clock() + self.timeout
+        self.until = self.clock() + self.timeout if activate else deadline
         if self.engine.pending is None:
             self.engine.cancel()  # Invalidate validation still in flight.
 
@@ -185,7 +186,9 @@ class Conversation:
         normalized = " ".join(normalized.split())
         phrases = {"pause": Action.PAUSE, "resume": Action.RESUME, "cancel": Action.CANCEL,
                    "home": Action.HOME, "home axes": Action.HOME, "emergency stop": Action.EMERGENCY,
-                   "status": Action.STATUS, "what's happening with": Action.STATUS,
+                   "status": Action.STATUS, "what is status of": Action.STATUS, "what's status of": Action.STATUS,
+                   "what is status": Action.STATUS, "what's status": Action.STATUS,
+                   "what's happening with": Action.STATUS,
                    "what is happening with": Action.STATUS, "what's happening": Action.STATUS,
                    "temperature": Action.TEMPERATURES, "temperatures": Action.TEMPERATURES,
                    "what's temperature": Action.TEMPERATURES, "what is temperature": Action.TEMPERATURES,

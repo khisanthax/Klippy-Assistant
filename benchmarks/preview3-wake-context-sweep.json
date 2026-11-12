@@ -1,0 +1,464 @@
+[
+  {
+    "repeat": 0,
+    "phrase": "Klippy",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Klippy",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Hey Klippy",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Hey Klippy",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "clipper",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "clipper",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Klipper",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Klipper",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "The printer is ready",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "The printer is ready",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Klippy, what is the status of the test printer?",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Klippy, what is the status of the test printer?",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Hey Klippy, what is the nozzle temperature?",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 0,
+    "phrase": "Hey Klippy, what is the nozzle temperature?",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Klippy",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Klippy",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Hey Klippy",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Hey Klippy",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "clipper",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "clipper",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Klipper",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Klipper",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "The printer is ready",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "The printer is ready",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Klippy, what is the status of the test printer?",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Klippy, what is the status of the test printer?",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Hey Klippy, what is the nozzle temperature?",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 1,
+    "phrase": "Hey Klippy, what is the nozzle temperature?",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Klippy",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Klippy",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Hey Klippy",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Hey Klippy",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "clipper",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "clipper",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Klipper",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Klipper",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "The printer is ready",
+    "voice": 0,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "The printer is ready",
+    "voice": 3,
+    "detected": {
+      "0.15": false,
+      "0.2": false,
+      "0.22": false,
+      "0.25": false
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Klippy, what is the status of the test printer?",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Klippy, what is the status of the test printer?",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Hey Klippy, what is the nozzle temperature?",
+    "voice": 0,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  },
+  {
+    "repeat": 2,
+    "phrase": "Hey Klippy, what is the nozzle temperature?",
+    "voice": 3,
+    "detected": {
+      "0.15": true,
+      "0.2": true,
+      "0.22": true,
+      "0.25": true
+    }
+  }
+]

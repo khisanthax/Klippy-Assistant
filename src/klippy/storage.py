@@ -103,7 +103,7 @@ class Store:
         # Macros/addresses are private user configuration. Never export credentials.
         payload = {"version": 2, "preferences": {key: self.get(key, default) for key, default in
                    (("followup_seconds", 30), ("confirmation_seconds", 30), ("spoken", True),
-                    ("monitor_enabled", True), ("wake_threshold", .15))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
+                    ("monitor_enabled", True), ("wake_threshold", .22))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
                    "selected": self.get("selected"), "listening": self.get("listening", {}),
                    "macros": {p.id: [m.model_dump(mode="json") for m in self.macros(p.id).values()]
                               for p in self.printers()}}

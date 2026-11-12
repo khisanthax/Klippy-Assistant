@@ -27,7 +27,8 @@ def run(pack):
     backend = SherpaBackend(pack, manifest["speech_config"])
     report = {"scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
               "speech_load_seconds": round(time.perf_counter() - started, 3),
-              "python_external_network_denied": True, "wake_cases": []}
+              "python_external_network_denied": True, "wake_threshold": backend.wake_threshold,
+              "keywords_score": 2.0, "wake_cases": []}
     def audio(text, voice=3, speed=1.0):
         # Probe alternate public synthetic voices without opening playback devices.
         from klippy.speech_text import normalize_for_speech
@@ -35,7 +36,7 @@ def run(pack):
         return resample(value.samples, value.sample_rate)
     def pad(samples):
         return np.r_[np.zeros(RATE // 2, dtype=np.float32), samples, np.zeros(RATE * 2, dtype=np.float32)]
-    for phrase in ["Klippy", "Hey Klippy", "Klippy stop talking", "Hey Klippy stop talking", "clipper", "The printer is ready", "clippy"]:
+    for phrase in ["Klippy", "Hey Klippy", "Klippy stop talking", "Hey Klippy stop talking", "clipper", "Klipper", "The printer is ready", "clippy"]:
         for voice in [0, 3]:
             backend.reset_wake()
             samples = pad(audio(phrase, voice))
@@ -46,9 +47,14 @@ def run(pack):
     received, wakes, states = [], [], []
     clock = [0.0]
     asr_observations = []
+    asr_errors = []
     transcribe = backend.transcribe
     def traced_transcribe(samples):
-        text = transcribe(samples)
+        try:
+            text = transcribe(samples)
+        except Exception as exc:
+            asr_errors.append(type(exc).__name__)
+            raise
         asr_observations.append({"at": round(clock[0], 3), "text": text, "audio_seconds": round(len(samples) / RATE, 3)})
         return text
     backend.transcribe = traced_transcribe
@@ -68,6 +74,9 @@ def run(pack):
         backend.reset_wake()
         feed(pad(audio("Klippy, what is the status of the test printer?", voice=0)))
         report["pipeline_transcripts"] = [v.text for v in received]
+        report["pipeline_wakes"] = list(wakes)
+        report["pipeline_states"] = list(states)
+        report["asr_errors"] = asr_errors
         # Exactly matching speaker echo must not become a command, including warm-up.
         voice._reset_dsp()
         received.clear()
@@ -163,16 +172,19 @@ def run(pack):
                 "extruder": {"temperature": 23.0}}}})
         engine = SafetyEngine(store, lambda p: Moonraker(p, transport=httpx.MockTransport(transport)))
         conversation = Conversation(engine)
-        report["simulated_status_response"] = asyncio.run(conversation.hear("Klippy status", source="voice"))
+        report["simulated_status_response"] = (asyncio.run(conversation.hear(report["pipeline_transcripts"][0], source="voice"))
+                                               if report["pipeline_transcripts"] else None)
         report["printer_writes"] = len(writes)
         store.close()
     positive = [c for c in report["wake_cases"] if "klippy" in c["phrase"].lower()]
-    negative = [c for c in report["wake_cases"] if c["phrase"] in {"clipper", "The printer is ready"}]
+    negative = [c for c in report["wake_cases"] if c["phrase"] in {"clipper", "Klipper", "The printer is ready"}]
     report["passed"] = (all(c["detected"] for c in positive) and not any(c["detected"] for c in negative)
                         and report["own_echo_requests"] == 0 and report["barge_wakes"] > 0
                         and any("stop talking" in t.lower() for t in report["barge_requests"])
                         and report["playback_flushed"] and report["printer_writes"] == 0
-                        and report["llm_intent"]["action"] == "temperatures")
+                        and report["llm_intent"]["action"] == "temperatures"
+                        and bool(report["pipeline_transcripts"])
+                        and "63%" in (report["simulated_status_response"] or ""))
     report["homophone_note"] = "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
     return report
 

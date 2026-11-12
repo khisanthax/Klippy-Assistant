@@ -62,6 +62,31 @@ window after delivery. See `benchmarks/preview3-delivery.json`; repeat with
 `python scripts/delivery_probe.py`. That sink includes OS scheduling overhead and does
 not measure a physical speaker.
 
+## Wake qualification findings
+
+Repeated qualification exposed stochastic synthetic-speech variation missed by the first
+passing run: at threshold 0.15, two of 18 negative samples triggered KWS; Whisper also
+occasionally segmented the name as "Clip E." and the original pipeline discarded it.
+The paired comparison used identical in-memory audio for four thresholds, two synthetic
+voices and three repeats. Threshold 0.25 detected all 12 positives with zero of 18 negatives;
+0.35 missed one positive. The standalone sweep initially favored 0.25, but a reproducible warm-context request
+was missed at that threshold. The new default is 0.22; explicit user preferences are preserved.
+A second paired sweep including whole requests detected 24/24 positives and 0/18 negatives
+at 0.22; the stricter full pipeline also passed.
+An exact ASR segmentation alias handles "Clip E" while still rejecting "Clipper", "Klipper"
+and bare "Clip". No fuzzy wake-word matching was added. A keyword candidate can interrupt
+audio immediately, but cannot open a follow-up session until the ASR prefix is accepted.
+Unsolicited notifications cannot open sessions; stale ASR completion and model shutdown
+cannot revive them.
+
+The integration gate now also requires the actual accepted ASR request to produce the
+simulated printer's 63% status response, and includes Klipper among its negative words.
+See `benchmarks/preview3-initial-installed-failure.json` and
+`benchmarks/preview3-wake-thresholds.json`, `preview3-wake-context-sweep.json` and
+`preview3-warm-context-thresholds.json`. Repeat the paired sweep with
+`python scripts/wake_threshold_probe.py`. These small synthetic samples do not establish
+human microphone false-positive rates; that acceptance gate remains open.
+
 ## Qualification and remaining gates
 
 Source tests preserve the original 99 cases and add follow-up, slow inference/playback,

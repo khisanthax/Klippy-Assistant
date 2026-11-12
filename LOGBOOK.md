@@ -1,5 +1,33 @@
 # Logbook
 
+## 2026-11-11 — Reproduced installed wake qualification failure
+
+The initial installed pilot failed the real-model gate, reproducing the earlier CI failure
+signal. Its recorded report showed a raw KWS false hit on synthetic "clipper" (voice 3)
+and an empty pipeline transcript because Whisper spelled the wake name "Clip E.".
+This was not hidden by an installer pass: publication remains on hold. Failed/passing
+numeric evidence is retained in benchmarks/preview3-*.json. The isolated pilot installation
+was uninstalled only after verifying its registry InstallLocation matched local/installer-qa.
+
+Paired threshold sweep: 30 fresh synthetic utterances (two voices, three repeats). At .15:
+12/12 positives, 2/18 false positives; at .25: 12/12 and 0/18; at .35: 11/12 and 0/18.
+An initial .25 candidate missed a whole request after model warm-up; defaults are now .22,
+preserving explicit preferences. A second 42-utterance paired sweep at .22 passed 24/24
+positives and 0/18 negatives, and the stricter source real-model pipeline passed. Exact "Clip E" ASR segmentation is
+recognized; Clipper/Klipper/bare Clip remain rejected by the prefix parser. Strengthened the
+real-model gate to require actual ASR input → deterministic intent → simulated printer
+status, and added Klipper as a negative sample. Original 99 tests unchanged; 156 tests and
+Ruff passed. Keyword candidates now interrupt audio without opening a follow-up session
+until ASR accepts the exact prefix; rejection cannot extend the session. Unsolicited
+notifications cannot open a voice session; shutdown clears queued holds, and late ASR
+activation is serialized against interruption. Each has a regression. Hardware acoustics remain open.
+
+Added reusable qualification-only CI workflow and legacy printer/macro fixture preservation
+checks so packaging retries can reuse an exact build. Prior-revision CI run 43122001818 passed build, installed offline model checks and a real
+0.2→0.3 upgrade on a fresh 8 GB Windows runner, with external app/runtime egress blocked.
+That artifact is superseded by the corrected wake/session settings and is not for release.
+Next: frozen/installed qualification on the corrected setting, then publish only its artifact.
+
 ## 2026-11-11 — 0.3 software expansion and usability corrections
 
 Resumed latest main from 0.2.0-preview.1 without physical printer connections/actions.

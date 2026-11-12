@@ -311,7 +311,7 @@ class Window(QMainWindow):
         self.sensitivity = QDoubleSpinBox()
         self.sensitivity.setRange(0.01, 1.0)
         self.sensitivity.setSingleStep(0.01)
-        self.sensitivity.setValue(self.store.get("wake_threshold", 0.15))
+        self.sensitivity.setValue(self.store.get("wake_threshold", 0.22))
         self.sensitivity.valueChanged.connect(lambda v: self.store.set("wake_threshold", v))
         layout.addWidget(QLabel("Wake detection threshold (lower is more sensitive; reload pack after changing)"))
         layout.addWidget(self.sensitivity)
@@ -735,7 +735,7 @@ class Window(QMainWindow):
                 self.turn += 1
                 if self.engine.pending and not self.engine.pending.ready:
                     self.engine.delivery_finished(self.engine.pending.token, False)
-                self.conversation.interrupt()
+                self.conversation.interrupt(activate=False)
                 self.voice.pending_token = self.engine.pending.token if self.engine.pending else None
                 self.command_busy = False
                 self.send_button.setEnabled(True)
@@ -776,7 +776,7 @@ class Window(QMainWindow):
         if self.voice and self.spoken.isChecked():
             pending = self.engine.pending
             self.voice.say(text, token=pending.token if confirmation and pending and not pending.ready else None,
-                           trace=getattr(self, "reaction_trace", None))
+                           trace=getattr(self, "reaction_trace", None) if confirmation else timings.new())
         elif confirmation and self.engine.pending and not self.engine.pending.ready:
             self.engine.delivery_finished(self.engine.pending.token, True)
 
@@ -797,7 +797,7 @@ class Window(QMainWindow):
             try:
                 manifest = await asyncio.to_thread(verify_pack, root, require_qualified=True)
                 backend = await asyncio.to_thread(SherpaBackend, root, manifest["speech_config"],
-                                                  self.store.get("wake_threshold", 0.15))
+                                                  self.store.get("wake_threshold", 0.22))
                 try:
                     llm = await self.runtime.start(root)
                 except ModelUnavailable:

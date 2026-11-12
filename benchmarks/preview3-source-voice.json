@@ -1,6 +1,7 @@
 {
   "scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
-  "speech_load_seconds": 4.508,
+  "speech_load_seconds": 4.792,
+  "python_external_network_denied": true,
   "wake_cases": [
     {
       "phrase": "Klippy",
@@ -53,6 +54,16 @@
       "detected": false
     },
     {
+      "phrase": "Klipper",
+      "synthetic_voice": 0,
+      "detected": false
+    },
+    {
+      "phrase": "Klipper",
+      "synthetic_voice": 3,
+      "detected": false
+    },
+    {
       "phrase": "The printer is ready",
       "synthetic_voice": 0,
       "detected": false
@@ -76,13 +87,27 @@
   "pipeline_transcripts": [
     "Klippy what is the status of the test printer?"
   ],
+  "pipeline_wakes": [
+    [
+      1.430000000000001,
+      1,
+      0
+    ]
+  ],
+  "pipeline_states": [
+    "Checking wake word",
+    "Listening"
+  ],
+  "asr_errors": [],
   "own_echo_wakes": 0,
   "own_echo_requests": 0,
   "barge_wakes": 1,
   "barge_candidates": [],
-  "barge_linear_fit_error": 1.5132434693903146e-13,
+  "barge_linear_fit_error": 1.541158187355873e-13,
   "barge_states": [
+    "Checking wake word",
     "Listening",
+    "Checking wake word",
     "Listening"
   ],
   "asr_observations": [
@@ -93,7 +118,7 @@
     },
     {
       "at": 13.69,
-      "text": "[Music]",
+      "text": "[SOUND]",
       "audio_seconds": 1.6
     },
     {
@@ -102,14 +127,14 @@
       "audio_seconds": 1.6
     },
     {
-      "at": 14.63,
+      "at": 14.64,
       "text": "Clippy stop, top.",
       "audio_seconds": 1.6
     },
     {
       "at": 15.68,
       "text": "Clippy stop talking",
-      "audio_seconds": 3.87
+      "audio_seconds": 3.86
     }
   ],
   "barge_frame_metrics": [
@@ -118,125 +143,125 @@
       "energy": 0.0,
       "near_end": false,
       "probe_busy": false,
-      "correlation": 0.987
+      "correlation": 0.986
     },
     {
       "at": 3.1,
       "energy": 0.009,
       "near_end": false,
       "probe_busy": false,
-      "correlation": 0.966
+      "correlation": 0.967
     },
     {
       "at": 3.2,
-      "energy": 0.0134,
+      "energy": 0.0129,
       "near_end": true,
       "probe_busy": true,
-      "correlation": 0.474
+      "correlation": 0.484
     },
     {
       "at": 3.3,
-      "energy": 0.1251,
+      "energy": 0.1248,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.431
+      "correlation": 0.437
     },
     {
       "at": 3.4,
-      "energy": 0.0172,
+      "energy": 0.0182,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.538
+      "correlation": 0.556
     },
     {
       "at": 3.5,
-      "energy": 0.0117,
+      "energy": 0.0114,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.653
+      "correlation": 0.655
     },
     {
       "at": 3.6,
-      "energy": 0.1042,
+      "energy": 0.0926,
       "near_end": true,
       "probe_busy": true,
-      "correlation": 0.622
+      "correlation": 0.606
     },
     {
       "at": 3.7,
-      "energy": 0.0037,
+      "energy": 0.0036,
       "near_end": true,
       "probe_busy": true,
-      "correlation": 0.529
+      "correlation": 0.517
     },
     {
       "at": 3.8,
       "energy": 0.0032,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.474
+      "correlation": 0.478
     },
     {
       "at": 3.9,
-      "energy": 0.0217,
+      "energy": 0.0225,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.88
+      "correlation": 0.879
     },
     {
       "at": 4.0,
-      "energy": 0.0949,
+      "energy": 0.1042,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.569
+      "correlation": 0.583
     },
     {
       "at": 4.1,
-      "energy": 0.0194,
+      "energy": 0.0186,
       "near_end": true,
       "probe_busy": true,
-      "correlation": 0.445
+      "correlation": 0.447
     },
     {
       "at": 4.2,
-      "energy": 0.0539,
+      "energy": 0.0555,
       "near_end": true,
       "probe_busy": true,
-      "correlation": 0.424
+      "correlation": 0.404
     },
     {
       "at": 4.3,
-      "energy": 0.0401,
+      "energy": 0.0379,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.505
+      "correlation": 0.511
     },
     {
       "at": 4.4,
-      "energy": 0.0336,
+      "energy": 0.0338,
       "near_end": true,
       "probe_busy": false,
       "correlation": 0.429
     },
     {
       "at": 4.5,
-      "energy": 0.0047,
+      "energy": 0.0046,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.482
+      "correlation": 0.466
     },
     {
       "at": 4.6,
-      "energy": 0.0016,
+      "energy": 0.0019,
       "near_end": true,
       "probe_busy": false,
-      "correlation": 0.584
+      "correlation": 0.574
     }
   ],
   "barge_requests": [
     "Klippy stop talking"
   ],
-  "barge_detection_seconds_from_user_start": 1.23,
+  "barge_detection_seconds_from_user_start": 1.24,
   "playback_flushed": true,
   "llm_intent": {
     "action": "temperatures",

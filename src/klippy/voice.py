@@ -20,7 +20,7 @@ from .models import verify_pack
 from .session import Session
 from .speech_text import normalize_for_speech
 
-WAKE_PREFIX = re.compile(r"^(?:(?:hey|hi)[,\s]+)?(?:klippy|clippy|klippi|clippie|clipy)\b[\s,.!?]*", re.I)
+WAKE_PREFIX = re.compile(r"^(?:(?:hey|hi)[,\s]+)?(?:klippy|clippy|klippi|clippie|clipy|clip\s+e)\b[\s,.!?]*", re.I)
 
 
 @dataclass(frozen=True)
@@ -33,9 +33,10 @@ class VoiceInput:
 
 
 class SherpaBackend:
-    def __init__(self, root: Path, config, sensitivity=0.15):
+    def __init__(self, root: Path, config, sensitivity=0.22):
         import sherpa_onnx as so
         verify_pack(root)
+        self.wake_threshold = sensitivity
         def absolute(values):
             return {key: str(root / value) for key, value in values.items()}
         self.kws = so.KeywordSpotter(**absolute(config["wake"]), keywords_threshold=sensitivity,
@@ -137,7 +138,6 @@ class VoiceLoop:
         self.preroll = deque(maxlen=300)
         self.frames = []
         self.voiced_frames = 0
-        self.session.deadline = 0.0
         self.last_voice = 0.0
         self.last_output = float("-inf")
         self.had_wake = False
@@ -190,6 +190,13 @@ class VoiceLoop:
         self.closed.set()
         self.enabled.clear()
         self.interrupt()
+        self.session.clear()
+        while not self.speech.empty():
+            try:
+                job = self.speech.get_nowait()
+                self.on_delivery(job[2], False)
+            except queue.Empty:
+                break
         for thread in self.threads:
             thread.join(timeout=4)
         self.asr_pool.shutdown(wait=True, cancel_futures=True)
@@ -197,7 +204,7 @@ class VoiceLoop:
     def say(self, text, token=None, trace=None):
         if self.closed.is_set():
             return
-        hold = self.session.begin()
+        hold = self.session.begin() if self.clock() < self.session.until else None
         job = (self.epoch, text[:600], token, trace, hold, self.clock())
         try:
             self.speech.put_nowait(job)
@@ -255,7 +262,7 @@ class VoiceLoop:
             finally:
                 if epoch == self.epoch:
                     self.speaking.clear()
-                self.session.finish(hold)
+                self.session.finish(hold, refresh=success)
                 self.on_delivery(token, success)
                 self.on_state("Speech finished" if success else "Speech interrupted or failed")
                 current.reset(context)
@@ -342,8 +349,7 @@ class VoiceLoop:
             epoch = self.epoch if accepted_probe else self.interrupt()
             if not accepted_probe:
                 self.on_wake(epoch)
-            self.on_state("Listening")
-            self.listen_until = now + self.followup_seconds
+            self.on_state("Checking wake word")
             self.frames = list(self.preroll)
             self.voiced_frames = sum(float(np.sqrt(np.mean(f * f))) >= self.energy_threshold for f in self.frames)
             self.had_wake = True
@@ -420,8 +426,9 @@ class VoiceLoop:
         if woke and self.wake_at is not None:
             timings.mark("wake", trace, at=self.wake_at)
         queued = self.clock()
-        hold = self.session.begin()
+        hold = self.session.begin() if not woke or self.clock() < self.session.until else None
         def run():
+            accepted = False
             context = current.set(trace)
             try:
                 if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set():
@@ -441,12 +448,19 @@ class VoiceLoop:
                         return
                 if match:
                     text = "Klippy " + text[match.end():]
-                self.listen_until = self.clock() + self.followup_seconds
+                with self.playback.lock:
+                    if epoch != self.playback.generation or not self.enabled.is_set() or self.closed.is_set():
+                        return
+                    self.listen_until = self.clock() + self.followup_seconds
+                    accepted = True
+                if woke:
+                    self.on_state("Listening")
                 self.on_text(VoiceInput(text, epoch, woke, confirmation_token, trace))
             except Exception:
                 self.on_state("Speech recognition unavailable; no request sent")
             finally:
-                self.session.finish(hold, refresh=epoch == self.epoch)
+                if hold is not None:
+                    self.session.finish(hold, refresh=accepted and epoch == self.epoch)
                 current.reset(context)
                 self.asr_slots.release()
         self.asr_pool.submit(run)

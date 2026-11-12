@@ -258,3 +258,108 @@ async def test_concurrent_cancel_cannot_be_undone_by_delivery_completion(rig, mo
         delivery.join(3)
         cancellation.join(3)
     assert engine.pending is None and not sim.writes
+
+
+@pytest.mark.parametrize("text,accepted", [("Clip E. What's the status?", True),
+                                          ("Clipper home", False), ("Klipper home", False),
+                                          ("Clip home", False)])
+def test_observed_asr_segmentation_preserves_exact_wake_boundary(text, accepted):
+    from klippy.voice import WAKE_PREFIX
+    assert bool(WAKE_PREFIX.match(text)) is accepted
+
+
+async def test_observed_full_asr_status_request_stays_deterministic(rig):
+    _, sim, engine, _ = rig
+    assert "63%" in await Conversation(engine).hear("Klippy what is the status of the Test Printer?", source="voice")
+    assert not sim.writes
+
+
+async def test_unverified_wake_can_cancel_stale_work_without_opening_followups(rig):
+    _, sim, engine, clock = rig
+    c = Conversation(engine, clock=lambda: clock[0])
+    c.interrupt(activate=False)
+    assert c.until == 0
+    assert await c.hear("home", source="voice") is None
+    assert engine.pending is None and not sim.writes
+
+
+def test_rejected_keyword_candidate_does_not_open_voice_session():
+    class Backend:
+        def transcribe(self, samples):
+            return "Clipper home"
+    values = []
+    voice = VoiceLoop(Backend(), values.append, lambda v: None)
+    voice.enabled.set()
+    try:
+        voice._transcribe(np.ones(3200, dtype=np.float32), voice.epoch, True, False)
+        voice.asr_pool.submit(lambda: None).result(timeout=3)
+        assert not values and voice.listen_until == 0
+        assert not voice.session.holds
+    finally:
+        voice.close()
+
+
+def test_background_notification_never_opens_a_voice_session():
+    from types import SimpleNamespace
+    entered, release, delivered = threading.Event(), threading.Event(), threading.Event()
+    class Backend:
+        def synthesize(self, *args, **kwargs):
+            entered.set()
+            release.wait(2)
+            return SimpleNamespace(samples=np.ones(160, dtype=np.float32), sample_rate=16000)
+    voice = VoiceLoop(Backend(), lambda v: None, lambda v: None, on_delivery=lambda *v: delivered.set())
+    worker = threading.Thread(target=voice._speak)
+    worker.start()
+    try:
+        voice.say("Unsolicited fault notification")
+        assert entered.wait(2)
+        assert voice.listen_until == 0
+        release.set()
+        deadline = time.monotonic() + 3
+        while not voice.playback.remaining and time.monotonic() < deadline:
+            time.sleep(.01)
+        voice._render(160)
+        assert delivered.wait(2)
+        assert voice.listen_until == 0
+    finally:
+        release.set()
+        voice.close()
+        worker.join(3)
+
+
+def test_model_close_clears_queued_session_holds_and_prompt_delivery():
+    values = []
+    voice = VoiceLoop(object(), lambda v: None, lambda v: None, on_delivery=lambda *v: values.append(v))
+    voice.session.touch()
+    voice.say("queued prompt", token="exact")
+    assert voice.session.holds
+    voice.close()
+    assert voice.listen_until == 0 and not voice.session.holds
+    assert values == [("exact", False)]
+
+
+def test_late_asr_prefix_check_cannot_reopen_session_after_interrupt(monkeypatch):
+    from klippy.voice import WAKE_PREFIX
+    entered, release = threading.Event(), threading.Event()
+    class Prefix:
+        def match(self, text):
+            entered.set()
+            release.wait(2)
+            return WAKE_PREFIX.match(text)
+    class Backend:
+        def transcribe(self, samples):
+            return "Klippy status"
+    monkeypatch.setattr("klippy.voice.WAKE_PREFIX", Prefix())
+    values = []
+    voice = VoiceLoop(Backend(), values.append, lambda v: None)
+    voice.enabled.set()
+    try:
+        voice._transcribe(np.ones(3200, dtype=np.float32), voice.epoch, True, False)
+        assert entered.wait(2)
+        voice.interrupt()
+        release.set()
+        voice.asr_pool.submit(lambda: None).result(timeout=3)
+        assert not values and voice.listen_until == 0
+    finally:
+        release.set()
+        voice.close()
