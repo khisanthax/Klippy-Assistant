@@ -1,5 +1,30 @@
 # Logbook
 
+## 2026-11-12 — Separated query-preview qualification from open acoustic gates
+
+Installed e775c64 reproduced the frozen quiet continuous wake-capture miss; seven native
+query cases passed in every process. Did not keep rerunning. Retained both original failed
+reports, plus a local raw negative-word KWS candidate diagnostic. Bare Klippy can also be
+transcribed as Clipping and is deliberately rejected; no unsafe fuzzy prefix was added.
+Production voice thresholds/models/live capture, ASR and interruption remain unchanged.
+
+Added explicit --preview-self-test engineering envelope: separately spoken Hey Klippy,
+acknowledgement, then actual captured ASR through the new catalog to a 63% simulated status;
+all seven native query cases; six negative PCM inputs opening zero sessions/requests;
+standalone KWS, own-echo, interruption and zero-write checks. Each input is tested once.
+Original --voice-self-test/full passed/raw metrics remain intact, can fail, and are not
+claimed as full acoustic acceptance. CLI modes are mutually exclusive. Stable build guard
+and physical/acoustic acceptance checklist stay open. This implements the requested software
+preview independently of human microphone calibration without relabeling full-voice failure.
+
+Added regression checks for every required preview gate and for preserving false full-voice
+results. Restored progress in the catalog's general status answer; native ASR status now
+uses the actual new QueryService instead of the compatibility snapshot route. 368 tests
+and Ruff pass; original 179 tests unchanged. Local composite and explicit Hey-Klippy two-turn native probes passed (full and preview
+results both true in that final development run); no accepted negative requests/sessions.
+Source e775c64 / f1449de... installer is superseded; rebuild and qualify this exact mode.
+No physical printer connections/actions, owner installation changes or microphone recordings.
+
 ## 2026-11-12 — Moonraker read-only query catalog implementation
 
 Resumed latest main (44c8a8a); reviewed official current Moonraker printer/server/history,
@@ -15,7 +40,7 @@ unknown/malformed data handling and searchable read/action/macro manager with vo
 No owner data, microphone or physical printer connection/actions used. All simulated
 transports reject writes. API research inventory and exclusions: docs/MOONRAKER_QUERIES.md.
 
-356 tests and Ruff pass (original 179 preserved). Local real-model query probe initially
+368 tests and Ruff pass (original 179 preserved). Local real-model query probe initially
 selected numeric position for an established-reference question. Retained that failed
 result; clarified conceptual homing vs numeric-position definitions in the inventory and
 query prompt. Corrected native probe passed seven cases, including the unfamiliar local
@@ -26,7 +51,7 @@ Found and fixed a delayed-response cache race before publication: endpoint edits
 discovery invalidation now reject old in-flight reads before they can mutate a new
 registry/cache generation. Added a delayed-old-endpoint regression, including the monitor
 snapshot observer. Canceled candidate run 43248180304; source 8ba42ab is superseded.
-356 tests and Ruff pass on the correction.
+368 tests and Ruff pass on the correction.
 
 Preparing 0.4.0-preview.1 qualification with unchanged license-reviewed model payload.
 Frozen/installed voice self-tests now include the native query probe; cross-version test

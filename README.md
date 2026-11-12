@@ -55,7 +55,9 @@ hides it. Choose Quit in the tray menu to exit. `--show` opens the panel immedia
    cancels the pending request; use `cancel print` for a print job. No transmission retry.
 
 For voice, enable listening and wait for the local model status to become ready. Say
-"Klippy, status" or "Hey Klippy, what's the temperature?". Follow-up listening lasts
+"Hey Klippy", wait for acknowledgement, then ask "status" or "what is the temperature?".
+Continuous wake-plus-sentence capture and raw wake-word accuracy remain unqualified in
+this query preview; voice is experimental. Follow-up listening lasts
 about 30 seconds. During a response, say "Klippy, stop talking" to stop speech. You can
 also use Stop speaking at any time. This never cancels a running print. Spoken approval
 applies only to the exact pending action and capture-time confirmation token.

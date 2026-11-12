@@ -46,7 +46,7 @@ $taskPeakProcesses = 0
 try {
     Assert-Native ([KlippyJob]::SetInformationJobObject($taskJob, 9, [ref]$taskLimits, $taskLimitSize))
     $taskProcess = Start-Process -FilePath (Join-Path $PWD $Application) -WindowStyle Hidden -PassThru -ArgumentList @(
-        '--voice-self-test','--smoke-report',('"' + $taskOutput + '"'))
+        '--preview-self-test','--smoke-report',('"' + $taskOutput + '"'))
     Assert-Native ([KlippyJob]::AssignProcessToJobObject($taskJob, $taskProcess.Handle))
     do {
         Assert-Native ([KlippyJob]::QueryAccounting($taskJob, 1, [ref]$taskAccounting, $taskAccountingSize, [IntPtr]::Zero))
@@ -56,9 +56,9 @@ try {
     Assert-Native ([KlippyJob]::QueryExtended($taskJob, 9, [ref]$taskLimits, $taskLimitSize, [IntPtr]::Zero))
     Assert-Native ([KlippyJob]::QueryAccounting($taskJob, 1, [ref]$taskAccounting, $taskAccountingSize, [IntPtr]::Zero))
     $taskVoice = Get-Content -LiteralPath $taskOutput -Raw | ConvertFrom-Json
-    $taskPassed = $taskProcess.ExitCode -eq 0 -and $taskVoice.passed -and $taskPeakProcesses -ge 2
+    $taskPassed = $taskProcess.ExitCode -eq 0 -and $taskVoice.engineering_preview_passed -and $taskPeakProcesses -ge 2
     @{
-        passed=$taskPassed; scope='Frozen real-model synthetic voice under process-tree commit budget; not a 16 GB Windows VM';
+        passed=$taskPassed; scope='Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM';
         memory_budget_gib=$MemoryGiB; peak_job_commit_bytes=$taskLimits.PeakJob.ToUInt64();
         peak_active_processes=$taskPeakProcesses; wall_seconds=[Math]::Round($taskStarted.Elapsed.TotalSeconds,3);
         cpu_seconds=[Math]::Round(($taskAccounting.User + $taskAccounting.Kernel)/10000000.0,3);

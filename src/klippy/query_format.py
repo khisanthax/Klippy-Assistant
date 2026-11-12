@@ -118,7 +118,8 @@ def render(identifier, status, result, subject=None):
     if identifier in {"errors", "status"}:
         web = obj("webhooks")
         return (f"Klipper: {clean(web.get('state'))}; {clean(web.get('state_message'))}. "
-                f"Job: {clean(stats.get('state'))}; message: {clean(stats.get('message'))}.")
+                f"Job: {clean(stats.get('state'))}; message: {clean(stats.get('message'))}." +
+                (f" Reported progress: {num(obj('virtual_sdcard').get('progress'), '%', 0, 1, 100)}." if identifier == "status" else ""))
     if identifier == "configuration":
         cfg = obj("configfile")
         warnings = cfg.get("warnings")

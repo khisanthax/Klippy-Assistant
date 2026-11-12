@@ -98,7 +98,9 @@ Full raw configuration/server configuration, arbitrary macro variables, database
 file contents, shell commands, peripheral/CANbus scans, LED/WLED control, metadata scans,
 unregistered plugins, live camera video and exhaustive history pagination are outside
 this preview's query surface. USB/serial/video inventories and additional sensor/WLED
-read endpoints are documented upstream but are not enabled here. No physical-printer,
+read endpoints are documented upstream but are not enabled here. Voice preview qualification explicitly covers “Hey Klippy”, acknowledgement, then a
+question, plus zero accepted negative inputs; original full continuous/raw-KWS results
+remain separate and can fail. No physical-printer,
 human acoustic, clean desktop VM or actual 16 GB host gate is closed by simulations.
 
 ## Catalog coverage
@@ -125,7 +127,7 @@ family expansions and validation rules are in `query_catalog.json` and the manag
 | fans | Available fan duty cycles and optional tachometer RPM | fan | Verified Klipper objects / core API | Are the fans running? |
 | filament_sensors | Filament presence and sensor enable state | /printer/objects/query | Verified Klipper objects / core API | Is filament detected? |
 | errors | Reported Klipper/print error messages; no diagnosis inferred | webhooks, print_stats | Verified Klipper objects / core API | Does the printer have an error? |
-| status | Klipper readiness and reported print state | webhooks, print_stats | Verified Klipper objects / core API | Is the printer ready? |
+| status | Klipper readiness and reported print state | webhooks, print_stats, virtual_sdcard | Verified Klipper objects / core API | Is the printer ready? |
 | configuration | Configured axis bounds and pending-save/warning status | toolhead, configfile | Verified Klipper objects / core API | What are the printer configuration warnings? |
 | bed_mesh | Already-loaded mesh profile; never probe or calibrate | bed_mesh | Verified Klipper objects / core API | Which bed mesh is loaded? |
 | leveling | Previously reported gantry/Z tilt application status | quad_gantry_level, z_tilt | Verified Klipper objects / core API | Is the gantry leveled? |

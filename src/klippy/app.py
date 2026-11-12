@@ -1004,10 +1004,13 @@ def main():
     parser.add_argument("--show", action="store_true", help="Open control panel on startup")
     parser.add_argument("--smoke-test", action="store_true", help="Launch/close UI using isolated temporary settings")
     parser.add_argument("--smoke-report", type=Path, help="Write isolated startup diagnostic result")
-    parser.add_argument("--voice-self-test", action="store_true", help="Exercise bundled models without opening devices or live printers")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--voice-self-test", action="store_true", help="Full voice acceptance probe without opening devices or live printers")
+    modes.add_argument("--preview-self-test", action="store_true",
+                        help="Qualify engineering query/wake-then-request flow; retain full-voice acceptance diagnostics")
     parser.add_argument("--voice-pack", type=Path, help="Override the voice model pack for a device-free self-test")
     args = parser.parse_args()
-    if args.voice_self_test:
+    if args.voice_self_test or args.preview_self_test:
         from .models import bundled_pack
         from .voice_probe import run
         report_path = args.smoke_report or Path("voice-self-test.json")
@@ -1017,7 +1020,8 @@ def main():
                 raise ModelUnavailable("Bundled model pack is missing")
             report = run(root.resolve())
             report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
-            return 0 if report["passed"] else 1
+            passed = report["engineering_preview_passed"] if args.preview_self_test else report["passed"]
+            return 0 if passed else 1
         except Exception:
             import traceback
             report_path.write_text(traceback.format_exc(), encoding="utf-8")

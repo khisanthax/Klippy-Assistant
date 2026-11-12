@@ -46,6 +46,30 @@ def qualify_report(report):
     report["passed"] = all(report["gates"].values())
 
 
+def qualify_preview_report(report):
+    """Explicit engineering envelope; never changes the full-voice acceptance result.
+
+    Continuous wake+request reliability remains a separate open acoustic gate.
+    The preview requires actual ASR-to-status with a separately spoken wake word,
+    no accepted requests/sessions for six negative audio inputs, echo/interruption
+    gates, and the native read-only query probe. Raw KWS accuracy stays reported.
+    """
+    report["preview_gates"] = {key: value for key, value in report["gates"].items()
+                               if key not in {"captured_status", "negative_words"}}
+    report["preview_gates"]["paced_captured_status"] = (
+        bool(report.get("paced_pipeline_transcripts")) and "63%" in (report.get("paced_status_response") or ""))
+    query = report.get("query_catalog", {})
+    report["preview_gates"]["read_only_query_catalog"] = (
+        query.get("passed") is True and query.get("printer_writes") == 0 and query.get("pending_write") is False)
+    negatives = report.get("negative_composite", [])
+    report["preview_gates"]["no_negative_query_activation"] = (
+        len(negatives) == 6 and all(row.get("accepted_requests") == [] and row.get("session_open") is False
+                                    for row in negatives))
+    report["engineering_preview_passed"] = all(report["preview_gates"].values())
+    report["preview_scope"] = "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified"
+    report["continuous_wake_status_passed"] = report["gates"]["captured_status"]
+
+
 def run(pack):
     from .offline_probe import deny_external_network
     deny_external_network()
@@ -63,10 +87,13 @@ def run(pack):
         return resample(value.samples, value.sample_rate)
     def pad(samples):
         return np.r_[np.zeros(RATE // 2, dtype=np.float32), samples, np.zeros(RATE * 2, dtype=np.float32)]
+    negative_audio = []
     for phrase in ["Klippy", "Hey Klippy", "Klippy stop talking", "Hey Klippy stop talking", "clipper", "Klipper", "The printer is ready", "clippy"]:
         for voice in [0, 3]:
             backend.reset_wake()
             samples = pad(audio(phrase, voice))
+            if phrase in {"clipper", "Klipper", "The printer is ready"}:
+                negative_audio.append((phrase, voice, samples))
             woke = False
             for i in range(0, len(samples), FRAME):
                 woke |= backend.wake(samples[i:i + FRAME])
@@ -104,6 +131,28 @@ def run(pack):
         report["pipeline_wakes"] = list(wakes)
         report["pipeline_states"] = list(states)
         report["asr_errors"] = asr_errors
+        # A distinct, preregistered wake-then-question interaction. Always run it,
+        # retain the continuous utterance above independently, and do not retry either.
+        voice._reset_dsp()
+        received.clear()
+        wakes.clear()
+        states.clear()
+        report["paced_wake_phrase"] = "Hey Klippy"
+        feed(pad(audio(report["paced_wake_phrase"], voice=0)))
+        # Wait for the wake acknowledgement/ASR before asking a follow-up, as a
+        # person does in the two-turn interaction. feed() drains the ASR worker.
+        feed(pad(audio("What is the status of the test printer?", voice=0)))
+        report["paced_pipeline_transcripts"] = [v.text for v in received]
+        report["paced_pipeline_wakes"] = list(wakes)
+        report["negative_composite"] = []
+        for phrase, sid, samples in negative_audio:
+            voice._reset_dsp()
+            received.clear()
+            wakes.clear()
+            feed(samples)
+            report["negative_composite"].append({"phrase": phrase, "synthetic_voice": sid,
+                "candidate_interrupts": len(wakes), "accepted_requests": [v.text for v in received],
+                "session_open": voice.listen_until > clock[0]})
         # Exactly matching speaker echo must not become a command, including warm-up.
         voice._reset_dsp()
         received.clear()
@@ -196,17 +245,35 @@ def run(pack):
             if request.method != "GET":
                 writes.append(request.url.path)
                 raise AssertionError("No simulated or real actuation permitted in voice probes")
-            return httpx.Response(200, json={"result": {"status": {"webhooks": {"state": "ready"},
-                "print_stats": {"state": "printing"}, "virtual_sdcard": {"progress": .63},
-                "extruder": {"temperature": 23.0}}}})
+            status = {"webhooks": {"state": "ready"}, "print_stats": {"state": "printing"},
+                      "virtual_sdcard": {"progress": .63}, "extruder": {"temperature": 23.0}}
+            if request.url.path == "/server/info":
+                result = {"components": [], "klippy_connected": True, "klippy_state": "ready"}
+            elif request.url.path == "/printer/objects/list":
+                result = {"objects": list(status)}
+            elif request.url.path == "/printer/objects/query":
+                result = {"status": {name: {key: value for key, value in status.get(name, {}).items()
+                          if not fields or key in fields.split(",")} for name, fields in request.url.params.items()}}
+            else:
+                raise AssertionError("Unreviewed voice probe endpoint")
+            return httpx.Response(200, json={"result": result})
         engine = SafetyEngine(store, lambda p: Moonraker(p, transport=httpx.MockTransport(transport)))
-        conversation = Conversation(engine)
+        from .queries import QueryService
+        conversation = Conversation(engine, queries=QueryService(store, engine.clients))
         report["simulated_status_response"] = (asyncio.run(conversation.hear(report["pipeline_transcripts"][0], source="voice"))
                                                if report["pipeline_transcripts"] else None)
+        conversation.clear()
+        async def paced_turns():
+            answer = None
+            for text in report["paced_pipeline_transcripts"]:
+                answer = await conversation.hear(text, source="voice")
+            return answer
+        report["paced_status_response"] = asyncio.run(paced_turns())
         report["printer_writes"] = len(writes)
         store.close()
     qualify_report(report)
     report["passed"] = report["passed"] and report["query_catalog"]["passed"]
+    qualify_preview_report(report)
     report["homophone_note"] = "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
     return report
 

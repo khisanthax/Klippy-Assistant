@@ -45,7 +45,7 @@ are never exported to a cloud service or written by the query engine.
 
 ## Tests and measurements
 
-356 tests and Ruff pass; the original 179 tests remain unchanged. New simulated tests cover
+368 tests and Ruff pass; the original 179 tests remain unchanged. New simulated tests cover
 every catalog entry and advertised example, ordinary variations, aliases/follow-ups, absent
 objects/components/fields, invalid values, missing layers, fresh/stale cache behavior,
 configuration/reconnect/clock changes, two-printer and delayed-old-endpoint isolation,
@@ -64,9 +64,38 @@ model prompt now distinguish those concepts; corrected evidence is
 `benchmarks/preview4-query-source.json`. Frozen and installed voice self-tests require the
 new native query probe to pass, in addition to all original voice/safety gates.
 
-Exact final build/installer qualification and artifact identity will be recorded here after
-all jobs pass. The earlier source candidate was superseded before publication by the cache
-generation correction; its artifact is not eligible for release.
+## Explicit engineering-preview qualification
+
+Full voice acceptance is not claimed. Source e775c64's first frozen run and installed run
+failed continuous wake-plus-request capture even though all seven query cases passed;
+a same-source frozen repeat passed. Reports are retained in
+`benchmarks/preview4-frozen-attempt1-failure.json` and `preview4-installed-failure.json`.
+A local diagnostic also produced a raw KWS candidate for synthetic “clipper”; its complete
+report is `benchmarks/preview4-local-negative-diagnostic.json`. A separately spoken bare
+“Klippy” was once transcribed as “Clipping” and correctly rejected. No production voice
+threshold, model, wake-prefix alias or live capture/ASR/interruption logic was changed.
+
+This query engineering preview therefore has an explicit supported test envelope:
+**say “Hey Klippy”, wait for acknowledgement, then ask the question**. `--preview-self-test`
+requires actual captured ASR to the catalog's simulated 63% status response, all seven
+native query cases, no accepted requests or sessions from six negative audio samples,
+standalone wake detection, own-echo rejection, verified interruption and zero writes.
+The negative end-to-end test uses the same PCM as its raw KWS diagnostic; candidate
+interrupts are reported separately from accepted sessions/queries. It runs each fixed
+interaction once and never retries samples to obtain a pass.
+
+`--voice-self-test` and the original full-voice `passed` result remain unchanged in meaning:
+continuous wake capture and raw negative-word detection must also pass. These full-voice
+results stay in every report even when false. Full and preview modes cannot be combined.
+Preview builds/installers use the explicitly named preview mode, not a claim of full acoustic
+acceptance. No stable release can be built while the release checklist remains incomplete.
+The local full/composite development probe passed; its report is
+`benchmarks/preview4-composite-source.json`. Unknown human/continuous-speech accuracy
+still requires separate evidence. See the final evidence for the recommended Hey-Klippy run.
+
+Exact final preview build/installer qualification and artifact identity will be recorded here
+after all required engineering-preview jobs pass. Earlier source/artifacts e775c64 and
+8ba42ab are superseded by the explicit qualification/probe changes and are not for release.
 
 ## Remaining limits
 

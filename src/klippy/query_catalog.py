@@ -74,7 +74,7 @@ CATALOG = {q.id: q for q in (
     object_query("errors", "Reported Klipper/print error messages; no diagnosis inferred",
                  {"webhooks": "state state_message", "print_stats": "state message"}, "Does the printer have an error?"),
     object_query("status", "Klipper readiness and reported print state",
-                 {"webhooks": "state state_message", "print_stats": "state"}, "Is the printer ready?", "Printer status"),
+                 {"webhooks": "state state_message", "print_stats": "state", "virtual_sdcard": "progress"}, "Is the printer ready?", "Printer status"),
     object_query("configuration", "Configured axis bounds and pending-save/warning status",
                  {"toolhead": "axis_minimum axis_maximum", "configfile": "save_config_pending warnings"},
                  "What are the printer configuration warnings?", "What is the build volume?"),

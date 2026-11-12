@@ -1,6 +1,6 @@
 {
   "reviewed_on": "2026-11-12",
-  "authority": "Built-in Python catalog; this JSON is a documentation export, not loaded as permissions",
+  "authority": "Built-in Python catalog; documentation export, not runtime permissions",
   "queries": [
     {
       "id": "homing",
@@ -596,6 +596,12 @@
           [
             "state"
           ]
+        ],
+        [
+          "virtual_sdcard",
+          [
+            "progress"
+          ]
         ]
       ],
       "examples": [
@@ -607,7 +613,8 @@
       "response_fields": [
         "webhooks.state",
         "webhooks.state_message",
-        "print_stats.state"
+        "print_stats.state",
+        "virtual_sdcard.progress"
       ],
       "classification": "read-only information; no printer actuation",
       "missing": "Report unavailable/unsupported; never invent values or run a command",

@@ -61,8 +61,12 @@ separation, current/stale/cache-delta behavior, reset/configuration changes, bou
 batches and delayed old-endpoint response isolation. Query transports assert GET and the
 independent endpoint/field/parameter allowlist rejects control and arbitrary API paths.
 
-The complete real-model `--voice-self-test` now also requires query_probe's seven-case
-simulated-printer/native-query-LLM report to pass. Both frozen and installed probes must
+Both full `--voice-self-test` and explicit engineering `--preview-self-test` retain
+query_probe's seven-case simulated-printer/native-query-LLM report. Preview mode requires
+Hey-Klippy acknowledgement followed by actual ASR-to-query status, six negative audio
+inputs opening zero sessions/requests, own-echo rejection, verified interruption and zero
+writes. Original full voice gates/results remain visible and can be false; full continuous
+speech/raw KWS acoustic acceptance stays open. Both frozen and installed probes must
 include it; it cannot be substituted by an unrelated hardcoded status request. Inspect
 `query_catalog` in each JSON report. Every probe must report zero printer writes.
 

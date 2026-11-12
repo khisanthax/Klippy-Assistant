@@ -58,9 +58,9 @@ try {
     if (-not $taskApp.WaitForExit(30000) -or $taskApp.ExitCode -ne 0) { throw 'Installed startup failed' }
     $taskVoiceReport = Join-Path $taskQaRoot 'installed-voice.json'
     $taskVoice = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
-        '--voice-self-test','--smoke-report',('"' + $taskVoiceReport + '"'))
+        '--preview-self-test','--smoke-report',('"' + $taskVoiceReport + '"'))
     Wait-QaProcess $taskVoice 240
-    if (-not (Get-Content -LiteralPath $taskVoiceReport -Raw | ConvertFrom-Json).passed) { throw 'Installed voice gate failed' }
+    if (-not (Get-Content -LiteralPath $taskVoiceReport -Raw | ConvertFrom-Json).engineering_preview_passed) { throw 'Installed engineering preview gate failed' }
     if ($MeasurePerformance) {
         & (Join-Path $PSScriptRoot 'performance_probe.ps1') -Application 'local\installer-qa\application\Klippy.exe'
     }
@@ -78,7 +78,7 @@ try {
         performance_budget_test=[bool]$MeasurePerformance;
         firewall_profiles=$(if ($BlockExternalNetwork) { @(Get-NetFirewallProfile | Select-Object Name,Enabled) } else { @() });
         installers=$taskInstallers; tests=@('per-user install','same-version reinstall preserving isolated data','installed application smoke test',
-                'installed complete-model offline voice integration',
+                'installed offline engineering query/wake-followup preview; full voice diagnostics retained separately',
                 'uninstall removes executable','uninstall preserves isolated user data');
         limitations=@('not clean Windows desktop VM qualification','not physical microphone accuracy')
     } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $taskQaRoot 'results.json') -Encoding utf8

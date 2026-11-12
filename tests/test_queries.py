@@ -532,3 +532,38 @@ async def test_delayed_old_endpoint_response_cannot_poison_new_printer_cache(que
     assert "Not homed: none" in await service.answer("sim", request)
     service.observe("sim", {"status": {"toolhead": {"homed_axes": ""}}}, clock[0], identity=printer.url)
     assert "Not homed: none" in await service.answer("sim", request)
+
+
+@pytest.mark.parametrize("broken", [None, "negative_accept", "negative_session", "standalone_wake", "own_echo", "verified_interruption",
+                                      "local_language", "no_printer_writes", "paced_status", "query", "query_write"])
+def test_preview_envelope_never_changes_or_claims_full_voice_acceptance(broken):
+    from klippy.voice_probe import qualify_preview_report
+    report = {"passed": False, "gates": {"captured_status": False, "negative_words": False,
+              "standalone_wake": True, "own_echo": True, "verified_interruption": True,
+              "local_language": True, "no_printer_writes": True},
+              "paced_pipeline_transcripts": ["Klippy", "status"], "paced_status_response": "63% complete",
+              "query_catalog": {"passed": True, "printer_writes": 0, "pending_write": False},
+              "negative_composite": [{"accepted_requests": [], "session_open": False} for _ in range(6)]}
+    if broken in report["gates"]:
+        report["gates"][broken] = False
+    elif broken == "paced_status":
+        report["paced_status_response"] = None
+    elif broken == "query":
+        report["query_catalog"]["passed"] = False
+    elif broken == "query_write":
+        report["query_catalog"]["printer_writes"] = 1
+    elif broken == "negative_accept":
+        report["negative_composite"][0]["accepted_requests"] = ["Klippy status"]
+    elif broken == "negative_session":
+        report["negative_composite"][0]["session_open"] = True
+    qualify_preview_report(report)
+    assert report["passed"] is False and report["continuous_wake_status_passed"] is False
+    assert report["engineering_preview_passed"] is (broken is None)
+
+
+def test_full_voice_and_preview_qualification_modes_cannot_be_combined():
+    import subprocess
+    import sys
+    result = subprocess.run([sys.executable, "-m", "klippy.app", "--voice-self-test", "--preview-self-test"],
+                            capture_output=True, text=True, timeout=15)
+    assert result.returncode == 2 and "not allowed with argument" in result.stderr
