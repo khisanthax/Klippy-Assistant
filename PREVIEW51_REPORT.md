@@ -19,6 +19,10 @@ Normalization now shares punctuation/possessive handling and bounded English num
 parsing across printer names and heating recognition. Mercury One and Mercury 1 match only
 configured labels; M1 must be configured as a name/alias. Collisions across printers are
 rejected rather than guessed, including collisions in older saved configurations.
+Heater/value/unit operands are excluded from printer mentions. An alias F/C/nozzle/90 cannot
+select a printer from a heating operand or strip its unit; an explicit “on F” still selects
+that configured printer while preserving Fahrenheit conversion. The earlier unit-alias
+collision is reproduced in `benchmarks/preview51-unit-alias-reproduction.json`.
 
 Set/heat/warm/bring instructions support polite wording, nozzle/hotend/hot end/extruder,
 bed, printer placement, number words, decimal values and units. They enter the deterministic
@@ -55,13 +59,14 @@ cancellation still discards the review. In-flight validation is invalidated duri
 
 ## Qualification plan and open gates
 
-Local full suite: **497 passed**, all 408 prior regressions retained; Ruff passed. New tests cover the exact owner phrases and variations,
+Final local full suite: **503 passed**, all 408 prior regressions retained; Ruff passed.
+Operand/name safety regressions are included. New tests cover the exact owner phrases and variations,
 configured/colliding aliases, number words/units, Fahrenheit boundaries, missing heaters and
 limits, query/action classification, invalid model output, explicit cancellation, clarification,
 confirmation races/policies, Celsius review and single-use/no-retry behavior. All services
 are simulated. No microphone recording or owner installation change is needed.
 
-The packaged self-test additionally requires a 20-case heating/cancellation probe through
+The packaged self-test additionally requires a 21-case heating/cancellation probe through
 Conversation and SafetyEngine with a transport that forbids every HTTP write. Supported
 requests must use zero LLM calls and leave zero writes/pending actions at completion.
 Windows frozen/installed/offline/upgrade and memory qualification must pass before publication.

@@ -1,0 +1,7 @@
+{
+  "scope": "Synthetic configured-unit-alias collision; no network or writes",
+  "before_matched_printer_ids": [
+    "other"
+  ],
+  "before_residual": "heat nozzle to 90"
+}

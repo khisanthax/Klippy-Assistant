@@ -110,6 +110,29 @@ async def test_canonical_alias_ambiguity_never_selects_or_heats(heating):
     assert store.get("selected") == "sim" and not sim.writes
 
 
+@pytest.mark.parametrize("label,phrase,target", [("F","heat nozzle to 90 F",pytest.approx(32.22222222222222)),
+    ("C","heat nozzle to 90 C",90), ("Celsius","heat nozzle to 90 Celsius",90),
+    ("90","heat nozzle to 90",90), ("Nozzle","heat nozzle to 90",90)])
+async def test_operand_words_never_select_a_printer_or_strip_units(heating, label, phrase, target):
+    store, sim, engine, _ = heating
+    store.save_printer(Printer(id="other",name="Other",aliases=(label,),url="http://127.0.0.1:17126",approved=True))
+    store.set("heater_limits", {"sim":{"0":200},"other":{"0":200}})
+    await Conversation(engine, NoModel()).hear(phrase)
+    assert store.get("selected") == "sim"
+    assert Intent.model_validate_json(engine.pending.intent_json).params["temperature"] == target
+    assert not sim.writes
+
+
+async def test_explicit_unit_named_printer_keeps_fahrenheit_operand(heating):
+    store, sim, engine, _ = heating
+    store.save_printer(Printer(id="other",name="F",url="http://127.0.0.1:17126",approved=True))
+    store.set("heater_limits", {"sim":{"0":200},"other":{"0":40}})
+    answer = await Conversation(engine, NoModel()).hear("heat nozzle to 90 F on F")
+    assert store.get("selected") == "other" and "degrees Celsius on F" in answer
+    assert Intent.model_validate_json(engine.pending.intent_json).params["temperature"] == pytest.approx(32.22222222222222)
+    assert not sim.writes
+
+
 async def test_printer_specific_limits_and_bed_selection(heating):
     store, sim, engine, _ = heating
     other = Printer(id="other",name="SV08",url="http://127.0.0.1:17126",approved=True)
@@ -307,10 +330,10 @@ async def test_clarification_during_validation_cannot_resurrect_pending(heating)
     assert engine.pending is None and not sim.writes
 
 
-async def test_packaged_command_probe_requires_all_twenty_cases_without_writes():
+async def test_packaged_command_probe_requires_all_twenty_one_cases_without_writes():
     from klippy.command_probe import run
     report = await run()
-    assert report["passed"] and len(report["cases"]) == 20
+    assert report["passed"] and len(report["cases"]) == 21
     assert report["printer_writes"] == report["supported_request_llm_calls"] == 0
     assert not report["pending_write"]
 

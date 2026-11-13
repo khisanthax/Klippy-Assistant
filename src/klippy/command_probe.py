@@ -1,4 +1,5 @@
 """Packaged parser/safety qualification. Mock transport forbids every write."""
+import math
 import tempfile
 from pathlib import Path
 
@@ -68,6 +69,15 @@ async def run():
                 except Rejected:
                     blocked = True
                 cases.append({"case": "ambiguous_or_outside_limits", "passed": blocked and engine.pending is None})
+            store.save_printer(Printer(id="unit",name="F",url="http://127.0.0.1:2",approved=True))
+            store.set("heater_limits", {"sim":{"0":200,"1":100},"unit":{"0":40}})
+            correct = True
+            for phrase, expected in (("heat nozzle 90 F","sim"), ("heat nozzle 90 F on F","unit")):
+                await c.hear(phrase)
+                intent = Intent.model_validate_json(engine.pending.intent_json)
+                correct = correct and intent.printer_id == expected and math.isclose(intent.params["temperature"], (90-32)*5/9, rel_tol=1e-12)
+            cases.append({"case":"temperature_operands_not_printer_mentions","passed":correct and not writes})
+            engine.select("sim")
             class WrongModel:
                 async def interpret(self, *args):
                     return Intent(action=Action.TEMPERATURES, printer_id="sim", params={"heater":0,"temperature":90})

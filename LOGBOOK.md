@@ -1,5 +1,22 @@
 # Logbook
 
+## 2026-11-13 — Final unit/name collision safety review
+
+Before publication, reproduced a configured F alias matching the unit in “heat nozzle to
+90 F”; name removal then left “heat nozzle to 90”, silently changing units and target
+selection. Evidence: benchmarks/preview51-unit-alias-reproduction.json. No network/writes.
+Heater/value/unit operands are now masked for name matching, with original spans retained
+so only genuine name mentions are removed. Added regressions for F, C, Celsius, numeric and
+nozzle aliases and explicit “90 F on F” preserving both the selected printer and conversion.
+The packaged command probe now has 21 cases, including the unit/name collision.
+
+Cancelled the 0588ed8 qualification run 43454620523 for this correction after its 497 tests
+and frozen 20-case probe passed. No attempt was selected for passing acoustic results.
+Final corrected full suite: 503 passed, all prior 408 retained; Ruff passed. The corrected
+application will be committed and qualified again before publication, including all 21
+packaged command cases. Earlier unqualified installer copies are discarded after checksum
+verification so they cannot be confused with the final distribution.
+
 ## 2026-11-13 — Reproduced owner heating/cancellation failures; 0.5.1 implementation
 
 Started from clean latest main 8e2b211. Reproduced the exact owner phrase with Mercury One/M1
