@@ -1,5 +1,34 @@
 # Logbook
 
+## 2026-11-13 — Qualified 0.5 conversational UX preview
+
+Exact application source 60fac7845aab494680b889eb34819f1d9b72d8db passed every job in
+Windows run 43408559522 attempt 1. 408 tests passed (all prior 370 retained), zero skipped
+or failed, plus Ruff. Local full run: 408 passed. Frozen startup/native probe, actual
+0.4 upgrade/reinstall, legacy SQLite and name/alias/selected-target/style preservation,
+installed startup, offline native inference, process-tree budget and uninstall preserving
+settings passed. All firewall profiles enabled; external app/runtime egress blocked.
+
+Both new single-attempt Hey wake-only and Hey-plus-temperature cases passed in all three
+frozen/installed/budgeted processes. Wake acknowledgement and unprefixed follow-up passed;
+7 native queries, 6 negative composite inputs, zero writes/pending query action, own echo
+and interruption passed. Original full-voice flags remain True/False/True: the installed
+probe missed the older bare-Klippy continuous status case before ASR. Failure retained in
+preview5-release-installed.json and the aggregate; broad/human wake acceptance remains open.
+The earlier e840b2a workflow was cancelled for the status-warning fix, not retried for a
+passing voice sample. Stage counts are cumulative; synthetic audio is not microphone proof.
+
+Installer: Klippy-Setup-0.5.0-preview.1.exe, 1,489,751,508 bytes; SHA-256
+d9831b4da7cda4a6ee40ba1c57d190148716ed319c01387b16c56906997e98f7.
+CI artifact/sidecar/installed-QA digest/local dist copy agree. Peak process-tree commit
+1,953,746,944 bytes on an 8 GiB runner under a 16 GiB commit limit; wall 144.065 seconds.
+Actual 16 GB hardware and clean desktop VM gates remain open. No real printer connections,
+owner microphone recording or owner installation changes. Models unchanged and outside Git.
+
+Next: publish the accurately scoped unsigned prerelease at the qualified source tag after
+checking uploaded asset sizes/digests. Then retain the open human microphone/room, sleep,
+actual fleet/accessory, clean VM/16 GB and supervised consequential acceptance gates.
+
 ## 2026-11-13 — Conversational UX implementation, qualification in progress
 
 Read the latest owner attachment and continuity docs; started from clean current main

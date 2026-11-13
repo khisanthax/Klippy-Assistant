@@ -13,6 +13,16 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 | 7. Stabilization | In progress | Expanded simulated regressions, crash/WAL recovery, validated backup/restore and monotonic reaction diagnostics; fresh-runner offline upgrade and 16 GiB process-budget probes passed; actual 16 GB VM/audio/sleep/fleet gates open |
 | 8. Distribution | Partial | Unsigned preview installer builds; install/reinstall/settings preservation/installed launch/uninstall passed on development host; complete licensed model payload, fresh Windows CI cross-version upgrade/reinstall/SQLite preservation/offline-model/uninstall qualification passed; clean Windows desktop VM and stable release gates remain open |
 
+## Conversational UX (0.5 preview)
+
+The 0.5 conversational UX candidate is qualified at source `60fac78`: Windows run
+43408559522 attempt 1 passed 408 tests/Ruff, frozen startup, actual 0.4 upgrade/reinstall,
+offline installed models, settings preservation and process-tree memory checks. Both
+single-attempt Hey cases passed in frozen/installed/budgeted probes. The installed original
+bare-Klippy continuous-status case missed activation; its broader full-voice flag stays false
+and the report is retained. Human first-attempt accuracy, clean desktop VM, actual 16 GB
+hardware and supervised printer gates remain open. See PREVIEW5_REPORT.md and issue #10.
+
 ## Moonraker query expansion (0.4 preview)
 
 Published [v0.4.0-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.4.0-preview.1) at source `643b949` after exact

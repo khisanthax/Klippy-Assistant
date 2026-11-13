@@ -1,6 +1,7 @@
 # 0.5 preview — conversational UX
 
-Engineering preview under qualification. Human microphone accuracy, physical printer
+Qualified engineering-preview scope at application source `60fac7845aab494680b889eb34819f1d9b72d8db`.
+Human microphone accuracy, physical printer
 acceptance, a clean Windows desktop VM and actual 16 GB hardware remain open. This is
 not a stable release or a claim of universal first-attempt wake recognition.
 
@@ -47,5 +48,51 @@ from full acoustic acceptance. Synthetic voices are not human microphone evidenc
 The existing 41-query/13-GET catalog, verified capabilities, freshness, query-only model
 fallback, reviewed macros and SafetyEngine write path remain. No physical printer was
 connected or acted on for this work. The same licensed 57-file model pack remains outside
-Git and is verified during packaging. Installer/CI results and artifact identity will be
-recorded here after qualification; no installer is claimed qualified before those checks.
+Git and is verified during packaging.
+
+## Verified qualification
+
+[Windows run 43408559522, attempt 1](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43408559522)
+passed every job at the exact source above. All prior 370 tests are retained: **408 passed,
+zero failed/skipped**, plus Ruff. Local full suite also passed 408 tests. Qt visual QA used
+isolated synthetic printer settings; no owner installation or physical printer was changed.
+
+Frozen startup and the native engineering-preview probe passed. Fresh Windows CI verified
+actual 0.4-to-0.5 upgrade, same-version reinstall, legacy SQLite preservation, names/aliases,
+selected-printer and response-style persistence, installed startup, offline native models,
+uninstall removing the executable and preserving settings. All firewall profiles were enabled;
+application and owned language-runtime external egress were blocked during offline probes.
+
+Each of the frozen, installed and memory-limited processes passed additional publication
+checks: exactly one preregistered Hey wake-only attempt accepted one wake, opened a session
+and yielded “I'm listening”; exactly one continuous Hey-plus-temperature attempt delivered
+the complete temperature question; the subsequent unprefixed status question returned 63%.
+No attempt was retried or substituted. All three passed seven native read-only query cases,
+six negative audio inputs with no accepted requests/sessions, own-echo/interruption gates,
+zero printer writes and no pending query action. Stage counts in the reports are cumulative
+for each probe process, not per-case deltas.
+
+**The original broader full-voice result was True / False / True** for frozen / installed /
+memory-limited processes. The installed run missed the older continuous bare “Klippy, what
+is the status …” case before ASR (no pipeline wake/transcript). That failure remains in
+`benchmarks/preview5-release-installed.json`; no threshold, negative-input or full-voice gate
+was weakened. Both new Hey cases passed there. Broad continuous/raw KWS and human accuracy
+remain separate open acceptance gates. Earlier 0.4 failures also remain in the repository.
+The initial e840b2a workflow was deliberately cancelled for the warning-preservation fix;
+the final 60fac78 qualification passed on attempt 1.
+
+On the 8 GiB Windows runner (AMD EPYC 7763), the app/process tree peaked at 1,953,746,944 bytes
+commit (about 1.82 GiB), three processes and 144.065 seconds wall time under a 16 GiB job
+commit budget. This is not qualification on an actual 16 GB computer or a clean desktop VM.
+Frozen simulated common reads measured 0.282–9.519 ms; the unfamiliar local-model query
+took 12.140 seconds. These exclude actual LAN and human microphone response time.
+
+Installer: `Klippy-Setup-0.5.0-preview.1.exe`, **1,489,751,508 bytes** (about 1.39 GiB), unsigned.
+
+SHA-256: `d9831b4da7cda4a6ee40ba1c57d190148716ed319c01387b16c56906997e98f7`.
+
+Downloaded CI artifact, sidecar, installer-QA digest and local `dist` copy agree. Complete
+self-contained evidence is `benchmarks/preview5-release-qualification.json`, with individual
+frozen/installed/memory reports alongside it. The same per-user application identity upgrades
+the existing installation while retaining settings and OS-vault credentials. GitHub repository
+access/sign-in is needed to download from the private prerelease page.
