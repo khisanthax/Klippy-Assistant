@@ -2,23 +2,37 @@
 import re
 
 from .domain import Printer
-from .language import normalize
+from .language import heat_intent, heating_request, incomplete_heat, normalize
+from .safety import Rejected
 
 
-def name_surface(text):
-    # Mask heater/value/unit operands, retaining offsets. A configured F/C/90/nozzle
-    # label must not select a different printer or be removed from a target value.
-    operand = re.compile(r"\b(?:nozzle|hotend|hot end|extruder|heated bed|bed)(?: temperature)? "
-                         r"(?:up to |to |at )?[+-]?(?:\d+(?:\.\d+)?|\.\d+)\s*"
-                         r"(?:(?:degrees?\s*)?(?:celsius|fahrenheit|c|f)\b|degrees?\b)?")
-    return operand.sub(lambda match: " " * len(match[0]), text)
+def complete_heat(text, printer_id):
+    try:
+        return heat_intent(text, printer_id) is not None
+    except Rejected:
+        return False
 
 
 def name_spans(printer, text):
-    surface = name_surface(text)
     labels = {normalize(n) for n in (printer.name, *printer.aliases)}
-    return [(match.start(), match.end()) for label in labels if label
-            for match in re.finditer(r"(?<!\w)" + re.escape(label) + r"(?!\w)", surface)]
+    spans = [(match.start(), match.end()) for label in labels if label
+             for match in re.finditer(r"(?<!\w)" + re.escape(label) + r"(?!\w)", text)]
+    if not heating_request(text):
+        return spans
+    # An already complete request names a heater/value/unit, not another printer.
+    # Otherwise a name is genuine only if removing that exact span leaves a full
+    # heating request. This keeps 90 F intact in 'heat nozzle 90 F on F'.
+    if complete_heat(text, printer.id):
+        return []
+    genuine = []
+    for start, end in spans:
+        before, after = text[:start], text[end:]
+        position = (re.search(r"\b(?:nozzle|hotend|hot end|extruder|bed)\b", after)
+                    or re.search(r"\b(?:on|for)(?: the| my)?(?: printer)?\s*$", before))
+        remaining = " ".join((before + " " + after).split())
+        if position and (complete_heat(remaining, printer.id) or incomplete_heat(remaining)):
+            genuine.append((start, end))
+    return genuine
 
 
 def matching(printers, text):

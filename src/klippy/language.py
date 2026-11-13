@@ -104,6 +104,12 @@ HEAT = re.compile(PREFIX + r"(?:heat|warm|set|bring) (?:the |my )?"
                   r"(?: (?:on|for)(?: the| my)?(?: printer)?)?(?: please)?")
 
 
+def incomplete_heat(text):
+    return bool(re.fullmatch(PREFIX + r"(?:heat|warm|set|bring) (?:the |my )?"
+                             r"(?:nozzle|hotend|hot end|extruder|bed|heated bed)(?: temperature)?"
+                             r"(?: up to| to| at)?", normalize(text)))
+
+
 def heating_request(text):
     return bool(HEAT_START.match(normalize(text)))
 

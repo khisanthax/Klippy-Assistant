@@ -112,7 +112,8 @@ async def test_canonical_alias_ambiguity_never_selects_or_heats(heating):
 
 @pytest.mark.parametrize("label,phrase,target", [("F","heat nozzle to 90 F",pytest.approx(32.22222222222222)),
     ("C","heat nozzle to 90 C",90), ("Celsius","heat nozzle to 90 Celsius",90),
-    ("90","heat nozzle to 90",90), ("Nozzle","heat nozzle to 90",90)])
+    ("90","heat nozzle to 90",90), ("Nozzle","heat nozzle to 90",90),
+    ("Set","set nozzle to 90",90), ("Heat","heat nozzle to 90",90), ("Please","please heat nozzle to 90",90)])
 async def test_operand_words_never_select_a_printer_or_strip_units(heating, label, phrase, target):
     store, sim, engine, _ = heating
     store.save_printer(Printer(id="other",name="Other",aliases=(label,),url="http://127.0.0.1:17126",approved=True))
@@ -130,6 +131,29 @@ async def test_explicit_unit_named_printer_keeps_fahrenheit_operand(heating):
     answer = await Conversation(engine, NoModel()).hear("heat nozzle to 90 F on F")
     assert store.get("selected") == "other" and "degrees Celsius on F" in answer
     assert Intent.model_validate_json(engine.pending.intent_json).params["temperature"] == pytest.approx(32.22222222222222)
+    assert not sim.writes
+
+
+@pytest.mark.parametrize("phrase", ["Switch to Nozzle One", "Is Nozzle One homed?"])
+def test_heater_word_in_actual_printer_name_remains_recognizable(phrase):
+    printer = Printer(id="n",name="Nozzle One",url="http://127.0.0.1:17126",approved=True)
+    assert matching([printer], phrase) == [printer]
+
+
+async def test_unknown_unit_cannot_be_reinterpreted_as_a_configured_printer(heating):
+    store, sim, engine, _ = heating
+    store.save_printer(Printer(id="k",name="Kelvin",aliases=("K",),url="http://127.0.0.1:17126",approved=True))
+    with pytest.raises(Rejected):
+        await Conversation(engine, NoModel()).hear("heat nozzle to 90 K")
+    assert store.get("selected") == "sim" and not sim.writes
+
+
+async def test_heater_word_in_named_heating_target_is_not_erased_as_operand(heating):
+    store, sim, engine, _ = heating
+    store.save_printer(Printer(id="n",name="Nozzle One",url="http://127.0.0.1:17126",approved=True))
+    store.set("heater_limits", {"n":{"0":200}})
+    answer = await Conversation(engine, NoModel()).hear("Heat Nozzle One's hotend to 90")
+    assert "degrees Celsius on Nozzle One" in answer and store.get("selected") == "n"
     assert not sim.writes
 
 

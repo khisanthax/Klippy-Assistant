@@ -1,5 +1,19 @@
 # Logbook
 
+## 2026-11-13 — Contextual name proof finalized, 510 tests passed
+
+Refined the operand fix into syntax-proven name spans. Complete heating requests retain
+the current selection; command words/operands cannot be inferred as names. A genuine name
+must occur before the heater or after on/for, and removing that exact span must leave a
+complete heating request or a header missing its target. Nozzle One remains usable in
+switching/queries/named heating; unknown unit K cannot become a configured K printer and
+silently default to Celsius. No placeholder temperature is used for execution.
+
+Final local full suite: 510 passed, all prior 408 retained; Ruff passed. Native command probe
+still requires all 21 cases with zero writes/LLM calls/pending actions. Cancelled intermediate
+20bc35c run 43458654066 for this final name-context correction, before publication. Exact
+corrected source will be qualified afresh; no acoustic result was retried or hidden.
+
 ## 2026-11-13 — Final unit/name collision safety review
 
 Before publication, reproduced a configured F alias matching the unit in “heat nozzle to
