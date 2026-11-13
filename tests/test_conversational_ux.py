@@ -137,6 +137,14 @@ def test_unknown_safety_warnings_are_never_reworded():
     assert Response("exact", "friendly") == "exact"
 
 
+def test_concise_status_keeps_unexpected_ready_state_warning():
+    status = {"webhooks": {"state": "ready", "state_message": "Inspect heater wiring before operating"},
+              "print_stats": {"state": "standby", "message": "Check filament path"}}
+    for style in ("brief", "conversational", "detailed"):
+        speech = present("M1", "status", status, "raw", style=style).spoken
+        assert "Inspect heater wiring before operating" in speech and "Check filament path" in speech
+
+
 async def test_auxiliary_sensor_speech_requires_explicit_request(queries):
     _, service, _, _ = queries
     answer = await service.answer("sim", match_query("How hot is the chamber?"))

@@ -19,6 +19,10 @@ Final full suite passed 407 tests (all original 370 retained), with Ruff passing
 Native source probe delay was traced to hashlib.file_digest during model verification,
 before inference. Do not infer voice qualification from process launch.
 
+Post-review: concise ready-state speech must retain unexpected Klipper state messages,
+even if the state is ready. Added the warning-preservation regression before release;
+exact-source CI is restarted for this final presentation correction.
+
 No real printer connections/actions, owner microphone recording or owner installer changes.
 Models remain unchanged/outside Git. First-attempt human wake, clean desktop VM, actual
 16 GB hardware, real fleet and supervised consequential acceptance gates stay open.

@@ -92,6 +92,9 @@ def present(name, identifier, status, detail, subject=None, style="brief", stale
                 speech += f" The job is {round(progress * 100)} percent complete."
             if mapping(status.get("print_stats")).get("message"):
                 speech += " " + clean(mapping(status.get("print_stats"))["message"])
+            message = clean(mapping(status.get("webhooks")).get("state_message"))
+            if message != "unavailable" and message.strip().lower().rstrip(".! ") not in {"", "ready", "printer is ready"}:
+                speech += " " + message
     elif identifier == "layers":
         info = mapping(mapping(status.get("print_stats")).get("info"))
         layer, total = numeric(info.get("current_layer"), 1), numeric(info.get("total_layer"), 1)
