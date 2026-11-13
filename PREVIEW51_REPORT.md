@@ -1,6 +1,7 @@
 # 0.5.1 preview — heating interpretation and explicit cancellation
 
-Engineering preview under qualification. No physical printer connections or heating actions
+Qualified engineering-preview scope at application source `2eabdfaee0bf0f189f18e5719714b0cbaec2ae63`.
+No physical printer connections or heating actions
 are used in development. Human microphone/room, broad continuous wake accuracy, actual fleet,
 clean Windows desktop VM and actual 16 GB hardware acceptance remain open.
 
@@ -61,7 +62,7 @@ and voice/manual/direct confirmation cannot execute it. This avoids executing a 
 the user has just questioned. A fresh request gets fresh validation and a new token; explicit
 cancellation still discards the review. In-flight validation is invalidated during clarification.
 
-## Qualification plan and open gates
+## Automated coverage and qualification
 
 Final local full suite: **510 passed**, all 408 prior regressions retained; Ruff passed.
 Operand/name safety regressions are included. New tests cover the exact owner phrases and variations,
@@ -73,7 +74,43 @@ are simulated. No microphone recording or owner installation change is needed.
 The packaged self-test additionally requires a 21-case heating/cancellation probe through
 Conversation and SafetyEngine with a transport that forbids every HTTP write. Supported
 requests must use zero LLM calls and leave zero writes/pending actions at completion.
-Windows frozen/installed/offline/upgrade and memory qualification must pass before publication.
+Windows frozen/installed/offline/upgrade and memory qualification passed before publication.
 Existing voice/query and negative-input gates remain; broad acoustic flags stay separate.
-Final test counts, exact source, installer identity and verified results will be recorded
-here after qualification. The same reviewed 57-file offline model pack is unchanged/outside Git.
+The same reviewed 57-file offline model pack is unchanged/outside Git.
+
+[Windows run 43461231046, attempt 1](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43461231046)
+passed all jobs at the exact source above: **510 tests, zero failures/skips**, Ruff, frozen
+startup/native probes, actual 0.5.0-to-0.5.1 upgrade, reinstall/legacy SQLite and settings
+preservation, installed startup, offline runtime, memory accounting and uninstall preserving
+data. Names/aliases, selected printer and response style survived upgrade/reinstall.
+All Windows firewall profiles were enabled; app/runtime external egress was blocked.
+
+All **21 command cases passed in each frozen/installed/memory-limited process**, with zero
+HTTP writes, zero supported-request LLM calls and no pending action at completion. Each also
+passed seven native query cases, six negative audio inputs with no accepted requests/sessions,
+own echo/interruption and both preregistered single-attempt Hey wake-only/temperature cases.
+The acknowledgement and unprefixed follow-up flow passed. Synthetic audio is not human
+microphone accuracy evidence. Diagnostic counts are cumulative within each probe process.
+
+Original broader full-voice flags remain **True / False / True** for frozen / installed /
+memory. In the installed older bare-Klippy continuous status case, ASR produced “Clibby …”;
+strict wake-prefix verification rejected it. That failed observation is retained unchanged in
+`benchmarks/preview51-release-installed.json` and the aggregate. No phonetic-prefix, threshold
+or negative-input gate was loosened. Broad/human wake reliability stays open. Earlier code
+candidates 0588ed8/20bc35c were cancelled for unit/name correctness refinements before
+publication, not retried to select a passing acoustic sample; reproductions remain committed.
+
+The 8 GiB Windows runner (Intel Xeon Platinum 8370C) peaked at **1,958,084,608 bytes** process-tree
+commit (about 1.82 GiB), three processes, **164.913 seconds** wall and 264.656 CPU seconds under
+a 16 GiB job commit limit. This is not a clean Windows desktop VM or actual 16 GB host test.
+
+Installer: `Klippy-Setup-0.5.1-preview.1.exe`, **1,489,751,540 bytes**, unsigned, about 1.39 GiB.
+
+SHA-256: `c3b87742262793490f24511103db577d019fa8353043e3b1a756f636b460424f`.
+
+CI artifact, checksum sidecar, installed-QA digest and local distribution copy agree.
+Self-contained evidence: `benchmarks/preview51-release-qualification.json`; individual
+frozen/installed/memory reports are alongside it. The same application identity upgrades
+the per-user app while retaining settings and OS-vault credentials. Human microphone/room,
+actual fleet/accessories, clean VM/actual 16 GB, sleep/resume and supervised physical heating
+acceptance remain open. No owner installation was modified during this work.

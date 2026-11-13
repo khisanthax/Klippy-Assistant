@@ -1,0 +1,1958 @@
+{
+  "release": "v0.5.1-preview.1",
+  "source_commit": "2eabdfaee0bf0f189f18e5719714b0cbaec2ae63",
+  "ci_run": "https://github.com/khisanthax/Klippy-Assistant/actions/runs/43461231046",
+  "ci_attempt": 1,
+  "tests": {
+    "passed": 510,
+    "failed": 0,
+    "skipped": 0,
+    "prior_cases_preserved": 408,
+    "ruff": "passed"
+  },
+  "catalog_queries": 41,
+  "allowlisted_read_routes": 13,
+  "installer_file": "Klippy-Setup-0.5.1-preview.1.exe",
+  "installer_bytes": 1489751540,
+  "installer_sha256": "c3b87742262793490f24511103db577d019fa8353043e3b1a756f636b460424f",
+  "engineering_preview_passed": true,
+  "heating_probe_cases": 21,
+  "additional_ux_publication_gates": {
+    "frozen": {
+      "single_attempt_wake_only": true,
+      "single_attempt_hey_temperature": true,
+      "wake_ack_and_followup": true,
+      "engineering_preview_passed": true,
+      "original_full_synthetic_voice_passed": true
+    },
+    "installed": {
+      "single_attempt_wake_only": true,
+      "single_attempt_hey_temperature": true,
+      "wake_ack_and_followup": true,
+      "engineering_preview_passed": true,
+      "original_full_synthetic_voice_passed": false
+    },
+    "memory": {
+      "single_attempt_wake_only": true,
+      "single_attempt_hey_temperature": true,
+      "wake_ack_and_followup": true,
+      "engineering_preview_passed": true,
+      "original_full_synthetic_voice_passed": true
+    }
+  },
+  "retained_reproductions": [
+    "benchmarks/preview51-initial-reproduction.json",
+    "benchmarks/preview51-unit-alias-reproduction.json"
+  ],
+  "cancelled_code_candidates": [
+    {
+      "source": "0588ed8",
+      "run": 43454620523,
+      "reason": "unit/name collision correction"
+    },
+    {
+      "source": "20bc35c",
+      "run": 43458654066,
+      "reason": "name-context refinement"
+    }
+  ],
+  "counter_note": "Wake diagnostic counts are cumulative for each probe process, not per-case deltas.",
+  "frozen_voice": {
+    "scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
+    "speech_load_seconds": 5.778,
+    "python_external_network_denied": true,
+    "wake_threshold": 0.22,
+    "keywords_score": 2.0,
+    "wake_cases": [
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 3,
+        "detected": true
+      }
+    ],
+    "pipeline_transcripts": [
+      "Klippy what is the status of the test printer?"
+    ],
+    "pipeline_wakes": [
+      [
+        1.430000000000001,
+        1,
+        0
+      ]
+    ],
+    "pipeline_states": [
+      "Checking wake word",
+      "Listening"
+    ],
+    "asr_errors": [],
+    "paced_wake_phrase": "Hey Klippy",
+    "first_attempt_wake_only": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy "
+      ],
+      "session_open": true,
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "frames": 914,
+        "voiced_frames": 320,
+        "candidates": 2,
+        "duplicate_candidates": 0,
+        "asr_started": 2,
+        "prefix_rejected": 0,
+        "echo_rejected": 0,
+        "verified": 2,
+        "delivered": 2
+      }
+    },
+    "paced_pipeline_transcripts": [
+      "Klippy ",
+      "What is the status of the test printer?"
+    ],
+    "paced_pipeline_wakes": [
+      [
+        7.22999999999989,
+        2,
+        0
+      ]
+    ],
+    "first_attempt_wake_command": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy what's the temperature?"
+      ],
+      "session_open": true,
+      "states": [
+        "Checking wake word",
+        "Listening"
+      ],
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "frames": 1867,
+        "voiced_frames": 674,
+        "candidates": 3,
+        "duplicate_candidates": 0,
+        "asr_started": 4,
+        "prefix_rejected": 0,
+        "echo_rejected": 0,
+        "verified": 3,
+        "delivered": 4
+      }
+    },
+    "negative_composite": [
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      }
+    ],
+    "own_echo_wakes": 0,
+    "own_echo_requests": 0,
+    "barge_wakes": 1,
+    "barge_candidates": [],
+    "barge_linear_fit_error": 1.5823035078406685e-13,
+    "barge_states": [
+      "Checking wake word",
+      "Listening",
+      "Checking wake word",
+      "Listening"
+    ],
+    "asr_observations": [
+      {
+        "at": 5.48,
+        "text": "Clippy, what is the status of the test printer?",
+        "audio_seconds": 3.5
+      },
+      {
+        "at": 9.14,
+        "text": "Hey Clippy!",
+        "audio_seconds": 1.71
+      },
+      {
+        "at": 14.11,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.08
+      },
+      {
+        "at": 18.67,
+        "text": "Hey Clippy, what's the temperature?",
+        "audio_seconds": 2.55
+      },
+      {
+        "at": 49.33,
+        "text": "[SOUND]",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 49.84,
+        "text": "Clibby stuff",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 50.3,
+        "text": "Clippy stop, top.",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 51.88,
+        "text": "Clippy stop talking",
+        "audio_seconds": 2.15
+      }
+    ],
+    "barge_frame_metrics": [
+      {
+        "at": 3.0,
+        "energy": 0.0,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.987
+      },
+      {
+        "at": 3.1,
+        "energy": 0.0093,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.966
+      },
+      {
+        "at": 3.2,
+        "energy": 0.0128,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.477
+      },
+      {
+        "at": 3.3,
+        "energy": 0.1241,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.432
+      },
+      {
+        "at": 3.4,
+        "energy": 0.0183,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.567
+      },
+      {
+        "at": 3.5,
+        "energy": 0.0113,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.65
+      },
+      {
+        "at": 3.6,
+        "energy": 0.1042,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.626
+      },
+      {
+        "at": 3.7,
+        "energy": 0.0038,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.533
+      },
+      {
+        "at": 3.8,
+        "energy": 0.0033,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.481
+      },
+      {
+        "at": 3.9,
+        "energy": 0.0217,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.875
+      },
+      {
+        "at": 4.0,
+        "energy": 0.09,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.571
+      },
+      {
+        "at": 4.1,
+        "energy": 0.0191,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.445
+      },
+      {
+        "at": 4.2,
+        "energy": 0.0542,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.422
+      },
+      {
+        "at": 4.3,
+        "energy": 0.0393,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.493
+      },
+      {
+        "at": 4.4,
+        "energy": 0.034,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.418
+      },
+      {
+        "at": 4.5,
+        "energy": 0.0044,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.471
+      },
+      {
+        "at": 4.6,
+        "energy": 0.0016,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.571
+      }
+    ],
+    "barge_requests": [
+      "Klippy stop talking"
+    ],
+    "barge_detection_seconds_from_user_start": 1.16,
+    "playback_flushed": true,
+    "wake_pipeline_counts": {
+      "captured_frames": 0,
+      "queue_drops": 0,
+      "device_ready": 0,
+      "discontinuities": 0,
+      "frames": 5445,
+      "voiced_frames": 1393,
+      "candidates": 4,
+      "duplicate_candidates": 0,
+      "asr_started": 5,
+      "prefix_rejected": 0,
+      "echo_rejected": 0,
+      "verified": 4,
+      "delivered": 5
+    },
+    "llm_intent": {
+      "action": "temperatures",
+      "printer_id": "synthetic-printer",
+      "query_subject": null,
+      "macro": null,
+      "params": {}
+    },
+    "query_catalog": {
+      "scope": "Real local query LLM, deterministic parser and injected simulated printers; no hardware/network APIs",
+      "catalog_queries": 41,
+      "cases": [
+        {
+          "synthetic_question": "Klippy, is my M1 printer homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 11.755,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What about the SV08?",
+          "answer": "SV08: Homed axes: X, Y, Z. Not homed: none.",
+          "milliseconds": 7.268,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How hot is the bed?",
+          "answer": "SV08: bed: 55 degrees Celsius, target 60 degrees Celsius",
+          "milliseconds": 5.559,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What's the target temperature?",
+          "answer": "SV08: bed: target 60 degrees Celsius",
+          "milliseconds": 0.976,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What layer am I on?",
+          "answer": "SV08: Slicer-reported layer 3 of 100; state printing.",
+          "milliseconds": 1.982,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Is Mercury One homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 11.99,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Has the machine established its coordinate reference?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 20719.682,
+          "http_reads": 1,
+          "error_code": null,
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "heat_fix_probe": {
+      "scope": "Deterministic heating/cancellation with injected simulated Moonraker; every HTTP write forbidden",
+      "cases": [
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Hey Klippy, can you set the Mercury 1 nozzle to 90 degrees Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set M1's nozzle to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Can you set the Mercury 1 nozzle to 90 Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One's hotend to 90.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set the nozzle temperature to 90 on M1.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Bring the nozzle up to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One nozzle to ninety",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 194 F",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 90",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "temperature_operands_not_printer_mentions",
+          "passed": true
+        },
+        {
+          "case": "invalid_model_action_parameters",
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "supported_request_llm_calls": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "simulated_status_response": "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+    "paced_responses": [
+      "I'm listening.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%."
+    ],
+    "paced_status_response": "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+    "printer_writes": 0,
+    "raw_embedded_keyword": {
+      "detected": 4,
+      "total": 4,
+      "misses": []
+    },
+    "gates": {
+      "standalone_wake": true,
+      "negative_words": true,
+      "captured_status": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true
+    },
+    "passed": true,
+    "preview_gates": {
+      "standalone_wake": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true,
+      "paced_captured_status": true,
+      "read_only_query_catalog": true,
+      "no_negative_query_activation": true,
+      "heating_parser_and_cancel_safety": true
+    },
+    "engineering_preview_passed": true,
+    "preview_scope": "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified",
+    "continuous_wake_status_passed": true,
+    "homophone_note": "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
+  },
+  "installed_voice": {
+    "scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
+    "speech_load_seconds": 6.779,
+    "python_external_network_denied": true,
+    "wake_threshold": 0.22,
+    "keywords_score": 2.0,
+    "wake_cases": [
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 3,
+        "detected": true
+      }
+    ],
+    "pipeline_transcripts": [],
+    "pipeline_wakes": [
+      [
+        1.430000000000001,
+        1,
+        0
+      ]
+    ],
+    "pipeline_states": [
+      "Checking wake word",
+      "Wake transcript unclear; please repeat Klippy and the request"
+    ],
+    "asr_errors": [],
+    "paced_wake_phrase": "Hey Klippy",
+    "first_attempt_wake_only": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy "
+      ],
+      "session_open": true,
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "frames": 915,
+        "voiced_frames": 322,
+        "candidates": 2,
+        "duplicate_candidates": 0,
+        "asr_started": 2,
+        "prefix_rejected": 1,
+        "echo_rejected": 0,
+        "verified": 1,
+        "delivered": 1
+      }
+    },
+    "paced_pipeline_transcripts": [
+      "Klippy ",
+      "What is the status of the test printer?"
+    ],
+    "paced_pipeline_wakes": [
+      [
+        7.22999999999989,
+        2,
+        0
+      ]
+    ],
+    "first_attempt_wake_command": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy what's the temperature?"
+      ],
+      "session_open": true,
+      "states": [
+        "Checking wake word",
+        "Listening"
+      ],
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "frames": 1869,
+        "voiced_frames": 679,
+        "candidates": 3,
+        "duplicate_candidates": 0,
+        "asr_started": 4,
+        "prefix_rejected": 1,
+        "echo_rejected": 0,
+        "verified": 2,
+        "delivered": 3
+      }
+    },
+    "negative_composite": [
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      }
+    ],
+    "own_echo_wakes": 0,
+    "own_echo_requests": 0,
+    "barge_wakes": 1,
+    "barge_candidates": [],
+    "barge_linear_fit_error": 1.5717260483466996e-13,
+    "barge_states": [
+      "Checking wake word",
+      "Listening",
+      "Checking wake word",
+      "Listening"
+    ],
+    "asr_observations": [
+      {
+        "at": 5.48,
+        "text": "Clibby what is the status of the test printer?",
+        "audio_seconds": 3.5
+      },
+      {
+        "at": 8.84,
+        "text": "Hey Clippy!",
+        "audio_seconds": 1.71
+      },
+      {
+        "at": 14.12,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.08
+      },
+      {
+        "at": 18.69,
+        "text": "Hey Clippy, what's the temperature?",
+        "audio_seconds": 2.55
+      },
+      {
+        "at": 49.42,
+        "text": "Clear.",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 49.9,
+        "text": "Clippy stuff",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 51.43,
+        "text": "Clippy stop talking",
+        "audio_seconds": 2.15
+      }
+    ],
+    "barge_frame_metrics": [
+      {
+        "at": 3.0,
+        "energy": 0.0,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.987
+      },
+      {
+        "at": 3.1,
+        "energy": 0.009,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.968
+      },
+      {
+        "at": 3.2,
+        "energy": 0.0132,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.455
+      },
+      {
+        "at": 3.3,
+        "energy": 0.1243,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.438
+      },
+      {
+        "at": 3.4,
+        "energy": 0.0192,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.536
+      },
+      {
+        "at": 3.5,
+        "energy": 0.0112,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.649
+      },
+      {
+        "at": 3.6,
+        "energy": 0.0925,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.608
+      },
+      {
+        "at": 3.7,
+        "energy": 0.0039,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.534
+      },
+      {
+        "at": 3.8,
+        "energy": 0.0029,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.466
+      },
+      {
+        "at": 3.9,
+        "energy": 0.0216,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.856
+      },
+      {
+        "at": 4.0,
+        "energy": 0.1016,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.287
+      },
+      {
+        "at": 4.1,
+        "energy": 0.0194,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.249
+      },
+      {
+        "at": 4.2,
+        "energy": 0.053,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.305
+      },
+      {
+        "at": 4.3,
+        "energy": 0.0388,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.471
+      },
+      {
+        "at": 4.4,
+        "energy": 0.0345,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.425
+      },
+      {
+        "at": 4.5,
+        "energy": 0.0048,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.417
+      },
+      {
+        "at": 4.6,
+        "energy": 0.0017,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.573
+      }
+    ],
+    "barge_requests": [
+      "Klippy stop talking"
+    ],
+    "barge_detection_seconds_from_user_start": 0.73,
+    "playback_flushed": true,
+    "wake_pipeline_counts": {
+      "captured_frames": 0,
+      "queue_drops": 0,
+      "device_ready": 0,
+      "discontinuities": 0,
+      "frames": 5448,
+      "voiced_frames": 1396,
+      "candidates": 4,
+      "duplicate_candidates": 0,
+      "asr_started": 5,
+      "prefix_rejected": 1,
+      "echo_rejected": 0,
+      "verified": 3,
+      "delivered": 4
+    },
+    "llm_intent": {
+      "action": "temperatures",
+      "printer_id": "synthetic-printer",
+      "query_subject": null,
+      "macro": null,
+      "params": {}
+    },
+    "query_catalog": {
+      "scope": "Real local query LLM, deterministic parser and injected simulated printers; no hardware/network APIs",
+      "catalog_queries": 41,
+      "cases": [
+        {
+          "synthetic_question": "Klippy, is my M1 printer homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 11.927,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What about the SV08?",
+          "answer": "SV08: Homed axes: X, Y, Z. Not homed: none.",
+          "milliseconds": 7.32,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How hot is the bed?",
+          "answer": "SV08: bed: 55 degrees Celsius, target 60 degrees Celsius",
+          "milliseconds": 7.408,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What's the target temperature?",
+          "answer": "SV08: bed: target 60 degrees Celsius",
+          "milliseconds": 1.04,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What layer am I on?",
+          "answer": "SV08: Slicer-reported layer 3 of 100; state printing.",
+          "milliseconds": 2.094,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Is Mercury One homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 5.217,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Has the machine established its coordinate reference?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 17471.753,
+          "http_reads": 1,
+          "error_code": null,
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "heat_fix_probe": {
+      "scope": "Deterministic heating/cancellation with injected simulated Moonraker; every HTTP write forbidden",
+      "cases": [
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Hey Klippy, can you set the Mercury 1 nozzle to 90 degrees Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set M1's nozzle to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Can you set the Mercury 1 nozzle to 90 Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One's hotend to 90.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set the nozzle temperature to 90 on M1.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Bring the nozzle up to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One nozzle to ninety",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 194 F",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 90",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "temperature_operands_not_printer_mentions",
+          "passed": true
+        },
+        {
+          "case": "invalid_model_action_parameters",
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "supported_request_llm_calls": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "simulated_status_response": null,
+    "paced_responses": [
+      "I'm listening.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%."
+    ],
+    "paced_status_response": "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+    "printer_writes": 0,
+    "raw_embedded_keyword": {
+      "detected": 4,
+      "total": 4,
+      "misses": []
+    },
+    "gates": {
+      "standalone_wake": true,
+      "negative_words": true,
+      "captured_status": false,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true
+    },
+    "passed": false,
+    "preview_gates": {
+      "standalone_wake": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true,
+      "paced_captured_status": true,
+      "read_only_query_catalog": true,
+      "no_negative_query_activation": true,
+      "heating_parser_and_cancel_safety": true
+    },
+    "engineering_preview_passed": true,
+    "preview_scope": "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified",
+    "continuous_wake_status_passed": false,
+    "homophone_note": "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
+  },
+  "budgeted_voice": {
+    "scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
+    "speech_load_seconds": 5.738,
+    "python_external_network_denied": true,
+    "wake_threshold": 0.22,
+    "keywords_score": 2.0,
+    "wake_cases": [
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 3,
+        "detected": true
+      }
+    ],
+    "pipeline_transcripts": [
+      "Klippy what is the status of the test printer?"
+    ],
+    "pipeline_wakes": [
+      [
+        1.430000000000001,
+        1,
+        0
+      ]
+    ],
+    "pipeline_states": [
+      "Checking wake word",
+      "Listening"
+    ],
+    "asr_errors": [],
+    "paced_wake_phrase": "Hey Klippy",
+    "first_attempt_wake_only": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy "
+      ],
+      "session_open": true,
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "frames": 915,
+        "voiced_frames": 320,
+        "candidates": 2,
+        "duplicate_candidates": 0,
+        "asr_started": 2,
+        "prefix_rejected": 0,
+        "echo_rejected": 0,
+        "verified": 2,
+        "delivered": 2
+      }
+    },
+    "paced_pipeline_transcripts": [
+      "Klippy ",
+      "What is the status of the test printer?"
+    ],
+    "paced_pipeline_wakes": [
+      [
+        7.22999999999989,
+        2,
+        0
+      ]
+    ],
+    "first_attempt_wake_command": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy what's the temperature?"
+      ],
+      "session_open": true,
+      "states": [
+        "Checking wake word",
+        "Listening"
+      ],
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "frames": 1869,
+        "voiced_frames": 681,
+        "candidates": 3,
+        "duplicate_candidates": 0,
+        "asr_started": 4,
+        "prefix_rejected": 0,
+        "echo_rejected": 0,
+        "verified": 3,
+        "delivered": 4
+      }
+    },
+    "negative_composite": [
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      }
+    ],
+    "own_echo_wakes": 0,
+    "own_echo_requests": 0,
+    "barge_wakes": 1,
+    "barge_candidates": [],
+    "barge_linear_fit_error": 1.52366906996088e-13,
+    "barge_states": [
+      "Checking wake word",
+      "Listening",
+      "Checking wake word",
+      "Listening"
+    ],
+    "asr_observations": [
+      {
+        "at": 5.48,
+        "text": "Clippy, what is the status of the test printer?",
+        "audio_seconds": 3.5
+      },
+      {
+        "at": 9.15,
+        "text": "Hey Clippy!",
+        "audio_seconds": 1.71
+      },
+      {
+        "at": 14.12,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.09
+      },
+      {
+        "at": 18.69,
+        "text": "Hey Clippy, what's the temperature?",
+        "audio_seconds": 2.56
+      },
+      {
+        "at": 49.4,
+        "text": "[Music]",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 49.88,
+        "text": "Clibby stuff",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 50.31,
+        "text": "Clippy stop, top.",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 51.55,
+        "text": "Clippy stop talking",
+        "audio_seconds": 2.15
+      }
+    ],
+    "barge_frame_metrics": [
+      {
+        "at": 3.0,
+        "energy": 0.0,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.987
+      },
+      {
+        "at": 3.1,
+        "energy": 0.0091,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.968
+      },
+      {
+        "at": 3.2,
+        "energy": 0.0142,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.451
+      },
+      {
+        "at": 3.3,
+        "energy": 0.1243,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.439
+      },
+      {
+        "at": 3.4,
+        "energy": 0.0195,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.537
+      },
+      {
+        "at": 3.5,
+        "energy": 0.0108,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.656
+      },
+      {
+        "at": 3.6,
+        "energy": 0.0932,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.612
+      },
+      {
+        "at": 3.7,
+        "energy": 0.004,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.534
+      },
+      {
+        "at": 3.8,
+        "energy": 0.0033,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.473
+      },
+      {
+        "at": 3.9,
+        "energy": 0.0219,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.887
+      },
+      {
+        "at": 4.0,
+        "energy": 0.1008,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.543
+      },
+      {
+        "at": 4.1,
+        "energy": 0.0173,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.443
+      },
+      {
+        "at": 4.2,
+        "energy": 0.0543,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.426
+      },
+      {
+        "at": 4.3,
+        "energy": 0.0397,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.512
+      },
+      {
+        "at": 4.4,
+        "energy": 0.0341,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.434
+      },
+      {
+        "at": 4.5,
+        "energy": 0.0047,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.477
+      },
+      {
+        "at": 4.6,
+        "energy": 0.0017,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.571
+      }
+    ],
+    "barge_requests": [
+      "Klippy stop talking"
+    ],
+    "barge_detection_seconds_from_user_start": 1.16,
+    "playback_flushed": true,
+    "wake_pipeline_counts": {
+      "captured_frames": 0,
+      "queue_drops": 0,
+      "device_ready": 0,
+      "discontinuities": 0,
+      "frames": 5446,
+      "voiced_frames": 1397,
+      "candidates": 4,
+      "duplicate_candidates": 0,
+      "asr_started": 5,
+      "prefix_rejected": 0,
+      "echo_rejected": 0,
+      "verified": 4,
+      "delivered": 5
+    },
+    "llm_intent": {
+      "action": "temperatures",
+      "printer_id": "synthetic-printer",
+      "query_subject": null,
+      "macro": null,
+      "params": {}
+    },
+    "query_catalog": {
+      "scope": "Real local query LLM, deterministic parser and injected simulated printers; no hardware/network APIs",
+      "catalog_queries": 41,
+      "cases": [
+        {
+          "synthetic_question": "Klippy, is my M1 printer homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 10.159,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What about the SV08?",
+          "answer": "SV08: Homed axes: X, Y, Z. Not homed: none.",
+          "milliseconds": 6.313,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How hot is the bed?",
+          "answer": "SV08: bed: 55 degrees Celsius, target 60 degrees Celsius",
+          "milliseconds": 4.799,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What's the target temperature?",
+          "answer": "SV08: bed: target 60 degrees Celsius",
+          "milliseconds": 0.794,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What layer am I on?",
+          "answer": "SV08: Slicer-reported layer 3 of 100; state printing.",
+          "milliseconds": 1.72,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Is Mercury One homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 5.034,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Has the machine established its coordinate reference?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 17157.855,
+          "http_reads": 1,
+          "error_code": null,
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "heat_fix_probe": {
+      "scope": "Deterministic heating/cancellation with injected simulated Moonraker; every HTTP write forbidden",
+      "cases": [
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Hey Klippy, can you set the Mercury 1 nozzle to 90 degrees Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set M1's nozzle to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Can you set the Mercury 1 nozzle to 90 Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One's hotend to 90.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set the nozzle temperature to 90 on M1.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Bring the nozzle up to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One nozzle to ninety",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 194 F",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 90",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "temperature_operands_not_printer_mentions",
+          "passed": true
+        },
+        {
+          "case": "invalid_model_action_parameters",
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "supported_request_llm_calls": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "simulated_status_response": "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+    "paced_responses": [
+      "I'm listening.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%."
+    ],
+    "paced_status_response": "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+    "printer_writes": 0,
+    "raw_embedded_keyword": {
+      "detected": 4,
+      "total": 4,
+      "misses": []
+    },
+    "gates": {
+      "standalone_wake": true,
+      "negative_words": true,
+      "captured_status": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true
+    },
+    "passed": true,
+    "preview_gates": {
+      "standalone_wake": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true,
+      "paced_captured_status": true,
+      "read_only_query_catalog": true,
+      "no_negative_query_activation": true,
+      "heating_parser_and_cancel_safety": true
+    },
+    "engineering_preview_passed": true,
+    "preview_scope": "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified",
+    "continuous_wake_status_passed": true,
+    "homophone_note": "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
+  },
+  "installer": {
+    "environment": "Fresh Windows CI runner; not a clean Windows desktop VM",
+    "limitations": [
+      "not clean Windows desktop VM qualification",
+      "not physical microphone accuracy"
+    ],
+    "firewall_profiles": [
+      {
+        "Name": "Domain",
+        "Enabled": 1
+      },
+      {
+        "Name": "Private",
+        "Enabled": 1
+      },
+      {
+        "Name": "Public",
+        "Enabled": 1
+      }
+    ],
+    "installer_sha256": "c3b87742262793490f24511103db577d019fa8353043e3b1a756f636b460424f",
+    "status": "passed",
+    "cross_version_upgrade": true,
+    "host_ram_bytes": 8584425472,
+    "installers": [
+      "local/previous/Klippy-Setup-0.5.0-preview.1.exe",
+      "dist\\Klippy-Setup-0.5.1-preview.1.exe",
+      "dist\\Klippy-Setup-0.5.1-preview.1.exe"
+    ],
+    "tests": [
+      "per-user install",
+      "same-version reinstall preserving isolated data",
+      "installed application smoke test",
+      "installed offline engineering query/wake-followup preview; full voice diagnostics retained separately",
+      "uninstall removes executable",
+      "uninstall preserves isolated user data"
+    ],
+    "build_run": null,
+    "performance_budget_test": true,
+    "os": "Microsoft Windows NT 10.0.26100.0",
+    "external_network_blocked": true
+  },
+  "performance": {
+    "peak_job_commit_bytes": 1958084608,
+    "peak_active_processes": 3,
+    "wall_seconds": 164.913,
+    "host_ram_bytes": 8584425472,
+    "os": "Microsoft Windows NT 10.0.26100.0",
+    "scope": "Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM",
+    "memory_budget_gib": 16,
+    "cpu_seconds": 264.656,
+    "cpu": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+    "limitations": [
+      "Total VM RAM/cache is not controlled by the process-tree commit budget",
+      "No human microphone accuracy",
+      "No real printer connections"
+    ],
+    "passed": true
+  },
+  "limitations": [
+    "Synthetic single attempts are not human microphone accuracy evidence",
+    "Broad raw KWS/continuous-speech accuracy remains open",
+    "Fresh Windows CI is not a clean desktop VM",
+    "16 GiB process-tree commit budget is not actual 16 GB host qualification",
+    "Physical printer and acoustic acceptance remain open; zero physical connections/actions"
+  ]
+}

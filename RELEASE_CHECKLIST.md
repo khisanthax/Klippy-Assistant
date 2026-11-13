@@ -31,3 +31,9 @@ unprefixed follow-up in frozen/installed/memory reports. Keep original full-voic
 and failures separate. Match the installer digest to CI, the sidecar and installed-QA
 evidence, and tag the exact qualified application source. These synthetic checks do not
 close human microphone/room or physical-printer gates.
+
+For the 0.5.1 heating/cancellation hotfix, all 21 packaged command-probe cases must pass
+in frozen/installed/memory reports, with zero HTTP writes, supported-request LLM calls or
+pending action. Check converted Celsius targets, configured-name/unit separation, explicit
+cancellation and clarification-safe confirmation. Keep initial failure reproductions and
+cancelled code candidates visible. Physical heater acceptance remains supervised and open.

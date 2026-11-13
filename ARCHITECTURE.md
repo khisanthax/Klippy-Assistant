@@ -57,3 +57,20 @@ a preceding sentence after silence; final ASR prefix and own-echo verification s
 session activation. Numeric in-memory counters separate microphone readiness/capture, drops,
 KWS candidates, ASR starts/rejections and delivered input. They never retain user audio or
 transcripts. Shared session holds preserve follow-ups during interpretation and playback.
+
+Heating instructions pass a bounded deterministic language parser before query/model routing.
+Configured names share possessive/punctuation and English number-word normalization. For
+heating, names require a name position and valid remaining command/header syntax; units,
+heater/value operands and polite command words cannot select a printer or be deleted as
+names. An omitted unit means Celsius. Explicit Fahrenheit converts to Celsius with decimal
+arithmetic and a conservative float boundary; the final target passes actual-heater telemetry,
+fresh state, selected-enrollment and finite reviewed-limit checks at proposal/confirmation.
+Model action/parameter mismatches reject at the adapter, conversation and policy boundaries;
+they are never repaired into writes. Model HEAT must agree with an independent Celsius parse.
+
+Explicit cancellation discards a pending review. Ordinary uncertain negative remarks suspend
+an unexpired review for clarification without calling it cancellation: ready=false plus a
+clarification-required flag block voice/manual/direct confirmation and old prompt completion.
+Only a complete fresh request creates a new validated token. Already dispatched operations
+cannot be retracted, and uncertain transmissions are never retried. Safe diagnostic codes
+are stored with their reaction identifier in bounded memory separately from spoken errors.

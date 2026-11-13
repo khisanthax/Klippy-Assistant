@@ -1,5 +1,34 @@
 # Logbook
 
+## 2026-11-13 — Qualified 0.5.1 heating/cancellation hotfix
+
+Exact source 2eabdfaee0bf0f189f18e5719714b0cbaec2ae63 passed every job in Windows run
+43461231046 attempt 1: 510 tests (all prior 408 retained), zero failed/skipped, Ruff,
+frozen startup/native probes, actual 0.5.0 upgrade/reinstall, legacy SQLite/name/alias/
+selected-target/style preservation, installed startup, offline models, process-tree budget
+and uninstall preserving data. All firewall profiles enabled; external app/runtime egress blocked.
+
+Every frozen/installed/budgeted process passed all 21 heating/cancellation cases with zero
+HTTP writes, supported-request LLM calls or pending action. Seven query cases, six negative
+audio inputs, own echo/interruption, both single-attempt Hey cases and acknowledgement/
+unprefixed follow-up also passed. Original broader voice flags remain True/False/True:
+installed ASR returned Clibby for the older bare-Klippy continuous status case; strict prefix
+verification rejected it. Failure retained in preview51-release-installed.json and aggregate.
+No acoustic gate, threshold or phonetic-prefix rule was weakened. Earlier code builds were
+cancelled for unit/name correctness, not retried for passing audio. Initial failures retained.
+
+Installer: Klippy-Setup-0.5.1-preview.1.exe, 1,489,751,540 bytes, SHA-256
+c3b87742262793490f24511103db577d019fa8353043e3b1a756f636b460424f.
+CI/sidecar/installed-QA/local copy agree. Peak process-tree commit 1,958,084,608 bytes, three
+processes, wall 164.913 seconds on an 8 GiB Intel Xeon 8370C runner under a 16 GiB commit
+budget; not actual 16 GB hardware or clean desktop VM qualification. Complete evidence in
+benchmarks/preview51-release-qualification.json. No physical connections/heating, owner
+recordings or owner installation changes; models unchanged/outside Git.
+
+Next: tag exact qualified source, verify every uploaded asset size/digest and publish the
+accurately labeled unsigned prerelease. Retain human microphone/room, actual fleet/accessory,
+clean VM/actual 16 GB, sleep/resume and supervised consequential acceptance gates as open.
+
 ## 2026-11-13 — Contextual name proof finalized, 510 tests passed
 
 Refined the operand fix into syntax-proven name spans. Complete heating requests retain

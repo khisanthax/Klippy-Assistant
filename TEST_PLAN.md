@@ -14,6 +14,17 @@ Wake/non-wake text cases validate conversation gating only. They do not validate
 Offline tests validate isolated software paths with simulated LAN transport, not a full
 network-isolated speech installation. CI must not substitute these for acceptance gates.
 
+The 0.5.1 regression suite includes the exact owner heating phrase and all requested
+variations, configured/colliding number-word aliases, Celsius default and explicit Fahrenheit,
+converted limit boundaries, missing heaters/limits, read-only versus heating classification,
+wrong-action model parameters, explicit cancellation versus negative conversational remarks,
+clarification/playback/confirmation races, configured prompt policy and single-use/no-retry.
+Unit/heater/command words cannot become printer mentions; explicit “90 F on F”, unsupported
+K units and genuine Nozzle One names exercise ambiguous positions without physical APIs.
+Frozen/installed/memory probes additionally require all 21 command cases through Conversation
+and SafetyEngine with every HTTP write forbidden, zero supported-request LLM calls and no
+remaining pending action. These checks do not authorize or qualify actual printer heating.
+
 ## Physical hardware — pending supervised testing
 
 - Klippy and Hey Klippy recognition, Klipper/Clippy false positives; labeled sample counts.

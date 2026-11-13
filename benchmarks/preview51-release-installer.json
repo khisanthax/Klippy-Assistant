@@ -1,0 +1,42 @@
+{
+  "environment": "Fresh Windows CI runner; not a clean Windows desktop VM",
+  "limitations": [
+    "not clean Windows desktop VM qualification",
+    "not physical microphone accuracy"
+  ],
+  "firewall_profiles": [
+    {
+      "Name": "Domain",
+      "Enabled": 1
+    },
+    {
+      "Name": "Private",
+      "Enabled": 1
+    },
+    {
+      "Name": "Public",
+      "Enabled": 1
+    }
+  ],
+  "installer_sha256": "c3b87742262793490f24511103db577d019fa8353043e3b1a756f636b460424f",
+  "status": "passed",
+  "cross_version_upgrade": true,
+  "host_ram_bytes": 8584425472,
+  "installers": [
+    "local/previous/Klippy-Setup-0.5.0-preview.1.exe",
+    "dist\\Klippy-Setup-0.5.1-preview.1.exe",
+    "dist\\Klippy-Setup-0.5.1-preview.1.exe"
+  ],
+  "tests": [
+    "per-user install",
+    "same-version reinstall preserving isolated data",
+    "installed application smoke test",
+    "installed offline engineering query/wake-followup preview; full voice diagnostics retained separately",
+    "uninstall removes executable",
+    "uninstall preserves isolated user data"
+  ],
+  "build_run": null,
+  "performance_budget_test": true,
+  "os": "Microsoft Windows NT 10.0.26100.0",
+  "external_network_blocked": true
+}

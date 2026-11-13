@@ -15,12 +15,17 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 
 ## Conversational UX (0.5 preview)
 
-The 0.5.1 heating/cancellation fix is under qualification. Configured number-word printer
+The 0.5.1 heating/cancellation fix is qualified at source `2eabdfa`, Windows run 43461231046
+attempt 1: 510 tests/Ruff, frozen/installed/offline 0.5 upgrade/reinstall and memory checks
+passed. All 21 command cases passed in each process with zero writes/LLM calls/pending actions.
+Original broader voice flags remain True/False/True; installed bare-Klippy ASR prefix rejection
+is retained. Human microphone, clean desktop VM/actual 16 GB and physical heater gates stay open.
+Configured number-word printer
 names, deterministic natural heating, Celsius default/Fahrenheit conversion, explicit
 cancellation and clarification-safe pending reviews are implemented with regression and
 packaged write-forbidden probes. Invalid model parameters produce useful explanations and
 separate diagnostics; reviewed limits/confirmation/no-retry safeguards remain mandatory.
-See PREVIEW51_REPORT.md. Preserve all 408 prior cases and keep physical/acoustic gates open.
+See PREVIEW51_REPORT.md. Preserve all 510 cases and keep physical/acoustic gates open.
 
 Published [v0.5.0-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.0-preview.1)
 at exact qualified source `60fac78`: Windows run

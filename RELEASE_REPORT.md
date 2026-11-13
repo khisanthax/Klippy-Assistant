@@ -1,6 +1,6 @@
 # Klippy engineering preview — 2026-11-11
 
-**Historical Phase 1 report.** See [PREVIEW5_REPORT.md](PREVIEW5_REPORT.md) for the current
+**Historical Phase 1 report.** See [PREVIEW51_REPORT.md](PREVIEW51_REPORT.md) for the current
 software preview and [PHASE2_REPORT.md](PHASE2_REPORT.md) for model qualification. The limits below describe 0.1.0.
 
 ## Repository and version
