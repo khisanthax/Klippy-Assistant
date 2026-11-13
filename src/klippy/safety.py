@@ -15,7 +15,19 @@ from .moonraker import ConnectionFailure
 
 
 class Rejected(Exception):
-    pass
+    def __init__(self, message, *, code="request_rejected"):
+        super().__init__(message)
+        self.code = code
+
+
+def validate_intent_fields(intent):
+    if intent.query_subject is not None and intent.action != Action.TEMPERATURES:
+        raise Rejected("The heater question doesn't match the requested operation. Please restate your request.", code="intent_subject_action_mismatch")
+    if intent.macro is not None and intent.action != Action.MACRO:
+        raise Rejected("The macro name doesn't match the requested operation. Please restate your request.", code="intent_macro_action_mismatch")
+    if intent.action not in (Action.MACRO, Action.HEAT) and intent.params:
+        raise Rejected("I couldn't match those settings to a heating or macro request. Please restate the operation and target; I haven't sent a command.",
+                       code="intent_parameters_for_" + intent.action.value)
 
 
 class NeedsParameter(Rejected):
@@ -55,6 +67,7 @@ class Pending:
     binding: str
     ready: bool = True
     hard_expires: float = 0.0
+    clarification_required: bool = False
 
 
 class SafetyEngine:
@@ -76,13 +89,19 @@ class SafetyEngine:
     def delivery_finished(self, token, success):
         with self.state_lock:
             pending = self.pending
-            if pending is None or pending.token != token or pending.ready:
+            if pending is None or pending.token != token or pending.ready or pending.clarification_required:
                 return
             if not success or self.clock() >= pending.hard_expires:
                 self.cancel()
             else:
                 self.pending = replace(pending, ready=True,
                                        expires=min(pending.hard_expires, self.clock() + self.confirmation_seconds))
+
+    def require_clarification(self):
+        with self.state_lock:
+            self.generation += 1  # Invalidate validation still in flight, without canceling a pending review.
+            if self.pending is not None:
+                self.pending = replace(self.pending, ready=False, clarification_required=True)
 
 
     def select(self, printer_id):
@@ -97,12 +116,7 @@ class SafetyEngine:
             raise Rejected("Printer is not approved")
         if self.store.get("selected") != printer.id:
             raise Rejected("Select the target printer first")
-        if intent.query_subject is not None and intent.action != Action.TEMPERATURES:
-            raise Rejected("Unexpected temperature subject")
-        if intent.macro is not None and intent.action != Action.MACRO:
-            raise Rejected("Unexpected macro field")
-        if intent.action not in (Action.MACRO, Action.HEAT) and intent.params:
-            raise Rejected("Unexpected parameters")
+        validate_intent_fields(intent)
         client = self.clients(printer)
         # Explicit emergency commands bypass the ready-state query but never enrollment/selection.
         state = Snapshot(connected=True) if intent.action == Action.EMERGENCY else await client.snapshot()
@@ -127,9 +141,15 @@ class SafetyEngine:
             heater, temperature = intent.params["heater"], intent.params["temperature"]
             if heater not in (0, 1) or not math.isfinite(temperature):
                 raise Rejected("Invalid heater or temperature")
+            name = "heater_bed" if heater == 1 else "extruder"
+            measured = state.temperatures.get(name)
+            if measured is None or not math.isfinite(measured) or measured < -273.15:
+                raise Rejected("The selected printer isn't reporting a valid temperature for that heater. Check its connection before requesting heat.", code="heat_heater_unavailable")
             limits = self.store.get("heater_limits", {}).get(printer.id, {})
             maximum = limits.get(str(int(heater)))
-            if maximum is None or not 0 <= temperature <= maximum:
+            if type(maximum) not in (int, float) or not math.isfinite(maximum) or maximum < 0:
+                raise Rejected("Please review this printer's heater limits in Settings before requesting heat.", code="heat_limits_need_review")
+            if not 0 <= temperature <= maximum:
                 raise Rejected("Temperature is outside locally reviewed heater limits")
             policy = {"maximum": maximum}
             script = f"{'M104' if heater == 0 else 'M140'} S{numeric_text(temperature)}"
@@ -228,6 +248,8 @@ class SafetyEngine:
     async def _confirm_locked(self, token):
         with self.state_lock:
             pending = self.pending
+            if pending is not None and pending.clarification_required:
+                raise Rejected("Please restate the complete request before confirming; we're still clarifying it.", code="confirmation_needs_clarification")
             self.cancel()  # Single use, including failure. Never retry a consequential request.
             generation = self.generation
         if pending is None or not pending.ready or not secrets.compare_digest(token, pending.token) or self.clock() >= pending.expires:

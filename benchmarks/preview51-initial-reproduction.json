@@ -1,0 +1,8 @@
+{
+  "scope": "Synthetic reproduction of reported failure class; injected wrong-action model output, not an owner model recording",
+  "deterministic_before": null,
+  "before_error": "Unexpected parameters",
+  "before_comment_response": "Pending action canceled.",
+  "before_pending_survives": false,
+  "simulated_writes": 0
+}

@@ -1,6 +1,7 @@
 """Bounded in-memory monotonic timings; never stores utterances or endpoints."""
 import contextvars
 import itertools
+import re
 import threading
 import time
 from collections import OrderedDict
@@ -39,6 +40,14 @@ class Timings:
             if key in self.rows:
                 self.rows[key]["stages"][stage] = round(seconds * 1000, 2)
 
+    def error(self, code, key=None):
+        key = current.get() if key is None else key
+        if not isinstance(code, str) or not re.fullmatch(r"[A-Za-z0-9_]{1,80}", code):
+            code = "request_rejected"
+        with self.lock:
+            if key in self.rows:
+                self.rows[key]["error_code"] = code
+
     @contextmanager
     def span(self, stage):
         start = self.clock()
@@ -49,11 +58,16 @@ class Timings:
 
     def snapshot(self):
         with self.lock:
-            return [{"reaction": k, "milliseconds": dict(v["stages"])} for k, v in self.rows.items()]
+            return [{"reaction": k, "milliseconds": dict(v["stages"]),
+                     **({"error_code": v["error_code"]} if "error_code" in v else {})} for k, v in self.rows.items()]
 
     def compact(self):
         rows = self.snapshot()
+        errors = [row for row in rows if "error_code" in row]
+        diagnostic = (f" · Latest diagnostic: {errors[-1]['error_code']} (reaction {errors[-1]['reaction']})"
+                      if errors else "")
         return ("Latest local reaction (ms): " + "; ".join(f"{k}: {v:g}" for k, v in rows[-1]["milliseconds"].items())
+                + diagnostic
                 if rows else "No reaction measured yet. Timings stay in memory; no transcripts are recorded.")
 
 

@@ -1,4 +1,4 @@
-param([string]$Installer = 'dist\Klippy-Setup-0.5.0-preview.1.exe', [string]$PreviousInstaller = '',
+param([string]$Installer = 'dist\Klippy-Setup-0.5.1-preview.1.exe', [string]$PreviousInstaller = '',
       [string]$Python = '.venv\Scripts\python.exe', [switch]$BlockExternalNetwork,
       [switch]$MeasurePerformance)
 $ErrorActionPreference = 'Stop'

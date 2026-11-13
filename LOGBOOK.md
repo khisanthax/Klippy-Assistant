@@ -1,5 +1,39 @@
 # Logbook
 
+## 2026-11-13 — Reproduced owner heating/cancellation failures; 0.5.1 implementation
+
+Started from clean latest main 8e2b211. Reproduced the exact owner phrase with Mercury One/M1
+configured: Mercury 1 was not resolved, deterministic intent returned None, and an injected
+model TEMPERATURES intent with heater/temperature parameters reproduced “Unexpected parameters”.
+This is the actual failing guard/path under simulation; the owner's actual model JSON is
+unknown, not recovered. The ordinary “I'm not sure why it didn't understand” remark also
+reproduced “Pending action canceled” and removed the pending review. Zero simulated writes.
+Initial evidence is benchmarks/preview51-initial-reproduction.json.
+
+Implemented deterministic normalized heating with configured name/alias matching, number
+words, possessives/punctuation, hotend synonyms, polite wording, Celsius default and explicit
+Fahrenheit conversion. Ambiguous/incomplete actions cannot fall through to query/model paths.
+Converted targets pass fresh selected-printer/heater/state/reviewed-limit checks and existing
+confirmation policy; Celsius values are reviewed, and no transmission is automatically retried.
+Wrong model action/parameter combinations reject with helpful speech and separate safe codes
+in bounded diagnostics. The owner phrase now becomes HEAT(heater=0, temperature=90) without LLM.
+
+Replaced generic-not cancellation with explicit cancellation matching. Uncertain remarks ask
+clarification and retain an existing review suspended, preventing old prompt completion or
+confirmation from executing it until a complete fresh request is given. Added safety races,
+unit boundaries, invalid model/limits/heater regressions and a write-forbidden 20-case packaged
+command probe. First full run: 489 passed. Expanded run found a new UI diagnostic test looking
+at the speech reaction instead of the rejected request; diagnostics now identify the latest
+error's reaction even after feedback speech, and the regression verifies that association.
+Final full suite: 497 passed, all prior 408 retained, Ruff passed. The final 97-test targeted
+heating/UI run also passed before the two additional non-heating-set regressions. The
+20-case command probe passed with zero writes, supported-request LLM calls or pending action.
+Exact frozen/installer qualification is next. See PREVIEW51_REPORT.md.
+
+No physical printer connection/action, owner recording or owner installation change. Models
+unchanged/outside Git. Human wake/room, clean VM/actual 16 GB, actual fleet/accessory and
+supervised consequential acceptance stay open. Do not infer hardware acceptance from mocks.
+
 ## 2026-11-13 — Published v0.5.0-preview.1
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.0-preview.1

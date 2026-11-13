@@ -134,6 +134,24 @@ def test_loaded_voice_is_enabled_before_workers_start(window, rig, monkeypatch):
     assert VoiceLoop is not LoadedVoice  # Test never opens a physical microphone.
 
 
+async def test_interpretation_diagnostic_is_kept_out_of_normal_speech(window, monkeypatch):
+    from klippy.diagnostics import timings
+    from klippy.safety import Rejected
+    requests, spoken = [], []
+    monkeypatch.setattr(window.worker, "submit", lambda name, coroutine: requests.append(coroutine))
+    async def reject(*args, **kwargs):
+        raise Rejected("Please restate the heater and target temperature.", code="intent_parameters_for_temperatures")
+    monkeypatch.setattr(window.conversation, "hear", reject)
+    window.voice.say = lambda text, **kwargs: spoken.append(text)
+    window.submit_turn("adjust the nozzle")
+    result = await requests.pop()
+    window.result("turn", result)
+    assert spoken == ["Please restate the heater and target temperature."]
+    reaction = next(row for row in timings.snapshot() if row["reaction"] == window.reaction_trace)
+    assert reaction["error_code"] == "intent_parameters_for_temperatures"
+    assert "intent_parameters_for_temperatures" in timings.compact()
+
+
 async def test_cancel_stops_prompt_and_invalidates_its_token(window, rig):
     _, sim, engine, _ = rig
     await engine.propose(Intent(action=Action.HOME, printer_id="sim"), defer_confirmation=True)

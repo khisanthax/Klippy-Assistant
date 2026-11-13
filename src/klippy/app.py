@@ -763,6 +763,7 @@ class Window(QMainWindow):
                                                          defer_confirmation=defer_confirmation)
                 return turn, value, False
             except (Rejected, ConnectionFailure) as exc:
+                timings.error(getattr(exc, "code", "connection_unavailable"))
                 return turn, str(exc), True
             finally:
                 current.reset(context)

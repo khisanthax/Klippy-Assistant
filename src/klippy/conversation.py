@@ -7,11 +7,12 @@ import time
 
 from .diagnostics import timings
 from .domain import Action, Intent, StrictModel
+from .language import cancellation, clarification, heat_intent, heating_request, normalize
 from .macros import candidates, words
 from .moonraker import ConnectionFailure
-from .printer_names import matching
+from .printer_names import matching, remove_names
 from .queries import QueryRequest, QueryService, QueryUnavailable, information_request, match_query
-from .safety import NeedsParameter, Rejected
+from .safety import NeedsParameter, Rejected, validate_intent_fields
 from .session import Session
 
 
@@ -89,7 +90,7 @@ class Conversation:
         generation = self.generation
         if self.clock() >= self.until:
             self.draft = None
-        text = text.strip().lower().rstrip(".!?")
+        text = normalize(text)
         wake = re.match(r"^(?:hey\s+)?klippy\b[,\s]*", text)
         if source == "voice" and not wake and self.clock() >= self.until:
             return None
@@ -104,11 +105,14 @@ class Conversation:
         if text in {"stop talking", "be quiet"}:
             return "speech_stopped"
         is_query = information_request(text)
-        if (text in {"no", "cancel", "don't do that", "do not do that", "never mind", "cancel that"}
-                or not is_query and re.search(r"\b(?:don't|do not|never|not)\b", text)):
+        if cancellation(text):
             self.engine.cancel()
             self.draft = None
             return "Pending action canceled."
+        if not is_query and clarification(text):
+            self.engine.require_clarification()
+            self.draft = None
+            return "What would you like to change? Please restate the complete request. I won't act while we're clarifying it."
         if text == "confirm":
             token = ((confirmation_token or "") if source == "voice" else
                      self.engine.pending.token if self.engine.pending else "")
@@ -125,8 +129,7 @@ class Conversation:
             if self.engine.store.get("selected") != mentioned[0].id:
                 self.draft = None
             self.engine.select(mentioned[0].id)
-            for name in sorted((mentioned[0].name, *mentioned[0].aliases), key=len, reverse=True):
-                text = re.sub(r"(?<!\w)" + re.escape(name.lower()) + r"(?!\w)", "", text).strip()
+            text = remove_names(mentioned[0], text)
         selected = self.engine.store.get("selected")
         active_question = re.fullmatch(r"(?:which|what) printer (?:am i using|are you (?:using|connected to))", text)
         if active_question:
@@ -140,13 +143,16 @@ class Conversation:
             return f"{mentioned[0].name} selected."
         if re.match(r"^(?:please )?(?:switch\b|change printers\b|select\b|use\b|go back to\b)", text):
             raise Rejected("Which enrolled printer would you like to use? Check its name or add an alias in Printers.")
+        # Explicit heating verbs are actions, including polite requests and incomplete ones.
+        # Never route them to a temperature query or a model that might guess values/units.
+        heat = heat_intent(text, selected)
         try:
-            query = match_query(text, self.last_query)
+            query = None if heating_request(text) else match_query(text, self.last_query)
         except QueryUnavailable as exc:
             raise Rejected(str(exc)) from None
         if text.startswith("what about") and query is None:
             raise Rejected("Please identify an enrolled printer and a previous information query")
-        basic = self.basic(text, selected)
+        basic = heat or self.basic(text, selected)
         # Keep the snapshot-only embedded Conversation API compatible. The desktop
         # supplies QueryService and routes all catalog reads through verified discovery.
         legacy_read = self.queries is None and basic and basic.action in {Action.STATUS, Action.TEMPERATURES}
@@ -206,6 +212,9 @@ class Conversation:
             raise Rejected("Please specify a status query, printer action, or approved macro")
         if generation != self.generation:
             return None  # A wake/correction/cancel superseded inference while it was awaited.
+        validate_intent_fields(intent)
+        if interpreted and intent.action == Action.HEAT:
+            validate_model_heat(intent, text)
         try:
             return await self.engine.propose(intent, defer_confirmation=defer_confirmation, force_confirmation=interpreted)
         except NeedsParameter:
@@ -243,6 +252,9 @@ class Conversation:
 
     @staticmethod
     def basic(text, printer_id):
+        heat = heat_intent(text, printer_id)
+        if heat is not None:
+            return heat
         query = " ".join(text.lower().replace("what's", "what is").split())
         if re.fullmatch(r"(?:what is |what are |tell me |tell me about |report |read )?(?:the )?(?:(nozzle|bed|extruder) )?temperatures?", query):
             subject = "nozzle" if "nozzle" in query or "extruder" in query else "bed" if "bed" in query else None
@@ -254,10 +266,6 @@ class Conversation:
             return Intent(action=Action.STATUS, printer_id=printer_id)
         normalized = re.sub(r"\b(please|can|could|you|the|it|that|printer|print|on|for|me|to)\b", " ", text)
         normalized = " ".join(normalized.split())
-        heat = re.fullmatch(r"(?:heat|warm|set) (nozzle|extruder|bed)(?: temperature)? (-?\d+(?:\.\d+)?)(?: (?:degrees(?: celsius)?|celsius|c))?", normalized)
-        if heat:
-            return Intent(action=Action.HEAT, printer_id=printer_id,
-                          params={"heater": 1 if heat[1] == "bed" else 0, "temperature": float(heat[2])})
         phrases = {"pause": Action.PAUSE, "resume": Action.RESUME, "cancel": Action.CANCEL,
                    "home": Action.HOME, "home axes": Action.HOME, "home all axes": Action.HOME, "emergency stop": Action.EMERGENCY,
                    "status": Action.STATUS, "what is status of": Action.STATUS, "what's status of": Action.STATUS,
@@ -269,6 +277,13 @@ class Conversation:
                    "what macros are available": Action.MACROS, "list macros": Action.MACROS}
         action = phrases.get(normalized)
         return Intent(action=action, printer_id=printer_id) if action else None
+
+
+def validate_model_heat(intent, text):
+    expected = heat_intent(text, intent.printer_id)
+    if expected is None or expected.params != intent.params:
+        raise Rejected("I couldn't verify the heater and temperature in that interpretation. Please restate the full heating request; I haven't sent a command.",
+                       code="model_heat_target_mismatch")
 
 
 class LocalLLM:
@@ -342,6 +357,8 @@ class LocalLLM:
                   "Use the supplied printer_id only. If ambiguous set intent=null and ask a question. "
                   "Otherwise put the complete intent in intent and set question=null. /no_think\n"
                   "Temperature/nozzle/bed temperature questions use action=temperatures. "
+                  "Heating instructions use action=heat with params={heater:0 for nozzle or 1 for bed,temperature:target in Celsius}. "
+                  "Never attach heating parameters to a read-only question. No unit means Celsius; convert explicit Fahrenheit. "
                   "Pause/hold/suspend a print uses action=pause. Continue a paused print uses resume. "
                   "General print progress uses status. Vague requests like 'do the thing' require clarification. "
                   "Never choose an operation absent from the request. Use params={} unless explicit numeric values exist.\n"
@@ -364,6 +381,9 @@ class LocalLLM:
                 intent = interpretation.intent
                 if intent.printer_id != printer_id:
                     raise Rejected("The model selected another printer; request again")
+                validate_intent_fields(intent)
+                if intent.action == Action.HEAT:
+                    validate_model_heat(intent, text)
                 if intent.action not in {Action.STATUS, Action.TEMPERATURES, Action.MACROS}:
                     if re.search(r"\b(?:no|not|don't|never)\b", text.lower()):
                         raise Rejected("Negative or ambiguous instruction; no action sent")

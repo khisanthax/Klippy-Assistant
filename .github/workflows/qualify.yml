@@ -28,7 +28,7 @@ jobs:
       - shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download v0.4.0-preview.1 --pattern 'Klippy-Setup-0.4.0-preview.1.exe' --dir local/previous
+        run: gh release download v0.5.0-preview.1 --pattern 'Klippy-Setup-0.5.0-preview.1.exe' --dir local/previous
       - shell: pwsh
         run: |
           if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
@@ -37,7 +37,7 @@ jobs:
       - shell: pwsh
         env:
           KLIPPY_QUALIFIED_BUILD_RUN: ${{ inputs.build_run_id }}
-        run: ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.4.0-preview.1.exe' -BlockExternalNetwork -MeasurePerformance
+        run: ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.5.0-preview.1.exe' -BlockExternalNetwork -MeasurePerformance
       - uses: actions/upload-artifact@v4
         if: always()
         with:

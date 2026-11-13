@@ -66,6 +66,12 @@ def qualify_preview_report(report):
         len(negatives) == 6 and all(row.get("accepted_requests") == [] and row.get("session_open") is False
                                     for row in negatives))
     report["engineering_preview_passed"] = all(report["preview_gates"].values())
+    if "heat_fix_probe" in report:
+        commands = report["heat_fix_probe"]
+        report["preview_gates"]["heating_parser_and_cancel_safety"] = (
+            commands.get("passed") is True and commands.get("printer_writes") == 0
+            and commands.get("supported_request_llm_calls") == 0 and commands.get("pending_write") is False)
+        report["engineering_preview_passed"] = all(report["preview_gates"].values())
     report["preview_scope"] = "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified"
     report["continuous_wake_status_passed"] = report["gates"]["captured_status"]
 
@@ -246,6 +252,8 @@ def run(pack):
         finally:
             runtime.close()
     asyncio.run(language_probe())
+    from .command_probe import run as command_probe
+    report["heat_fix_probe"] = asyncio.run(command_probe())
     # All inference integration above has no command transport. Verify read-only conversation
     # separately against an injected simulator whose every write raises immediately.
     import tempfile
