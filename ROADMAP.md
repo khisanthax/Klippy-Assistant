@@ -15,7 +15,8 @@ Each phase stays open until its exit gate is verified. Implementation is not acc
 
 ## Conversational UX (0.5 preview)
 
-The 0.5.1 heating/cancellation fix is qualified at source `2eabdfa`, Windows run 43461231046
+Published [v0.5.1-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.1-preview.1)
+at exact qualified source `2eabdfa`, Windows run 43461231046
 attempt 1: 510 tests/Ruff, frozen/installed/offline 0.5 upgrade/reinstall and memory checks
 passed. All 21 command cases passed in each process with zero writes/LLM calls/pending actions.
 Original broader voice flags remain True/False/True; installed bare-Klippy ASR prefix rejection
@@ -63,7 +64,7 @@ next UI tick. Stage counters and preregistered native single-attempt probes expo
 failures. See PREVIEW5_REPORT.md. Original 370 regressions are preserved; human first-attempt
 wake accuracy and every physical/clean-VM/actual-16-GB acceptance gate remain open.
 
-1. Preserve the 408 passing regressions (all prior 370 retained); extend unfamiliar
+1. Preserve the 510 passing regressions (all prior 408/370 retained); extend unfamiliar
    query semantic coverage and supported field/accessory cases without granting write authority.
 2. Extend the macro semantic benchmark and fleet authentication/subscription qualification;
    use simulated services for software work independently of hardware availability.

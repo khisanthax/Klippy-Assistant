@@ -2,13 +2,13 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
-[Download the 0.5.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.0-preview.1)
+[Download the 0.5.1 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.1-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.
 The repository is private: sign in to GitHub with an account that has access before
 opening the download link. GitHub can show 404 when you are signed out or lack access.
 
-**0.5.0.dev1 — conversational UX engineering preview, not stable v1.0.** The installer includes
+**0.5.1.dev1 — heating/cancellation hotfix engineering preview, not stable v1.0.** The installer includes
 local wake-word, ASR, TTS and language models. Enable the microphone in the tray or
 Settings to load them. No post-install model download, Python, Ollama or cloud AI is needed.
 Microphone/room accuracy and supervised printer safety acceptance remain open.
@@ -30,6 +30,17 @@ natural switching (“Switch to M1”, “Use the SV08”, “Go back to Mercury
 Ordinary speech rounds temperatures; detailed UI values stay exact. Ask “How hot is the
 nozzle?” then “And the bed?” without repeating the wake word during the active session.
 See [PREVIEW5_REPORT.md](PREVIEW5_REPORT.md) for capture fixes, diagnostics and open gates.
+
+The [0.5.1 hotfix report](PREVIEW51_REPORT.md) covers deterministic heating and explicit
+cancellation. With Mercury One/M1 configured, ask “Can you set the Mercury 1 nozzle to 90
+degrees?” or “Heat Mercury One's hotend to ninety”. Omitted units mean Celsius; explicit
+Fahrenheit converts before reviewed-limit checks (“194 F” reviews 90 C). “What's the nozzle
+temperature?” remains read-only. Units/command words cannot be mistaken for printer names.
+Only explicit cancellation phrases discard a review. Ordinary uncertain “not” remarks ask
+clarification; an existing review cannot execute until a complete new request is stated.
+Invalid model action/parameters produce helpful explanations, with technical codes only
+in Settings diagnostics. Reviewed heater limits, configured prompts and no-retry safeguards
+remain. 510 tests and all 21 packaged command cases passed; physical heating acceptance stays open.
 
 See [PREVIEW3_REPORT.md](PREVIEW3_REPORT.md) for voice latency fixes, fleet/MMU monitoring,
 macro review improvements, confirmation settings, recovery and qualification limits.

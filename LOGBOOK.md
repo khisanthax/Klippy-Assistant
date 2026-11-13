@@ -1,5 +1,28 @@
 # Logbook
 
+## 2026-11-13 — Published v0.5.1-preview.1 heating/cancellation hotfix
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.1-preview.1 at
+annotated exact-source tag 2eabdfaee0bf0f189f18e5719714b0cbaec2ae63 after all jobs in
+43461231046 attempt 1 passed. Every one of seven uploaded asset sizes/SHA-256 digests was
+verified against local files before publication. Installer digest matches CI, sidecar and QA:
+c3b87742262793490f24511103db577d019fa8353043e3b1a756f636b460424f.
+Published, prerelease=true, unsigned and not latest/stable. README/roadmap/issues updated.
+
+510 tests and 21 command cases in each native process passed, all prior 408 retained.
+Both failure reproductions are committed; original installed Clibby ASR-prefix rejection
+and True/False/True broader voice flags remain visible. No original gate was weakened.
+The owner phrase now maps to HEAT(heater=0,temperature=90) deterministically when configured
+names/aliases identify the printer, with Celsius default/Fahrenheit conversion and fresh
+reviewed-limit/confirmation checks. Uncertain remarks clarify without false cancellation;
+pending correction reviews cannot execute until restated. No physical heating/connection,
+owner recording or owner installation change occurred. Models unchanged/outside Git.
+
+Next: preserve 510 regressions. Actual owner microphone/room and supervised heater/fleet
+acceptance remain unverified, as do clean desktop VM/actual 16 GB, accessory and sleep/resume
+gates. Use safe in-memory reaction diagnostics for future reported failures; never infer
+hardware acceptance from the simulated/fresh-runner evidence or automatically retry heat.
+
 ## 2026-11-13 — Qualified 0.5.1 heating/cancellation hotfix
 
 Exact source 2eabdfaee0bf0f189f18e5719714b0cbaec2ae63 passed every job in Windows run
