@@ -1,5 +1,23 @@
 # Logbook
 
+## 2026-11-13 — Published v0.5.0-preview.1
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.0-preview.1
+at annotated exact-source tag 60fac7845aab494680b889eb34819f1d9b72d8db after all jobs in
+43408559522 attempt 1 passed. Seven uploaded assets were checked individually against
+local size/SHA-256 before publication. GitHub installer digest agrees with CI/sidecar/QA:
+d9831b4da7cda4a6ee40ba1c57d190148716ed319c01387b16c56906997e98f7.
+Release is published, prerelease=true, unsigned and not latest/stable. README/roadmap and
+relevant GitHub issues point to the qualified preview; full reports retain the installed
+bare-Klippy continuous activation miss and True/False/True original full-voice results.
+Both new single-attempt Hey cases and the engineering envelope passed all three processes.
+
+Next: preserve 408 regressions and use in-memory stage counters to diagnose owner microphone
+first-attempt reports. Keep broader semantic/fleet/accessory, human room/interruption,
+sleep/resume, clean desktop VM/actual 16 GB and supervised consequential acceptance open.
+Do not claim these were satisfied by CI or synthetic audio. No physical printer connection
+or action, owner microphone recording or owner installation change was performed.
+
 ## 2026-11-13 — Qualified 0.5 conversational UX preview
 
 Exact application source 60fac7845aab494680b889eb34819f1d9b72d8db passed every job in

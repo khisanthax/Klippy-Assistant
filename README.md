@@ -2,13 +2,13 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
-[Download the 0.4.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.4.0-preview.1)
+[Download the 0.5.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.0-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.
 The repository is private: sign in to GitHub with an account that has access before
 opening the download link. GitHub can show 404 when you are signed out or lack access.
 
-**0.5.0.dev1 — conversational UX under preview qualification, not stable v1.0.** The installer includes
+**0.5.0.dev1 — conversational UX engineering preview, not stable v1.0.** The installer includes
 local wake-word, ASR, TTS and language models. Enable the microphone in the tray or
 Settings to load them. No post-install model download, Python, Ollama or cloud AI is needed.
 Microphone/room accuracy and supervised printer safety acceptance remain open.
@@ -63,8 +63,10 @@ hides it. Choose Quit in the tray menu to exit. `--show` opens the panel immedia
 
 For voice, enable listening and wait for the local model status to become ready. Say
 "Hey Klippy", wait for acknowledgement, then ask "status" or "what is the temperature?".
-Continuous wake-plus-sentence capture and raw wake-word accuracy remain unqualified in
-this query preview; voice is experimental. Follow-up listening lasts
+Both preregistered single-attempt Hey wake-only and Hey-plus-temperature cases passed
+synthetic frozen/installed/memory probes. Broader continuous-speech and raw wake-word accuracy
+remain unqualified; the installed original bare-Klippy continuous case missed activation
+and its failure is retained. Voice is experimental. Follow-up listening lasts
 about 30 seconds. During a response, say "Klippy, stop talking" to stop speech. You can
 also use Stop speaking at any time. This never cancels a running print. Spoken approval
 applies only to the exact pending action and capture-time confirmation token.
