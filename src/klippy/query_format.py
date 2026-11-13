@@ -58,6 +58,8 @@ def render(identifier, status, result, subject=None):
                 continue
             if subject == "bed" and name != "heater_bed" or subject == "nozzle" and not name.startswith("extruder"):
                 continue
+            if subject == "sensors" and not name.startswith(("temperature_sensor ", "temperature_fan ")):
+                continue
             value = mapping(raw)
             label = "bed" if name == "heater_bed" else "nozzle" if name == "extruder" else clean(name)
             if identifier == "heater_power":

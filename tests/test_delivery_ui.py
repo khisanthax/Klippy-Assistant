@@ -85,6 +85,55 @@ def test_new_command_stops_stale_speech_before_interpretation(window, monkeypatc
     assert window.voice.interruptions == before + 1
 
 
+async def test_spoken_presentation_never_replaces_pending_exact_review(window, rig):
+    from klippy.presentation import Response
+    spoken = []
+    window.voice.say = lambda text, **kwargs: spoken.append((text, kwargs))
+    window.say(Response("205.5 degrees", "206 degrees"))
+    assert spoken[-1][0] == "206 degrees"
+    prompt = await rig[2].propose(Intent(action=Action.HOME, printer_id="sim"), defer_confirmation=True)
+    window.say(Response(prompt, "Unsafe summary"), confirmation=True)
+    assert spoken[-1][0] == prompt and spoken[-1][1]["token"] == rig[2].pending.token
+
+
+def test_printer_page_exposes_edit_and_editor_persists_names(window, rig, monkeypatch):
+    from PySide6.QtWidgets import QDialog, QDialogButtonBox, QLineEdit, QPushButton, QTextEdit
+    assert any(b.text() == "Edit Names & Aliases" for b in window.findChildren(QPushButton))
+    window.fleet.selectRow(0)
+    def edit(dialog):
+        fields = dialog.findChildren(QLineEdit)
+        fields[0].setText("Mercury One")
+        dialog.findChild(QTextEdit).setPlainText("M1\nMercury 1")
+        fields[1].setText("Switch to M1")
+        next(b for b in dialog.findChildren(QPushButton) if b.text().startswith("Test name")).click()
+        dialog.findChild(QDialogButtonBox).accepted.emit()
+        return QDialog.DialogCode.Accepted
+    monkeypatch.setattr(QDialog, "exec", edit)
+    window.edit_printer_aliases()
+    assert rig[0].printers()[0].name == "Mercury One"
+    assert rig[0].printers()[0].aliases == ("M1", "Mercury 1")
+    assert window.active_name() == "Mercury One" and not rig[1].writes
+
+
+def test_loaded_voice_is_enabled_before_workers_start(window, rig, monkeypatch):
+    import threading
+
+    from klippy.voice import VoiceLoop
+    rig[0].set("listening", {"mode": "always"})
+    started = []
+    class LoadedVoice:
+        def __init__(self, *args, **kwargs):
+            self.enabled = threading.Event()
+        def start(self):
+            started.append(self.enabled.is_set())
+        def close(self):
+            pass
+    monkeypatch.setattr("klippy.voice.VoiceLoop", LoadedVoice)
+    window.result("voice_loaded", (object(), None))
+    assert started == [True]
+    assert VoiceLoop is not LoadedVoice  # Test never opens a physical microphone.
+
+
 async def test_cancel_stops_prompt_and_invalidates_its_token(window, rig):
     _, sim, engine, _ = rig
     await engine.propose(Intent(action=Action.HOME, printer_id="sim"), defer_confirmation=True)

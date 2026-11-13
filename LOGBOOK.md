@@ -1,5 +1,28 @@
 # Logbook
 
+## 2026-11-13 — Conversational UX implementation, qualification in progress
+
+Read the latest owner attachment and continuity docs; started from clean current main
+2f74fca. Implemented visible name/alias editing with local recognition tests and conflict
+validation, deterministic natural printer switching/active-target questions, heater-subject
+follow-ups, deterministic speech presentation/styles, friendly known query failures and
+specific incomplete-heater clarifications. Exact detailed values, safety prompts and
+uncertain-outcome warnings remain intact. No application write authority was added.
+
+Fixed duplicate wake candidates resetting the first capture, preceding-sentence preroll,
+and the post-model-load wait for the next listening tick. Threshold/prefix/echo protection
+unchanged. Added bounded numeric stage diagnostics and single-attempt native Hey probes.
+Regression tests cover names/conflicts/persistence, selections, pending invalidation,
+multi-turn subject/printer context, stale speech, styles, safety prompts and capture defects.
+Final full suite passed 407 tests (all original 370 retained), with Ruff passing; the
+41-test targeted UX/UI run also passed. Frozen/installer qualification is next.
+Native source probe delay was traced to hashlib.file_digest during model verification,
+before inference. Do not infer voice qualification from process launch.
+
+No real printer connections/actions, owner microphone recording or owner installer changes.
+Models remain unchanged/outside Git. First-attempt human wake, clean desktop VM, actual
+16 GB hardware, real fleet and supervised consequential acceptance gates stay open.
+
 ## 2026-11-12 — Published v0.4.0-preview.1 query engineering preview
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.4.0-preview.1 at exact qualified application source 643b949.

@@ -46,6 +46,8 @@ from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
 from .monitor import Monitor
 from .moonraker import ConnectionFailure, Moonraker
+from .presentation import friendly_error
+from .printer_names import matching, rename, validate_names
 from .queries import QueryService
 from .query_manager import QueryManager
 from .runtime import LlamaRuntime
@@ -244,21 +246,50 @@ class Window(QMainWindow):
         self.worker.submit("capabilities", refresh())
 
     def edit_printer_aliases(self):
-        from PySide6.QtWidgets import QInputDialog
-        printer = self.target()
+        printer = self.fleet_target() or self.target()
         if printer is None:
-            self.failure("Select an approved printer first")
+            self.failure("Select a printer in the Printers list first")
             return
-        text, accepted = QInputDialog.getText(self, "Printer voice aliases", "Comma-separated alternate names", text=", ".join(printer.aliases))
-        if accepted:
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Edit Printer Names & Aliases")
+        form = QFormLayout(dialog)
+        name, aliases = QLineEdit(printer.name), QTextEdit()
+        aliases.setPlainText("\n".join(printer.aliases))
+        aliases.setMaximumHeight(140)
+        form.addRow("Printer name", name)
+        form.addRow("Aliases (one per line; delete a line to remove)", aliases)
+        sample, feedback = QLineEdit(), QLabel()
+        sample.setPlaceholderText("Try: Switch to Mercury Two")
+        feedback.setWordWrap(True)
+        form.addRow("Test recognition", sample)
+        def proposed():
+            return validate_names(self.store, printer, name.text(),
+                                  [a.strip() for a in aliases.toPlainText().splitlines() if a.strip()])
+        def test():
             try:
-                updated = printer.model_copy(update={"aliases": tuple(a.strip() for a in text.split(",") if a.strip())})
-                updated = Printer.model_validate(updated.model_dump())
-                self.engine.cancel()
-                self.store.save_printer(updated)
+                updated = proposed()
+                found = matching([updated, *(p for p in self.store.printers() if p.id != printer.id)], sample.text())
+                feedback.setText("Recognized: " + ", ".join(p.name for p in found) if len(found) == 1 else
+                                 "Use one printer name or alias." if found else "No printer recognized. Try a name or alias above.")
+            except ValueError as exc:
+                feedback.setText(str(exc))
+        form.addRow(self.button("Test name recognition (no printer action)", test))
+        form.addRow(feedback)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+        def save():
+            try:
+                updated = proposed()
+                rename(self.store, printer, updated.name, updated.aliases)
+                self.conversation.clear()
                 self.reload_printers()
-            except ValueError:
-                self.failure("Use up to twelve short, distinct aliases")
+                self.sprite.announce(self.active_name() + " · Ready", "idle")
+                dialog.accept()
+            except ValueError as exc:
+                feedback.setText(str(exc))
+        buttons.accepted.connect(save)
+        buttons.rejected.connect(dialog.reject)
+        form.addRow(buttons)
+        dialog.exec()
 
     def page(self, title):
         widget = QWidget()
@@ -320,6 +351,7 @@ class Window(QMainWindow):
         layout.addWidget(self.fleet)
         row = QHBoxLayout()
         row.addWidget(self.button("Add printer", self.add_printer))
+        row.addWidget(self.button("Edit Names & Aliases", self.edit_printer_aliases))
         row.addWidget(self.button("Test selected", self.test_printer))
         row.addWidget(self.button("Approve selected", self.approve_printer))
         row.addWidget(self.button("Remove selected", self.remove_printer))
@@ -352,6 +384,12 @@ class Window(QMainWindow):
         self.model_status = QLabel("Voice disabled: verified model pack not loaded")
         self.model_status.setWordWrap(True)
         layout.addWidget(self.model_status)
+        self.response_style = QComboBox()
+        self.response_style.addItems(["Brief", "Conversational", "Detailed"])
+        self.response_style.setCurrentText(self.store.get("response_style", "brief").title())
+        self.response_style.currentTextChanged.connect(lambda value: self.store.set("response_style", value.lower()))
+        layout.addWidget(QLabel("Spoken response style (facts and safety checks are always preserved)"))
+        layout.addWidget(self.response_style)
         layout.addWidget(self.button("Load local voice pack", self.load_voice))
         layout.addWidget(self.button("Review selected printer heater limits", self.review_heater_limits))
         self.sensitivity = QDoubleSpinBox()
@@ -565,6 +603,7 @@ class Window(QMainWindow):
                     raise ValueError("Duplicate name")
                 printer = Printer(id=uuid.uuid4().hex, name=name.text(), url=url.text(), approved=approve.isChecked(),
                                   aliases=tuple(a.strip() for a in aliases.text().split(",") if a.strip()))
+                printer = validate_names(self.store, printer, printer.name, printer.aliases)
                 Credentials.set(printer.id, secret.text())
                 self.store.save_printer(printer)
                 self.reload_printers()
@@ -758,7 +797,7 @@ class Window(QMainWindow):
         self.polling = False
         self.write_message(text)
         self.sprite.announce(self.active_name() + " · Needs attention", "error")
-        self.say(text)
+        self.say(friendly_error(text))
 
     def result(self, name, value):
         if name == "capabilities":
@@ -790,6 +829,9 @@ class Window(QMainWindow):
                                    lambda epoch: self.worker.result.emit("voice_wake", epoch),
                                    session=self.conversation.session,
                                    on_delivery=lambda token, ok: self.worker.result.emit("delivery", (token, ok)))
+            # Do not leave a newly loaded loop deaf until the next one-second UI tick.
+            if listening_enabled(self.store.get("listening", {}), datetime.now()):
+                self.voice.enabled.set()
             self.voice.start()
             self.conversation.llm = llm
             self.model_status.setText("Offline voice loaded · Echo cancellation and wake-word interruption active" +
@@ -810,6 +852,8 @@ class Window(QMainWindow):
             self.model_status.setText(value)
             if value == "Listening":
                 self.sprite.announce(self.active_name() + " · Listening", "listening")
+            elif value == "Checking wake word":
+                self.sprite.announce(self.active_name() + " · Checking wake word…", "listening")
             elif value == "Speaking":
                 self.sprite.state = "speaking"
             elif value == "Speech finished" and self.conversation.until:
@@ -844,7 +888,8 @@ class Window(QMainWindow):
             return  # Alerts remain visible; preserve a quiet confirmation response window.
         if self.voice and self.spoken.isChecked():
             pending = self.engine.pending
-            self.voice.say(text, token=pending.token if confirmation and pending and not pending.ready else None,
+            spoken = text if pending else getattr(text, "spoken", text)
+            self.voice.say(spoken, token=pending.token if confirmation and pending and not pending.ready else None,
                            trace=getattr(self, "reaction_trace", None) if confirmation else timings.new())
         elif confirmation and self.engine.pending and not self.engine.pending.ready:
             self.engine.delivery_finished(self.engine.pending.token, True)
@@ -920,6 +965,7 @@ class Window(QMainWindow):
                 for key in ("confirmation_seconds", "followup_seconds"):
                     self.findChild(QDoubleSpinBox, key).setValue(self.store.get(key, 30))
                 self.spoken.setChecked(self.store.get("spoken", True))
+                self.response_style.setCurrentText(self.store.get("response_style", "brief").title())
                 self.monitor_enabled.setChecked(self.store.get("monitor_enabled", True))
                 self.listening.setCurrentText("manual")
                 self.schedule.setText("[]")
@@ -938,6 +984,9 @@ class Window(QMainWindow):
     def tick(self):
         self.ticks += 1
         self.diagnostics.setText(timings.compact())
+        if self.voice:
+            self.diagnostics.setText(timings.compact() + "\nWake pipeline (counts): " +
+                                     "; ".join(f"{k}: {v}" for k, v in self.voice.wake_diagnostics().items()))
         enabled = listening_enabled(self.store.get("listening", {}), datetime.now())
         if self.voice:
             (self.voice.enabled.set if enabled else self.voice.enabled.clear)()

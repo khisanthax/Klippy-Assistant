@@ -9,6 +9,7 @@ from .diagnostics import timings
 from .domain import Action, Intent, StrictModel
 from .macros import candidates, words
 from .moonraker import ConnectionFailure
+from .printer_names import matching
 from .queries import QueryRequest, QueryService, QueryUnavailable, information_request, match_query
 from .safety import NeedsParameter, Rejected
 from .session import Session
@@ -115,21 +116,30 @@ class Conversation:
         # Any other utterance cancels the prior action before interpretation, including failures.
         self.engine.cancel()
         printers = self.engine.store.printers()
-        mentioned = [p for p in printers if any(re.search(r"(?<!\w)" + re.escape(name.lower()) + r"(?!\w)", text)
-                                               for name in (p.name, *p.aliases))]
+        mentioned = matching(printers, text)
         if len(mentioned) > 1:
             raise Rejected("Which single printer do you mean?")
         if mentioned and not mentioned[0].approved:
             raise Rejected("The named printer is not approved")
         if mentioned:
+            if self.engine.store.get("selected") != mentioned[0].id:
+                self.draft = None
             self.engine.select(mentioned[0].id)
             for name in sorted((mentioned[0].name, *mentioned[0].aliases), key=len, reverse=True):
                 text = re.sub(r"(?<!\w)" + re.escape(name.lower()) + r"(?!\w)", "", text).strip()
         selected = self.engine.store.get("selected")
+        active_question = re.fullmatch(r"(?:which|what) printer (?:am i using|are you (?:using|connected to))", text)
+        if active_question:
+            printer = next((p for p in printers if p.id == selected and p.approved), None)
+            return f"You're using {printer.name}." if printer else "Which printer would you like to use?"
         if not selected:
             raise Rejected("Select an approved printer first")
-        if text in {"select", "use", "switch to", ""} and mentioned:
+        selection = re.fullmatch(r"(?:please )?(?:switch(?: printers)? to|change printers to|select|use|go back to)(?: my| the)?(?: printer)?", " ".join(text.split()))
+        if (selection or not text) and mentioned:
+            self.draft = None
             return f"{mentioned[0].name} selected."
+        if re.match(r"^(?:please )?(?:switch\b|change printers\b|select\b|use\b|go back to\b)", text):
+            raise Rejected("Which enrolled printer would you like to use? Check its name or add an alias in Printers.")
         try:
             query = match_query(text, self.last_query)
         except QueryUnavailable as exc:
@@ -145,6 +155,10 @@ class Conversation:
         self.last_query = None
         intent = None
         interpreted = False
+        if re.fullmatch(r"(?:please )?(?:heat|warm|set)(?: the)? (?:nozzle|extruder|bed)(?: temperature)?", text):
+            raise Rejected("What temperature would you like? Please include the heater name and temperature.")
+        if text in {"heat", "warm", "set temperature"}:
+            raise Rejected("Which heater and temperature would you like? For example, ask to heat the bed to 60 degrees.")
         if self.draft and self.draft.printer_id == selected:
             macro = self.engine.store.macros(selected).get(self.draft.macro)
             if macro:

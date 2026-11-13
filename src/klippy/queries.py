@@ -257,14 +257,16 @@ class QueryService:
         return status, times
 
     async def answer(self, printer_id, request):
-        if not isinstance(request, QueryRequest) or request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle"}:
+        from .presentation import Response, present
+        if not isinstance(request, QueryRequest) or request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle", "sensors"}:
             raise QueryUnavailable("Unknown or invalid information query")
         printer = self.printer(printer_id)
         spec = CATALOG[request.query_id]
         with timings.span("query_response"):
             cap = await self.discover(printer)
             if spec.component and spec.component not in cap.components:
-                return f"{printer.name}: {spec.description} unsupported; {spec.component} component not reported."
+                return Response(f"{printer.name}: {spec.description} unsupported; {spec.component} component not reported.",
+                                f"{printer.name} doesn't report that information.")
             fields = object_fields(spec, cap.objects)
             status, times = self._status(printer_id, fields)
             stale = False
@@ -281,7 +283,8 @@ class QueryService:
                         age = self.clock() - acquired
                         label = f"STALE observation ({age:.1f} seconds old): " if age > self.fresh_seconds else ""
                         return f"{printer.name}: {label}{render(identifier, {}, result)}"[:550]
-                    return f"{printer.name}: {spec.description} unavailable; required objects not reported."
+                    return Response(f"{printer.name}: {spec.description} unavailable; required objects not reported.",
+                                    f"{printer.name} doesn't report that information.")
                 # Missing fields are probed again instead of being assumed supported or permanently absent.
                 complete = all((printer_id, name, key) in self.cache for name, keys in fields.items() for key in keys)
                 if not complete or not times or self.clock() - min(times) > self.fresh_seconds:
@@ -339,7 +342,9 @@ class QueryService:
                 answer = render(spec.id, status, result, request.subject)
             # Fits the existing spoken response budget; manager provides full spec detail separately.
             response = f"{printer.name}: {label}{answer}"
-            return response if len(response) <= 550 else response[:520] + "; further results omitted."
+            detail = response if len(response) <= 550 else response[:520] + "; further results omitted."
+            return present(printer.name, spec.id, status, detail, request.subject,
+                           self.store.get("response_style", "brief"), stale)
 
 
 def normalize(text):
@@ -358,6 +363,7 @@ def information_request(text):
                 or text in {"homed", "homing status", "status", "printer status", "temperatures", "temperature",
                             "position", "progress", "history", "fans", "layers", "speed", "acceleration", "mmu status",
                             "and", "and the", "and it", "and that printer"}
+                or bool(re.fullmatch(r"(?:and|what about|how about)(?: the)? (?:bed|nozzle|extruder|hotend)", text))
                 or text.startswith("can it extrude"))
 
 
@@ -371,6 +377,12 @@ def match_query(text, previous=None):
     if re.fullmatch(r"(?:(?:what|how) about|and)(?: the| it| that printer)?", text):
         return previous
     subject = "bed" if re.search(r"\bbed\b", text) else "nozzle" if re.search(r"\b(?:nozzle|extruder|hotend|hot end)\b", text) else None
+    if subject is None and re.search(r"\b(?:sensors?|chamber|enclosure)\b", text):
+        subject = "sensors"
+    if previous and subject and re.fullmatch(r"(?:and|what about|how about)(?: the)? (?:bed|nozzle|extruder|hotend)", text):
+        if previous.query_id in {"temperatures", "targets", "heater_power"}:
+            return QueryRequest(query_id=previous.query_id, subject=subject)
+        raise QueryUnavailable("Would you like the temperature or target for that heater?")
     patterns = (
         ("homing", r"\b(?:homed|homing|axes home|axis home)\b"),
         ("host_stats", r"\b(?:cpu (?:temperature|load|usage)|host.*(?:hot|temperature|load|throttl)|throttl|uptime)"),

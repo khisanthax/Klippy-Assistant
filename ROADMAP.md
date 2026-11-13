@@ -32,6 +32,14 @@ frozen wake-capture failure is retained; it remains an acoustic reliability limi
 
 ## Next priority
 
+Conversational UX implementation for the 0.5 preview adds a visible printer-name/alias
+editor and recognition test, deterministic natural selection, heater follow-ups, separate
+factual speech/styles and friendly interpretation failures. Wake capture retains the first
+candidate and removes preceding-sentence preroll; startup listening no longer waits for the
+next UI tick. Stage counters and preregistered native single-attempt probes expose remaining
+failures. See PREVIEW5_REPORT.md. Original 370 regressions are preserved; human first-attempt
+wake accuracy and every physical/clean-VM/actual-16-GB acceptance gate remain open.
+
 1. Preserve the 370 passing regressions (original 179/99 cases unchanged); extend unfamiliar
    query semantic coverage and supported field/accessory cases without granting write authority.
 2. Extend the macro semantic benchmark and fleet authentication/subscription qualification;

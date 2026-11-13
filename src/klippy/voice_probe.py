@@ -139,11 +139,24 @@ def run(pack):
         states.clear()
         report["paced_wake_phrase"] = "Hey Klippy"
         feed(pad(audio(report["paced_wake_phrase"], voice=0)))
+        report["first_attempt_wake_only"] = {
+            "attempts": 1, "accepted_requests": [v.text for v in received],
+            "session_open": voice.listen_until > clock[0], "counts": voice.wake_diagnostics()}
         # Wait for the wake acknowledgement/ASR before asking a follow-up, as a
         # person does in the two-turn interaction. feed() drains the ASR worker.
         feed(pad(audio("What is the status of the test printer?", voice=0)))
         report["paced_pipeline_transcripts"] = [v.text for v in received]
         report["paced_pipeline_wakes"] = list(wakes)
+        # Preregistered single continuous Hey+question attempt, with no retries.
+        voice._reset_dsp()
+        received.clear()
+        wakes.clear()
+        states.clear()
+        feed(pad(audio("Hey Klippy, what's the temperature?", voice=0)))
+        report["first_attempt_wake_command"] = {
+            "attempts": 1, "accepted_requests": [v.text for v in received],
+            "session_open": voice.listen_until > clock[0], "states": list(states),
+            "counts": voice.wake_diagnostics()}
         report["negative_composite"] = []
         for phrase, sid, samples in negative_audio:
             voice._reset_dsp()
@@ -219,6 +232,7 @@ def run(pack):
         report["barge_requests"] = [v.text for v in received]
         report["barge_detection_seconds_from_user_start"] = round(wakes[0][0] - begin - 3, 3) if wakes else None
         report["playback_flushed"] = bool(wakes) and all(w[2] == 0 for w in wakes)
+        report["wake_pipeline_counts"] = voice.wake_diagnostics()
     finally:
         voice.close()
     async def language_probe():
@@ -265,8 +279,10 @@ def run(pack):
         conversation.clear()
         async def paced_turns():
             answer = None
+            report["paced_responses"] = []
             for text in report["paced_pipeline_transcripts"]:
                 answer = await conversation.hear(text, source="voice")
+                report["paced_responses"].append(answer)
             return answer
         report["paced_status_response"] = asyncio.run(paced_turns())
         report["printer_writes"] = len(writes)

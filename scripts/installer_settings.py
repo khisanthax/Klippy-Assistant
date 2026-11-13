@@ -14,7 +14,10 @@ store = Store(actual / "settings.sqlite")
 try:
     if sys.argv[1] == "prepare":
         store.set("qa_sentinel", "preserve-me")
-        store.save_printer(Printer(id="qa-simulation", name="QA simulation", url="http://127.0.0.1:17125"))
+        store.save_printer(Printer(id="qa-simulation", name="QA simulation", aliases=("QA One", "Q1"),
+                                  url="http://127.0.0.1:17125"))
+        store.set("selected", "qa-simulation")
+        store.set("response_style", "detailed")
         # Emulate the v0.2 record shape, before optional review-history fields existed.
         legacy = Macro(name="QA_STATUS", definition="M105").model_dump(mode="json")
         legacy.pop("previous_definition")
@@ -25,6 +28,8 @@ try:
     elif sys.argv[1] == "verify":
         assert store.get("qa_sentinel") == "preserve-me"
         assert any(p.id == "qa-simulation" and not p.approved for p in store.printers())
+        assert next(p for p in store.printers() if p.id == "qa-simulation").aliases == ("QA One", "Q1")
+        assert store.get("selected") == "qa-simulation" and store.get("response_style") == "detailed"
         macro = store.macros("qa-simulation")["QA_STATUS"]
         assert macro.definition == "M105" and not macro.approved and macro.previous_definition is None
     else:

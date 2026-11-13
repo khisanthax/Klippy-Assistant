@@ -8,7 +8,7 @@ then enable the microphone from the tray and wait for the models to become ready
 The repository is private: sign in to GitHub with an account that has access before
 opening the download link. GitHub can show 404 when you are signed out or lack access.
 
-**0.4.0.dev1 — offline voice and fleet engineering preview, not stable v1.0.** The installer includes
+**0.5.0.dev1 — conversational UX under preview qualification, not stable v1.0.** The installer includes
 local wake-word, ASR, TTS and language models. Enable the microphone in the tray or
 Settings to load them. No post-install model download, Python, Ollama or cloud AI is needed.
 Microphone/room accuracy and supervised printer safety acceptance remain open.
@@ -23,6 +23,13 @@ accuracy results. See [PHASE2_REPORT.md](PHASE2_REPORT.md).
 See [docs/MOONRAKER_QUERIES.md](docs/MOONRAKER_QUERIES.md) for the 41-query catalog, capabilities, freshness and safety boundaries. Open **Queries & Commands** to search queries, operations and discovered macros, refresh capabilities, or edit printer voice aliases. Ask “Klippy, is my M1 printer homed?”, “What about the SV08?”, “How hot is the bed?” or “What layer am I on?”. Information queries never run homing/heating actions.
 
 See [PREVIEW4_REPORT.md](PREVIEW4_REPORT.md) for query qualification and remaining gaps.
+
+The 0.5 source adds **Printers → Edit Names & Aliases**, a local recognition test,
+natural switching (“Switch to M1”, “Use the SV08”, “Go back to Mercury Two”) and
+“Which printer am I using?”. Settings offers Brief, Conversational and Detailed speech.
+Ordinary speech rounds temperatures; detailed UI values stay exact. Ask “How hot is the
+nozzle?” then “And the bed?” without repeating the wake word during the active session.
+See [PREVIEW5_REPORT.md](PREVIEW5_REPORT.md) for capture fixes, diagnostics and open gates.
 
 See [PREVIEW3_REPORT.md](PREVIEW3_REPORT.md) for voice latency fixes, fleet/MMU monitoring,
 macro review improvements, confirmation settings, recovery and qualification limits.

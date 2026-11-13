@@ -158,6 +158,32 @@ class VoiceLoop:
         self.first_render = False
         self.wake_at = None
         self.capture_queue_delay = 0.0
+        self.diagnostic_lock = threading.Lock()
+        self.wake_counts = dict.fromkeys(("captured_frames", "queue_drops", "device_ready", "discontinuities",
+                                         "frames", "voiced_frames", "candidates", "duplicate_candidates",
+                                         "asr_started", "prefix_rejected", "echo_rejected", "verified", "delivered"), 0)
+
+    def count(self, stage):
+        with self.diagnostic_lock:
+            self.wake_counts[stage] += 1
+
+    def wake_diagnostics(self):
+        with self.diagnostic_lock:
+            return dict(self.wake_counts)
+
+    def _wake_preroll(self):
+        # Discard a preceding sentence separated by >=300 ms silence. Keep 100 ms
+        # context before the current phrase, including the complete wake prefix.
+        frames = list(self.preroll)
+        silent, start = 0, 0
+        for i, frame in enumerate(frames):
+            if float(np.sqrt(np.mean(frame * frame))) < self.energy_threshold:
+                silent += 1
+            else:
+                if silent >= 30:
+                    start = max(0, i - 10)
+                silent = 0
+        return frames[start:]
 
     @property
     def listen_until(self):
@@ -281,11 +307,13 @@ class VoiceLoop:
         outdata[:, 0] = output
         if not self.enabled.is_set():
             return
+        self.count("captured_frames")
         try:
             delay = max(0, min(500, round((timing.outputBufferDacTime - timing.inputBufferAdcTime) * 1000)))
             self.audio.put_nowait((indata[:, 0].copy(), output, self.clock(),
                                    self.speaking.is_set(), delay, bool(status)))
         except queue.Full:
+            self.count("queue_drops")
             self.overrun.set()
 
     def _output_callback(self, outdata, frames, timing, status):
@@ -323,6 +351,9 @@ class VoiceLoop:
         energy = float(np.sqrt(np.mean(cleaned * cleaned)))
         self.last_energy = energy
         voiced = energy >= self.energy_threshold
+        self.count("frames")
+        if voiced:
+            self.count("voiced_frames")
         if output_context and voiced and len(self.echo.near) >= 10:
             # Latch double-talk evidence across syllable gaps. Resetting KWS on every
             # echo-dominated gap erases short wake words while the assistant speaks.
@@ -341,6 +372,13 @@ class VoiceLoop:
             pass
         if accepted_probe:
             wake, near_end = True, True
+        if wake:
+            self.count("candidates")
+        if wake and self.frames and self.had_wake and self.capture_epoch == self.epoch:
+            # A second KWS hit in one utterance must not erase its first words or
+            # supersede the captured confirmation token. Final ASR still verifies it.
+            self.count("duplicate_candidates")
+            wake = False
         if self.echo.echo_only and not near_end:
             self._clear_capture()
             return
@@ -350,7 +388,7 @@ class VoiceLoop:
             if not accepted_probe:
                 self.on_wake(epoch)
             self.on_state("Checking wake word")
-            self.frames = list(self.preroll)
+            self.frames = self._wake_preroll()
             self.voiced_frames = sum(float(np.sqrt(np.mean(f * f))) >= self.energy_threshold for f in self.frames)
             self.had_wake = True
             self.capture_epoch = epoch
@@ -434,6 +472,7 @@ class VoiceLoop:
                 if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set():
                     return
                 timings.duration("asr_queue", self.clock() - queued)
+                self.count("asr_started")
                 with timings.span("asr"):
                     text = self.backend.transcribe(samples).strip()
                 timings.mark("asr_complete")
@@ -441,10 +480,12 @@ class VoiceLoop:
                     return
                 match = WAKE_PREFIX.match(text)
                 if woke and match is None:
+                    self.count("prefix_rejected")
                     self.on_state("Wake transcript unclear; please repeat Klippy and the request")
                     return
                 if output_context:
                     if self._is_own_text(text):
+                        self.count("echo_rejected")
                         return
                 if match:
                     text = "Klippy " + text[match.end():]
@@ -454,7 +495,9 @@ class VoiceLoop:
                     self.listen_until = self.clock() + self.followup_seconds
                     accepted = True
                 if woke:
+                    self.count("verified")
                     self.on_state("Listening")
+                self.count("delivered")
                 self.on_text(VoiceInput(text, epoch, woke, confirmation_token, trace))
             except Exception:
                 self.on_state("Speech recognition unavailable; no request sent")
@@ -478,6 +521,7 @@ class VoiceLoop:
             if not self.enabled.is_set():
                 continue
             if discontinuity or len(near) != FRAME:
+                self.count("discontinuities")
                 self.reset_session()
                 self.on_state("Audio discontinuity; please wake Klippy and repeat")
                 continue
@@ -518,6 +562,7 @@ class VoiceLoop:
                                           extra_settings=extra, callback=self._output_callback))
                 with stream:
                     if capturing:
+                        self.count("device_ready")
                         self.on_state("Microphone ready")
                     while not self.closed.wait(0.25):
                         if self.enabled.is_set() != capturing:

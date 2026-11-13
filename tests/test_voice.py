@@ -79,6 +79,48 @@ def test_wake_preserves_preroll_and_transcribes_request(loop):
     assert values[0].woke
 
 
+def test_duplicate_wake_does_not_reset_first_capture_or_token(loop):
+    voice, backend, values, states, wakes, clock = loop
+    backend.trigger = True
+    voice.pending_token = "first-token"
+    feed(voice, clock, 350)
+    epoch, length = voice.epoch, len(voice.frames)
+    voice.pending_token = "later-token"
+    backend.trigger = True
+    feed(voice, clock, 1)
+    assert voice.epoch == epoch and len(voice.frames) == length + 1
+    feed(voice, clock, 70, signal=False)
+    drain(voice)
+    assert len(wakes) == 1 and len(values) == 1
+    assert values[0].confirmation_token == "first-token"
+    assert states[0] == "Checking wake word" and "Listening" in states
+    assert voice.wake_diagnostics()["duplicate_candidates"] == 1
+
+
+def test_wake_preroll_excludes_previous_sentence_after_silence(loop):
+    voice, backend, values, _, _, clock = loop
+    feed(voice, clock, 150)
+    feed(voice, clock, 40, signal=False)
+    feed(voice, clock, 20)
+    backend.trigger = True
+    feed(voice, clock, 1)
+    assert len(voice.frames) == 31  # 100 ms lead-in + current utterance, not previous speech.
+    feed(voice, clock, 70, signal=False)
+    drain(voice)
+    assert len(values) == 1
+
+
+def test_unverified_candidate_does_not_open_session_or_acknowledge(loop):
+    voice, backend, values, states, _, clock = loop
+    backend.text = "Klipper is ready"
+    backend.trigger = True
+    feed(voice, clock, 40)
+    feed(voice, clock, 70, signal=False)
+    drain(voice)
+    assert not values and voice.listen_until <= clock[0] and "Listening" not in states
+    assert voice.wake_diagnostics()["prefix_rejected"] == 1
+
+
 def test_barge_in_flushes_playback_before_asr(loop):
     voice, backend, _, _, wakes, clock = loop
     voice.playback.enqueue(np.ones(16000, dtype=np.float32), voice.epoch)

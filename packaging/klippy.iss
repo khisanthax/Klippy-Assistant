@@ -1,4 +1,4 @@
-#define AppVersion "0.4.0-preview.1"
+#define AppVersion "0.5.0-preview.1"
 [Setup]
 AppId={{D51FBA83-D0C3-4CA5-BA79-EE038805EC21}
 AppName=Klippy Assistant Engineering Preview
@@ -33,6 +33,8 @@ Source: "..\TEST_PLAN.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LOGBOOK.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\THIRD_PARTY_LICENSES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\PREVIEW3_REPORT.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\PREVIEW4_REPORT.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\PREVIEW5_REPORT.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\PHASE2_REPORT.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
