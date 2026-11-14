@@ -5,6 +5,15 @@ import numpy as np
 from klippy.audio_probe import audit, cached_pipeline
 
 
+def test_slower_ci_producer_completes_pcm_before_playing_without_starvation():
+    sizes=[73070,68552,63479]
+    raw=(.2*np.sin(2*np.pi*1200*np.arange(sum(sizes))/24000)).astype(np.float32)
+    parts=np.split(raw,np.cumsum(sizes)[:-1])
+    result=audit(raw,parts,24000,[4.794938,9.306531,13.656573],[1/3,2/3,1],13.6697,repeats=1)
+    assert result['passed'] and result['after']['queue_gap_seconds']==0
+    assert result['after']['first_pcm_render_seconds']>=13.6697
+
+
 def test_recorded_slow_producer_schedule_is_buffered_without_dropping_samples():
     sizes=[6001,6002,6004]
     raw=(.2*np.sin(2*np.pi*1200*np.arange(sum(sizes))/24000)).astype(np.float32)

@@ -1,5 +1,20 @@
 # Logbook
 
+## 2026-11-14 - Packaged audit caught slower-producer starvation; complete-PCM fallback
+
+Candidate cc64a72 / run 43614107826 completed frozen probe in 137.645 s but failed the added
+audio gate: RTF 1.5996 exceeded the two-second reserve, leaving 0.96 s starvation. All other
+engineering gates passed; no installer/release. Preserved exact observed numeric schedule
+and quality failure in benchmarks/audio61-ci-buffer-reproduction.json. New policy retains
+streaming reserve <=2 s and completes PCM first when estimate exceeds it. Same schedule
+replay now has zero gap, with first audio 13.67 s versus immediate 4.80 s/2.95 s gaps.
+This is an explicit slow-host latency tradeoff, not a claim of faster speech synthesis.
+Mic callbacks never wait; interruption flushes buffered PCM immediately; session holds remain.
+Two regressions added for the actual CI schedule and interrupt/EOF fallback. Focused 16 passed,
+Ruff clean. Full 610-case suite and exact-source package qualification follow. Physical/acoustic
+acceptance remains open, no hardware printer actions or user recordings.
+
+
 ## 2026-11-14 - Expanded native qualification timeout retained and diagnosed
 
 Candidate 1ebd45d / run 43612972932 passed 608 tests/Ruff and frozen startup/orb, but native

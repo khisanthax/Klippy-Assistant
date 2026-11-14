@@ -56,6 +56,20 @@ def test_known_eof_drains_short_utterance_without_waiting_for_prefill():
     assert playback.diagnostics()['queue_underruns']==0
 
 
+def test_complete_pcm_fallback_remains_interruptible_and_finishes_on_eof():
+    playback=Playback(clock=lambda:0.0)
+    stream=playback.begin(0)
+    playback.defer_start(0,stream,2.0,complete_first=True)
+    playback.enqueue(np.ones(320,np.float32),0,stream=stream)
+    assert not playback.render().any()
+    playback.interrupt()
+    assert not playback.render().any() and not playback.receipt(0,stream)
+    stream=playback.begin(1)
+    playback.defer_start(1,stream,2.0,complete_first=True)
+    playback.enqueue(np.ones(160,np.float32),1,stream=stream,final=True)
+    assert playback.render().all() and playback.receipt(1,stream)
+
+
 def test_starvation_is_distinct_from_eof_and_cannot_arm_delivery():
     playback=Playback()
     stream=playback.begin(0,prefill=0)

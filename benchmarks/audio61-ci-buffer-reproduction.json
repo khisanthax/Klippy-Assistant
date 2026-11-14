@@ -1,0 +1,202 @@
+{
+  "failed_source": "cc64a7237acedab7bdc8ab03ea538d205335f677",
+  "failed_run": 43614107826,
+  "observed_frozen_kokoro_quality": {
+    "passed": false,
+    "checks": {
+      "original_is_finite_unclipped": true,
+      "callback_chunks_match_original": true,
+      "converted_length": true,
+      "chunk_invariance": true,
+      "antialias_rejection": true,
+      "render_preserves_converted_pcm": true,
+      "legacy_render_preserves_legacy_pcm": true,
+      "buffered_generation_has_no_starvation": false,
+      "non_silent_render_receipt": false
+    },
+    "source_rate": 24000,
+    "target_rate": 16000,
+    "source_samples": 205101,
+    "chunk_samples": [
+      73070,
+      68552,
+      63479
+    ],
+    "arrivals_seconds": [
+      4.794938000000002,
+      9.306530799999564,
+      13.656572900000356
+    ],
+    "chunk_progress": [
+      0.3333333432674408,
+      0.6666666865348816,
+      1.0
+    ],
+    "generation_seconds": 13.66969969999991,
+    "generation_realtime_factor": 1.5995670074743558,
+    "source_peak": 0.3457563817501068,
+    "legacy_chunk_vs_batch_peak_error": 0.29776984453201294,
+    "new_chunk_vs_batch_peak_error": 0.0,
+    "legacy_10khz_alias_db": -2.728707575288005,
+    "new_10khz_alias_db": -107.30644650214688,
+    "before": {
+      "first_pcm_render_seconds": 4.8,
+      "queue_gap_seconds": 2.95,
+      "receipt": false,
+      "queue_underruns": 2,
+      "missing_samples": 47346,
+      "device_underflows": 0,
+      "device_overflows": 0,
+      "device_status_events": 0,
+      "clipped_samples": 0,
+      "invalid_pcm": 0,
+      "prefill_frames": 0
+    },
+    "after": {
+      "first_pcm_render_seconds": 6.8,
+      "queue_gap_seconds": 0.96,
+      "receipt": false,
+      "queue_underruns": 1,
+      "missing_samples": 15377,
+      "device_underflows": 0,
+      "device_overflows": 0,
+      "device_status_events": 0,
+      "clipped_samples": 0,
+      "invalid_pcm": 0,
+      "prefill_frames": 124160
+    },
+    "conversion_cpu": {
+      "legacy": {
+        "iterations": 32,
+        "wall_seconds": 0.061829999999645224,
+        "cpu_seconds": 0.0625,
+        "audio_seconds_processed": 273.468
+      },
+      "sinc": {
+        "iterations": 32,
+        "wall_seconds": 0.3266883999995116,
+        "cpu_seconds": 0.328125,
+        "audio_seconds_processed": 273.468
+      }
+    },
+    "scope": "Synthetic Kokoro PCM and a 10 ms device-free sink; no microphone or printers",
+    "limitations": [
+      "Numeric signal/queue evidence is not human perceived-quality acceptance",
+      "Short CPU timings depend on host load; Windows CPU time is quantized",
+      "16 kHz AEC/output retained; shared WASAPI mix conversion remains in Windows"
+    ],
+    "production_cached_pipeline": {
+      "passed": true,
+      "rendered_samples": 136734,
+      "expected_samples": 136734,
+      "wall_seconds": 2.036881799999719,
+      "diagnostics": {
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 1120,
+        "callbacks": 1295,
+        "max_callback_gap_ms": 2.027499999712745,
+        "max_callback_work_ms": 0.3219999998691492,
+        "source_peak": 0.3457563817501068,
+        "preclip_peak": 0.3454477787017822,
+        "render_peak": 0.3454477787017822,
+        "input_latency_ms": 0.0,
+        "output_latency_ms": 0.0
+      },
+      "scope": "Production cached TTS worker and output callback; accelerated synthetic sink, no devices"
+    }
+  },
+  "corrected_schedule_replay": {
+    "passed": true,
+    "checks": {
+      "original_is_finite_unclipped": true,
+      "callback_chunks_match_original": true,
+      "converted_length": true,
+      "chunk_invariance": true,
+      "antialias_rejection": true,
+      "render_preserves_converted_pcm": true,
+      "legacy_render_preserves_legacy_pcm": true,
+      "buffered_generation_has_no_starvation": true,
+      "non_silent_render_receipt": true
+    },
+    "source_rate": 24000,
+    "target_rate": 16000,
+    "source_samples": 205101,
+    "chunk_samples": [
+      73070,
+      68552,
+      63479
+    ],
+    "arrivals_seconds": [
+      4.794938000000002,
+      9.306530799999564,
+      13.656572900000356
+    ],
+    "chunk_progress": [
+      0.3333333432674408,
+      0.6666666865348816,
+      1.0
+    ],
+    "generation_seconds": 13.66969969999991,
+    "generation_realtime_factor": 1.5995670074743558,
+    "source_peak": 0.20000000298023224,
+    "legacy_chunk_vs_batch_peak_error": 0.06180340051651001,
+    "new_chunk_vs_batch_peak_error": 0.0,
+    "legacy_10khz_alias_db": -2.728707575288005,
+    "new_10khz_alias_db": -107.41921395092012,
+    "before": {
+      "first_pcm_render_seconds": 4.8,
+      "queue_gap_seconds": 2.95,
+      "receipt": false,
+      "queue_underruns": 2,
+      "missing_samples": 47346,
+      "device_underflows": 0,
+      "device_overflows": 0,
+      "device_status_events": 0,
+      "clipped_samples": 0,
+      "invalid_pcm": 0,
+      "prefill_frames": 0,
+      "complete_pcm_fallbacks": 0
+    },
+    "after": {
+      "first_pcm_render_seconds": 13.67,
+      "queue_gap_seconds": 0.0,
+      "receipt": true,
+      "queue_underruns": 0,
+      "missing_samples": 0,
+      "device_underflows": 0,
+      "device_overflows": 0,
+      "device_status_events": 0,
+      "clipped_samples": 0,
+      "invalid_pcm": 0,
+      "prefill_frames": 218720,
+      "complete_pcm_fallbacks": 1
+    },
+    "conversion_cpu": {
+      "legacy": {
+        "iterations": 1,
+        "wall_seconds": 0.0032953000627458096,
+        "cpu_seconds": 0.0,
+        "audio_seconds_processed": 8.545875
+      },
+      "sinc": {
+        "iterations": 1,
+        "wall_seconds": 0.012061099987477064,
+        "cpu_seconds": 0.015625,
+        "audio_seconds_processed": 8.545875
+      }
+    },
+    "scope": "Synthetic Kokoro PCM and a 10 ms device-free sink; no microphone or printers",
+    "limitations": [
+      "Numeric signal/queue evidence is not human perceived-quality acceptance",
+      "Short CPU timings depend on host load; Windows CPU time is quantized",
+      "16 kHz AEC/output retained; shared WASAPI mix conversion remains in Windows"
+    ]
+  },
+  "replay_scope": "Harmonic synthetic PCM using observed CI chunk lengths/arrival schedule; no recovered or recorded owner audio"
+}

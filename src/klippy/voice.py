@@ -326,7 +326,8 @@ class VoiceLoop:
                         if first_chunk and 0 < progress < 1 and len(pcm):
                             now = time.monotonic()
                             duration = len(pcm)/rate
-                            self.playback.defer_start(epoch,stream,now+synthesis_reserve(now-synth_began,duration,progress))
+                            reserve=synthesis_reserve(now-synth_began,duration,progress)
+                            self.playback.defer_start(epoch,stream,now+min(2.0,reserve),complete_first=reserve>2.0)
                         first_chunk = False
                         timings.mark("tts_first_pcm")
                         self.playback.enqueue(converter.push(pcm),epoch,stream=stream)

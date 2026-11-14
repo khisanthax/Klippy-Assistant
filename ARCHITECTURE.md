@@ -64,6 +64,14 @@ session activation. Numeric in-memory counters separate microphone readiness/cap
 KWS candidates, ASR starts/rejections and delivered input. They never retain user audio or
 transcripts. Shared session holds preserve follow-ups during interpretation and playback.
 
+TTS conversion uses a stateful windowed-sinc resampler on the speech worker. Rational phase,
+filter history and final sample count persist across SDK chunks; the 16 kHz AEC reference
+is exactly the guarded DAC-bound PCM. A bounded producer-rate reserve and queue prefill run
+without sleeping in capture/render callbacks. Playback receipts bind generation and utterance;
+silence, invalid PCM, clipping, starvation or device faults cannot deliver a confirmation.
+Output-only discontinuities reset AEC/partial capture while preserving the shared session;
+input loss still closes it. Numeric callback/queue/peak/latency diagnostics retain no audio.
+
 Heating instructions pass a bounded deterministic language parser before query/model routing.
 Configured names share possessive/punctuation and English number-word normalization. For
 heating, names require a name position and valid remaining command/header syntax; units,

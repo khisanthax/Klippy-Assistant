@@ -10,10 +10,10 @@ FRAME = 160  # WebRTC AEC uses 10 ms frames.
 
 
 def synthesis_reserve(elapsed, chunk_seconds, progress):
-    """Bounded first-chunk reserve for a producer slower than real-time speech."""
+    """Estimated reserve; callers complete PCM first if it exceeds two seconds."""
     if not (np.isfinite(progress) and 0<progress<1 and elapsed>=0 and chunk_seconds>0):
         return 0.0
-    return min(2.0,max(0.0,elapsed/progress-chunk_seconds/progress+chunk_seconds+.12-elapsed))
+    return max(0.0,elapsed/progress-chunk_seconds/progress+chunk_seconds+.12-elapsed)
 
 
 class AudioLevels:
@@ -77,8 +77,9 @@ class Playback:
         self.starving = False
         self.audible_samples = self.prefill = 0
         self.not_before = 0.0
+        self.complete_first = False
         self.stats = dict.fromkeys(('queue_underruns','missing_samples','device_underflows','device_overflows','device_status_events',
-                                   'clipped_samples','invalid_pcm','prefill_frames'),0)
+                                   'clipped_samples','invalid_pcm','prefill_frames','complete_pcm_fallbacks'),0)
 
     def begin(self, generation, prefill=RATE*120//1000):
         with self.lock:
@@ -89,12 +90,15 @@ class Playback:
             self.starving = False
             self.audible_samples = 0
             self.prefill, self.not_before = prefill, 0.0
+            self.complete_first = False
             return self.stream_token
 
-    def defer_start(self, generation, stream, when):
+    def defer_start(self, generation, stream, when, *, complete_first=False):
         with self.lock:
             if (generation,stream) == (self.generation,self.stream_token) and not self.started:
                 self.not_before = when
+                self.complete_first = complete_first
+                self.stats['complete_pcm_fallbacks'] += int(complete_first)
 
     def receipt(self, generation, stream):
         with self.lock:
@@ -120,6 +124,7 @@ class Playback:
             self.starving = False
             self.audible_samples = 0
             self.not_before = 0.0
+            self.complete_first = False
             return self.generation
 
     def enqueue(self, samples, generation, *, stream=None, final=False):
@@ -147,8 +152,9 @@ class Playback:
     def render_packet(self, size=FRAME):
         output = np.zeros(size, dtype=np.float32)
         with self.lock:
-            if not self.started and (self.clock()<self.not_before or
-                                     (self.producing and self.remaining<self.prefill)):
+            if not self.started and ((self.complete_first and self.producing) or
+                    (not self.complete_first and self.clock()<self.not_before) or
+                    (self.producing and self.remaining<self.prefill)):
                 self.stats['prefill_frames'] += size
                 if self.starving and self.producing:
                     self.stats['missing_samples'] += size

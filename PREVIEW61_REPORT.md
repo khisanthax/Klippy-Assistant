@@ -30,7 +30,7 @@ Unmuting leaves the session closed until a fresh validated wake. A single statio
 click toggles the microphone; dragging still changes position. Existing session snapshots
 keep the orb visible/Listening until expiry, followed by its configured fade.
 
-608 tests preserve the previous 568. New regressions cover real CallbackFlags, callback-to-
+610 tests preserve the previous 568. New regressions cover real CallbackFlags, callback-to-
 DSP output/input-loss behavior, three actual captured exchanges after one wake with 90 s
 ASR and TTS delays, playback-based countdown, configured timeout, expiry, immediate orb
 mute/unmute and failed confirmation delivery. Existing echo, barge-in, background/no-wake,
@@ -96,3 +96,19 @@ and [official Sherpa TTS progress API](https://github.com/k2-fsa/sherpa-onnx/blo
 CLI argument validation now precedes heavy native/ML imports, correcting a reproduced
 15-second invalid-argument timeout without weakening its test. Mute invalidates both success
 and error responses from an old in-flight UI request.
+
+## Slower-host correction found by packaged qualification
+
+Candidate cc64a72's frozen audit completed in 137.645 seconds and correctly rejected its
+remaining starvation: Kokoro took 13.67 seconds for 8.55 seconds of speech (RTF 1.60).
+The two-second streaming reserve still left a 0.96-second gap. Candidate was not released.
+When estimated reserve exceeds two seconds, playback now waits for complete generated PCM;
+fast/cached replies retain streaming. Replaying the exact CI chunk sizes/arrival schedule
+with a synthetic harmonic input gives zero starvation and first PCM at 13.67 seconds, versus
+4.80 seconds with 2.95 seconds of gaps originally. This deliberately trades first-audio
+latency for continuity on slow hosts; microphone capture, processing/session holds and
+immediate interruption remain active throughout. Numeric complete_pcm_fallbacks exposes it.
+The regression preserves the observed schedule and tests interruption/EOF behavior. The
+original 180-second whole-probe cap was exceeded by an earlier candidate; 300-second
+orchestration caps and durable stage checkpoints now retain useful failure evidence.
+No behavioral/signal/memory gate was removed. 610 tests preserve all previous cases.

@@ -34,7 +34,7 @@ def replay(parts, arrivals, progress, generated_at, source_rate, *, improved):
         while next_part<len(parts) and arrivals[next_part]<=clock[0]:
             if improved and next_part==0:
                 reserve=synthesis_reserve(arrivals[0],len(parts[0])/source_rate,progress[0])
-                playback.defer_start(0,stream,clock[0]+reserve)
+                playback.defer_start(0,stream,clock[0]+min(2.0,reserve),complete_first=reserve>2.0)
             playback.enqueue(converted[next_part],0,stream=stream)
             next_part+=1
         if not source_done and clock[0]>=generated_at and next_part==len(parts):
