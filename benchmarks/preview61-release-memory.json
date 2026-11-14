@@ -1,0 +1,17 @@
+{
+  "scope": "Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM",
+  "wall_seconds": 147.378,
+  "os": "Microsoft Windows NT 10.0.26100.0",
+  "peak_job_commit_bytes": 1965461504,
+  "memory_budget_gib": 16,
+  "limitations": [
+    "Total VM RAM/cache is not controlled by the process-tree commit budget",
+    "No human microphone accuracy",
+    "No real printer connections"
+  ],
+  "passed": true,
+  "cpu_seconds": 239.047,
+  "peak_active_processes": 3,
+  "cpu": "AMD EPYC 9V74 80-Core Processor                ",
+  "host_ram_bytes": 8584425472
+}

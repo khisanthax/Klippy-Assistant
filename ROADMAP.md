@@ -1,6 +1,6 @@
 # Roadmap
 
-## Conversation and playback — 0.6.1 candidate
+## Conversation and playback - 0.6.1 qualified preview candidate
 
 Preserve the shared session/countdown holds and fix output-only audio status incorrectly
 clearing conversations, hard-coded ASR timeout and orb microphone mute behavior. 610 cases

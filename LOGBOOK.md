@@ -1,5 +1,20 @@
 # Logbook
 
+## 2026-11-14 - 0.6.1 exact-source Windows qualification passed
+
+App source f9565e0f9afc1fbb64facbec6e70c750b4565d4d; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43615190106, attempt 1. All 610 tests/Ruff passed.
+Frozen and installed startup/orb/native voice and process-tree 16 GiB budget passed,
+including audio signal/delivery, three unprefixed follow-ups, 7 native query cases and
+21 heating/cancellation safety cases with zero writes. Upgrade 0.6.0/reinstall/offline/
+settings/uninstall preservation passed. Retained actual broad acoustic outcomes separately.
+Installer 1489813001 bytes, SHA-256 311c013d7bae1a1af3d9971a09b4ff2c556346bb1a4c45f7287604cb5ceaf5d3.
+Full evidence: benchmarks/preview61-release-qualification.json. Superseded 13c7adf/54af64b,
+timed-out 1ebd45d and starved cc64a72 candidates not published. Audio CI failure led to
+complete-PCM fallback, never a relaxed signal gate. Next: verified draft assets, exact-source
+tag, preview publication, settings-backed owner update and installer copy to dist.
+Human perceived quality/hardware/clean desktop VM/actual 16 GB gates remain open.
+
+
 ## 2026-11-14 - Packaged audit caught slower-producer starvation; complete-PCM fallback
 
 Candidate cc64a72 / run 43614107826 completed frozen probe in 137.645 s but failed the added

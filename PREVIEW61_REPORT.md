@@ -1,6 +1,6 @@
 # 0.6.1 preview - conversation continuity and speech playback
 
-Candidate pending exact-source Windows qualification; no physical printer actions.
+Exact-source Windows engineering qualification passed; human/hardware acceptance remains open.
 
 The existing shared Session already holds the countdown during interpretation and speech.
 Investigation reproduced another path that bypassed that protection: the duplex callback
@@ -112,3 +112,22 @@ The regression preserves the observed schedule and tests interruption/EOF behavi
 original 180-second whole-probe cap was exceeded by an earlier candidate; 300-second
 orchestration caps and durable stage checkpoints now retain useful failure evidence.
 No behavioral/signal/memory gate was removed. 610 tests preserve all previous cases.
+
+## Exact-source Windows qualification
+
+Qualified app source `f9565e0f9afc1fbb64facbec6e70c750b4565d4d` in [Windows run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43615190106), attempt 1.
+610 tests and Ruff passed. Frozen and installed startup/orb passed. Upgrade from 0.6.0,
+reinstall, external-network-blocked runtime, settings preservation and uninstall preservation
+passed. The process-tree 16 GiB budget passed; this is not actual 16 GB hardware qualification.
+
+- frozen: all engineering gates passed; audio signal/delivery passed; three follow-ups verified; broad original voice result `True`; probe 87.719 s; generation RTF 0.905; new replay gaps 0.0 s.
+- installed: all engineering gates passed; audio signal/delivery passed; three follow-ups verified; broad original voice result `False`; probe 150.171 s; generation RTF 1.745; new replay gaps 0.0 s.
+- budgeted: all engineering gates passed; audio signal/delivery passed; three follow-ups verified; broad original voice result `True`; probe 146.424 s; generation RTF 1.637; new replay gaps 0.0 s.
+
+Installer: `Klippy-Setup-0.6.1-preview.1.exe`, 1489813001 bytes.
+SHA-256: `311c013d7bae1a1af3d9971a09b4ff2c556346bb1a4c45f7287604cb5ceaf5d3`. Full source-bound evidence:
+`benchmarks/preview61-release-qualification.json` and its frozen/installed/memory reports.
+Failed/superseded candidate evidence and original broad acoustic results remain retained.
+Human perceived sound quality, long device-load, microphone/room, clean desktop VM, actual
+16 GB hardware and supervised physical-printer acceptance remain open. This is an unsigned
+engineering preview, not stable v1.0. No physical printer actions were executed.
