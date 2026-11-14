@@ -1,11 +1,18 @@
 # Roadmap
 
-## Conversation and playback - 0.6.1 qualified preview candidate
+## Conversation and playback - 0.6.1 preview published
 
-Preserve the shared session/countdown holds and fix output-only audio status incorrectly
-clearing conversations, hard-coded ASR timeout and orb microphone mute behavior. 610 cases
-preserve prior 568; require three unprefixed native follow-ups in all packaged probes.
-PREVIEW61_REPORT.md tracks Windows qualification and remaining hardware acceptance.
+Published [v0.6.1-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.1-preview.1) at exact qualified app source
+f9565e0f9afc1fbb64facbec6e70c750b4565d4d, Windows run 43615190106. All seven asset
+sizes/digests verified before publication. 610 tests preserve prior 568; frozen, installed,
+offline/upgrade and 16 GiB process-tree budget gates pass. All three native reports verify
+three unprefixed follow-ups and audio signal/delivery. Stateful antialias conversion and
+producer-aware buffering fix measured discontinuities/starvation. Slow producers use
+complete PCM, trading first-audio latency for continuity without pausing mic/interruption.
+Owner installation upgraded to 0.6.1 with exact settings preservation and isolated startup
+verified; checksum-verified installer and sidecar are in dist. Human perceived quality,
+long device-load, microphone/room, clean desktop VM, actual 16 GB and supervised physical
+printer gates remain open. See PREVIEW61_REPORT.md and benchmarks/preview61-release-*.json.
 
 ## Floating voice orb — 0.6 preview published
 

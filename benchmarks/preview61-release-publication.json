@@ -1,0 +1,54 @@
+{
+  "release_url": "https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.1-preview.1",
+  "tag": "v0.6.1-preview.1",
+  "source_commit": "f9565e0f9afc1fbb64facbec6e70c750b4565d4d",
+  "prerelease": true,
+  "draft": false,
+  "latest_requested": false,
+  "published_at": "2026-11-14T16:48:08Z",
+  "all_seven_asset_sizes_and_digests_verified": true,
+  "assets": [
+    {
+      "name": "Klippy-Setup-0.6.1-preview.1.exe",
+      "size": 1489813001,
+      "digest": "sha256:311c013d7bae1a1af3d9971a09b4ff2c556346bb1a4c45f7287604cb5ceaf5d3",
+      "state": "uploaded"
+    },
+    {
+      "name": "Klippy-Setup-0.6.1-preview.1.exe.sha256",
+      "size": 100,
+      "digest": "sha256:c04942be085e7ef461a19f45a097f3d7a8779d06b94eeeba564ce4a61eab5250",
+      "state": "uploaded"
+    },
+    {
+      "name": "manifest.json",
+      "size": 26591,
+      "digest": "sha256:c1ee41d40b27cf02de34723992d328111c8c06c5f6dfe1389c12ece654a5782f",
+      "state": "uploaded"
+    },
+    {
+      "name": "MOONRAKER_QUERIES.md",
+      "size": 14398,
+      "digest": "sha256:7949d274a57c5a1322aa906178cd0491ac9cb5e068ea0edeb58cae94ef452247",
+      "state": "uploaded"
+    },
+    {
+      "name": "preview61-release-qualification.json",
+      "size": 76971,
+      "digest": "sha256:af47ff309e410b66a1b0ac2bc71e4738c74a2a244bf13d5432543dd141e77314",
+      "state": "uploaded"
+    },
+    {
+      "name": "PREVIEW61_REPORT.md",
+      "size": 10221,
+      "digest": "sha256:85598686b44e7147a5f83346e933ace3032bf63e793379b68ffcafd4a3c0c062",
+      "state": "uploaded"
+    },
+    {
+      "name": "query_catalog.json",
+      "size": 36955,
+      "digest": "sha256:2ee0cfade447859a3163ed23a578cf695e2250e2ecb3b1eafa9fd928e6a7b40e",
+      "state": "uploaded"
+    }
+  ]
+}

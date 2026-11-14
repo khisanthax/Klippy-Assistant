@@ -1,5 +1,27 @@
 # Logbook
 
+## 2026-11-14 - Published and installed qualified 0.6.1 preview
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.1-preview.1, unsigned prerelease/not latest or stable, after all seven asset sizes and
+GitHub SHA-256 digests matched local files. Remote tag resolves exactly to qualified app
+source f9565e0f9afc1fbb64facbec6e70c750b4565d4d (not later bookkeeping commits).
+Publication evidence: benchmarks/preview61-release-publication.json. All Windows jobs passed.
+Installed and budgeted audio replay gaps improved from 3.73/3.16 s to zero using complete-PCM
+fallback; fast frozen host kept first audio at 2.68 s. Peak job commit 1,965,461,504 bytes.
+Original broad acoustic outcomes retained: frozen true, installed false, budgeted true;
+this variability is not human accuracy qualification. All engineering gates passed.
+
+Owner-authorized update completed from 0.6.0 to registered 0.6.1-preview.1. Online SQLite
+backup verified before setup; exact logical database digest and integrity preserved after
+setup and isolated installed startup/shutdown. App left closed; no real-profile microphone
+or printer operations started. Checksum-verified installer and sidecar copied to project dist.
+No owner audio/configuration/credentials or local backup metadata committed. No physical
+printer actions. Remaining: owner listening/room and prolonged device-load acceptance,
+clean interactive VM, actual 16 GB hardware and separately supervised printer gates.
+Next: gather numeric playback diagnostics during owner listening, with no speech recordings;
+retain mandatory safety and do not treat synthetic tests as closed hardware acceptance.
+
+
 ## 2026-11-14 - 0.6.1 exact-source Windows qualification passed
 
 App source f9565e0f9afc1fbb64facbec6e70c750b4565d4d; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43615190106, attempt 1. All 610 tests/Ruff passed.

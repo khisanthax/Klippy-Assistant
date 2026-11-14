@@ -2,12 +2,12 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
-Current source **0.6.1.dev1** adds phase-continuous antialias speech conversion, buffered
-playback and numeric audio diagnostics, and fixes output-only audio faults resetting follow-up conversations,
-uses the configured shared timeout and adds single-click orb microphone toggling. The
-countdown starts after playback; unmuting requires a fresh wake. Qualification progress:
-[PREVIEW61_REPORT.md](PREVIEW61_REPORT.md). The published download below remains the prior
-preview until the new installer qualifies.
+Current engineering preview **0.6.1-preview.1** corrects speech resampling discontinuities,
+playback starvation and follow-up conversation resets. Slow producers complete PCM before
+playback; capture and interruption remain active. 610 tests, Windows frozen/installed,
+upgrade/offline and process-tree memory qualification passed. Human sound-quality,
+microphone/room and physical-printer acceptance remain open. See
+[PREVIEW61_REPORT.md](PREVIEW61_REPORT.md) for measurements and latency tradeoffs.
 
 The 0.6 preview adds a floating waveform orb using the existing voice streams. It shows wake
 verification, listening, thinking, real playback and pending confirmation above the taskbar
@@ -16,7 +16,7 @@ drag to customize and right-click to reset. It normally stays hidden with the mi
 off or outside a conversation. See [PREVIEW6_REPORT.md](PREVIEW6_REPORT.md) for actual Qt
 captures, measurements, qualification progress and open desktop acceptance gates.
 
-[Download the 0.6 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.0-preview.1)
+[Download the 0.6.1 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.1-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.
 The repository is private: sign in to GitHub with an account that has access before
