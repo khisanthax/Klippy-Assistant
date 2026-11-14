@@ -59,6 +59,10 @@ def qualify_preview_report(report):
     report["preview_gates"]["paced_captured_status"] = (
         bool(report.get("paced_pipeline_transcripts")) and "63%" in (report.get("paced_status_response") or ""))
     query = report.get("query_catalog", {})
+    if "followup_capture_count" in report:
+        report["preview_gates"]["three_unprefixed_followups"] = (
+            report["followup_capture_count"] == 3 and len(report.get("paced_responses", [])) == 4
+            and all("63%" in (answer or "") for answer in report["paced_responses"][1:]))
     report["preview_gates"]["read_only_query_catalog"] = (
         query.get("passed") is True and query.get("printer_writes") == 0 and query.get("pending_write") is False)
     negatives = report.get("negative_composite", [])
@@ -150,7 +154,9 @@ def run(pack):
             "session_open": voice.listen_until > clock[0], "counts": voice.wake_diagnostics()}
         # Wait for the wake acknowledgement/ASR before asking a follow-up, as a
         # person does in the two-turn interaction. feed() drains the ASR worker.
-        feed(pad(audio("What is the status of the test printer?", voice=0)))
+        for _ in range(3):
+            feed(pad(audio("What is the status of the test printer?", voice=0)))
+        report["followup_capture_count"] = len(received)-1
         report["paced_pipeline_transcripts"] = [v.text for v in received]
         report["paced_pipeline_wakes"] = list(wakes)
         # Preregistered single continuous Hey+question attempt, with no retries.

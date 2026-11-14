@@ -136,7 +136,8 @@ class Window(QMainWindow):
         self.setWindowIcon(companion_icon())
         self.resize(940, 680)
         self.sprite = VoiceOrb(self.summon, store, companion_icon(), source=self.orb_snapshot,
-                               tray_geometry=lambda: self.tray.geometry() if hasattr(self, "tray") else None)
+                               tray_geometry=lambda: self.tray.geometry() if hasattr(self, "tray") else None,
+                               mute=self.toggle_listening)
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
         self.make_console()
@@ -945,8 +946,8 @@ class Window(QMainWindow):
         self.store.set("listening", settings)
         self.conversation.clear()
         if self.voice:
-            self.voice.reset_session()
             (self.voice.enabled.set if settings["override"] else self.voice.enabled.clear)()
+            self.voice.reset_session()
         self.sprite.clear_activity()
 
     def clear_override(self):

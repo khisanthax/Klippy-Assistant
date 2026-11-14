@@ -23,7 +23,7 @@ LABELS = {"idle":"Ready", "muted":"Mic off", "verifying":"Verifying wake", "list
 class VoiceOrb(QWidget):
     preferences_changed = Signal()
 
-    def __init__(self, summon, store, icon, *, source=None, tray_geometry=None, clock=time.monotonic):
+    def __init__(self, summon, store, icon, *, source=None, tray_geometry=None, clock=time.monotonic, mute=None):
         super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint |
                          Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -33,6 +33,7 @@ class VoiceOrb(QWidget):
         self.setAccessibleName("Klippy voice status")
         self.store, self.open_panel, self.clock, self.icon = store, summon, clock, icon
         self.source = source or (lambda: {})
+        self.toggle_microphone = mute
         self.tray_geometry = tray_geometry or (lambda: None)
         try:
             self.prefs = preferences(store.get("voice_orb", {}))
@@ -328,6 +329,8 @@ class VoiceOrb(QWidget):
             if self.dragged:
                 screen = QApplication.screenAt(self.geometry().center()) or QApplication.primaryScreen()
                 self.configure(position="custom", custom_position=[self.x(), self.y()], custom_monitor=screen.name())
+            elif self.toggle_microphone:
+                self.toggle_microphone()
 
     def mouseDoubleClickEvent(self, event):
         self.open_panel()  # Focus only after this explicit user action.

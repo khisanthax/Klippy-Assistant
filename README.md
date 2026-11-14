@@ -2,6 +2,12 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
+Current source **0.6.1.dev1** fixes output-only audio faults resetting follow-up conversations,
+uses the configured shared timeout and adds single-click orb microphone toggling. The
+countdown starts after playback; unmuting requires a fresh wake. Qualification progress:
+[PREVIEW61_REPORT.md](PREVIEW61_REPORT.md). The published download below remains the prior
+preview until the new installer qualifies.
+
 The 0.6 preview adds a floating waveform orb using the existing voice streams. It shows wake
 verification, listening, thinking, real playback and pending confirmation above the taskbar
 clock. **Settings → Voice Orb** controls diameter, labels, auto-hide, pinning and motion;

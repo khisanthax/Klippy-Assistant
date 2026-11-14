@@ -138,6 +138,7 @@ class VoiceLoop:
         self.playback = Playback()
         self.levels = AudioLevels(clock)
         self.capture_ready = threading.Event()
+        self.render_fault = threading.Event()
         self.audio = queue.Queue(maxsize=100)
         self.speech = queue.Queue(maxsize=4)
         self.overrun = threading.Event()
@@ -171,6 +172,7 @@ class VoiceLoop:
         self.capture_queue_delay = 0.0
         self.diagnostic_lock = threading.Lock()
         self.wake_counts = dict.fromkeys(("captured_frames", "queue_drops", "device_ready", "discontinuities",
+                                         "output_discontinuities", "session_resets",
                                          "frames", "voiced_frames", "candidates", "duplicate_candidates",
                                          "asr_started", "prefix_rejected", "echo_rejected", "verified", "delivered"), 0)
 
@@ -224,7 +226,9 @@ class VoiceLoop:
         return epoch
 
     def reset_session(self):
+        self.count("session_resets")
         self.interrupt()
+        self.session.clear()
         self.reset_requested.set()
 
     def close(self):
@@ -272,6 +276,7 @@ class VoiceLoop:
                     continue
                 timings.duration("tts_queue", self.clock() - queued)
                 self.speaking.set()
+                self.render_fault.clear()
                 self.report_state("Speaking", epoch)  # Existing event means preparation; rendered PCM drives the orb.
                 self.output_trace, self.first_render = trace, False
                 with self.spoken_lock:
@@ -296,7 +301,7 @@ class VoiceLoop:
                 tail_end = time.monotonic() + max(.65, self.delay_ms / 1000 + .1)
                 while time.monotonic() < tail_end and not cancelled():
                     self.closed.wait(.02)
-                success = not cancelled()
+                success = not cancelled() and not self.render_fault.is_set()
                 timings.mark("playback_complete")
             except Exception:
                 if epoch == self.epoch:
@@ -305,7 +310,7 @@ class VoiceLoop:
             finally:
                 if epoch == self.epoch:
                     self.speaking.clear()
-                self.session.finish(hold, refresh=success)
+                self.session.finish(hold, refresh=success or (epoch == self.epoch and not self.closed.is_set()))
                 self.on_delivery(token, success)
                 self.report_state("Speech finished" if success else "Speech interrupted or failed", epoch)
                 current.reset(context)
@@ -328,14 +333,29 @@ class VoiceLoop:
             return
         self.count("captured_frames")
         try:
+            fault = self.callback_fault(status)
+            if fault == 2:
+                self.render_fault.set()
             delay = max(0, min(500, round((timing.outputBufferDacTime - timing.inputBufferAdcTime) * 1000)))
             self.audio.put_nowait((indata[:, 0].copy(), output, self.clock(),
-                                   self.speaking.is_set(), delay, bool(status)))
+                                   self.speaking.is_set(), delay, fault))
         except queue.Full:
             self.count("queue_drops")
             self.overrun.set()
 
+    @staticmethod
+    def callback_fault(status):
+        if not status:
+            return 0
+        if not hasattr(status, "input_overflow"):
+            return 1  # Unknown status must not authorize continuous capture.
+        if status.input_overflow or status.input_underflow or status.priming_output:
+            return 1
+        return 2 if status.output_underflow or status.output_overflow else 1
+
     def _output_callback(self, outdata, frames, timing, status):
+        if status:
+            self.render_fault.set()
         output = self._render(frames)
         outdata[:, 0] = output
         if np.any(output):
@@ -513,7 +533,7 @@ class VoiceLoop:
                 with self.playback.lock:
                     if epoch != self.playback.generation or not self.enabled.is_set() or self.closed.is_set():
                         return
-                    self.listen_until = self.clock() + self.followup_seconds
+                    self.session.touch()
                     accepted = True
                 if woke:
                     self.count("verified")
@@ -542,6 +562,14 @@ class VoiceLoop:
             except queue.Empty:
                 continue
             if not self.enabled.is_set():
+                continue
+            if discontinuity == 2 and len(near) == FRAME:
+                # Output loss invalidates AEC reference and prompt delivery, not
+                # continuous microphone permission or the shared conversation clock.
+                self._clear_capture()
+                self.preroll.clear()
+                self.echo = EchoFilter(self.delay_ms)
+                self.count("output_discontinuities")
                 continue
             if discontinuity or len(near) != FRAME:
                 self.count("discontinuities")

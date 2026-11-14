@@ -1,4 +1,4 @@
-Klippy Assistant 0.6.0-preview.1 — Floating Voice Orb Engineering Preview
+Klippy Assistant 0.6.1-preview.1 — Follow-up Conversation Engineering Preview
 
 This package is unsigned and is not a stable v1.0 release.
 

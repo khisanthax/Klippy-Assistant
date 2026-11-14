@@ -1,5 +1,26 @@
 # Logbook
 
+## 2026-11-14 — Follow-up capture/session reset correction
+
+Reproduced an output-only PortAudio underflow taking the same reset path as lost microphone
+input: `_callback` reduced all status bits to bool, `_process` scheduled `_reset_dsp`, and
+the shared Session was cleared. This reproduces a failure class; no owner trace/audio was
+retained, so do not claim this is recovered hardware evidence. Existing shared processing/
+playback holds already work and are preserved. Output-only faults now reset AEC/partial
+capture while retaining the continuous microphone/session; prompt delivery fails safely.
+Input loss/unknown status/queue overflow/device changes still require fresh wake. Added
+numeric output-discontinuity/session-reset counters, configured Session timeout in ASR,
+synchronous mute invalidation and single stationary orb-click microphone toggling.
+
+New synthetic pipeline regression captures three commands after one wake with 90 s ASR/TTS
+delays, starts countdown after playback, then verifies expiry. Tests cover callback flags,
+DSP input/output distinctions, custom timeout, orb mute/unmute and failed confirmation.
+First full extended run: 579 passed / Ruff clean. Final rerun follows numeric-counter
+refinement. Native preview probes now require three actual ASR follow-ups/status responses.
+See PREVIEW61_REPORT.md. No physical printer connection/action or owner install change.
+Next: exact-source Windows qualification, 0.6 upgrade/offline tests, verified 0.6.1 preview.
+All physical/acoustic/clean desktop VM/actual 16 GB/interactive desktop gates remain open.
+
 ## 2026-11-14 — Published v0.6.0-preview.1 floating voice orb
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.0-preview.1
