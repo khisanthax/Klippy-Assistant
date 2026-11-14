@@ -27,6 +27,11 @@ class Session:
             self.holds.add(token)
             return token
 
+    def begin_active(self):
+        """Hold an already-authorized conversation without opening an expired one."""
+        with self.lock:
+            return self.begin() if self.clock() < self.until else None
+
     def finish(self, token, *, refresh=True):
         with self.lock:
             if token in self.holds:

@@ -1,5 +1,17 @@
 # Logbook
 
+## 2026-11-14 — Near-expiry capture hold refinement
+
+Final boundary review found capture had no session hold until VAD completed. A question
+starting just before expiry could lose UI query context mid-utterance. Added atomic
+`Session.begin_active()` and capture-to-ASR hold transfer, with generation checking so
+old/muted frames cannot open a session. Expired sessions cannot acquire this hold and mute
+invalidates it permanently. Two boundary regressions added. Candidate 13c7adf / Windows run
+43601805764 cancelled before publication; new exact-source qualification follows.
+Final validation: 581 passed in 70.80s and Ruff clean. The first boundary test asserted
+the deadline after advancing another 700 ms beyond ASR completion; corrected that test's
+clock observation to the actual handoff. No production acceptance criterion was relaxed.
+
 ## 2026-11-14 — Follow-up capture/session reset correction
 
 Reproduced an output-only PortAudio underflow taking the same reset path as lost microphone

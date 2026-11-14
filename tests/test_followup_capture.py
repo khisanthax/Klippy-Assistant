@@ -10,6 +10,45 @@ from klippy.session import Session
 from klippy.voice import VoiceLoop
 
 
+def test_capture_started_before_expiry_holds_context_until_asr_handoff():
+    clock = [100.0]
+    session = Session(lambda: clock[0])
+    session.touch()
+    values = []
+    backend = SimpleNamespace(wake=lambda _:False, reset_wake=lambda:None,
+                              transcribe=lambda _:'status')
+    voice = VoiceLoop(backend, values.append, lambda _:None, session=session, clock=lambda:clock[0])
+    voice.enabled.set()
+    rng = np.random.default_rng(6)
+    try:
+        clock[0] = 129
+        for _ in range(40):
+            clock[0] += .01
+            voice.process_frame(rng.normal(0,.05,160).astype(np.float32),np.zeros(160,np.float32),clock[0])
+        assert session.until == float('inf')
+        clock[0] += 2
+        assert session.until > clock[0]  # UI expiry must not clear query/printer context.
+        for _ in range(1):
+            clock[0] += .01
+            voice.process_frame(np.zeros(160,np.float32),np.zeros(160,np.float32),clock[0])
+        voice.asr_pool.submit(lambda:None).result(timeout=3)
+        assert len(values)==1 and values[0].text=='status'
+        assert not session.holds and session.until == clock[0]+30
+    finally:
+        voice.close()
+
+
+def test_capture_hold_cannot_open_expired_session_or_restore_muted_one():
+    clock=[100.0]
+    session=Session(lambda:clock[0])
+    assert session.begin_active() is None
+    session.touch()
+    token=session.begin_active()
+    session.clear()
+    session.finish(token)
+    assert session.until==0 and session.begin_active() is None
+
+
 async def test_three_captured_exchanges_one_wake_and_long_playback_delays(rig):
     from klippy.conversation import Conversation
     _, sim, engine, clock = rig

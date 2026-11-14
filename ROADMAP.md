@@ -3,7 +3,7 @@
 ## Follow-up conversation — 0.6.1 candidate
 
 Preserve the shared session/countdown holds and fix output-only audio status incorrectly
-clearing conversations, hard-coded ASR timeout and orb microphone mute behavior. 579 cases
+clearing conversations, hard-coded ASR timeout and orb microphone mute behavior. 581 cases
 preserve prior 568; require three unprefixed native follow-ups in all packaged probes.
 PREVIEW61_REPORT.md tracks Windows qualification and remaining hardware acceptance.
 

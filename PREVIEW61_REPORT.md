@@ -16,6 +16,10 @@ device loss and capture queue overflow still require a fresh wake word. Separate
 output-discontinuity/session-reset counters support further diagnosis without recording
 audio or transcripts. No output or printer operation is automatically retried.
 
+Speech capture atomically holds an already-active session before VAD/ASR, so a question
+started just before expiry retains its context. This hold cannot open an expired session;
+mute invalidates it permanently. Generation checks reject old capture frames.
+
 ASR now refreshes the configured shared Session timeout rather than a separate hard-coded
 voice-loop duration. Existing processing/playback holds stay intact; countdown begins
 after rendered buffers and the DAC/echo tail finish. Muting clears permission before
@@ -24,7 +28,7 @@ Unmuting leaves the session closed until a fresh validated wake. A single statio
 click toggles the microphone; dragging still changes position. Existing session snapshots
 keep the orb visible/Listening until expiry, followed by its configured fade.
 
-579 tests preserve the previous 568. New regressions cover real CallbackFlags, callback-to-
+581 tests preserve the previous 568. New regressions cover real CallbackFlags, callback-to-
 DSP output/input-loss behavior, three actual captured exchanges after one wake with 90 s
 ASR and TTS delays, playback-based countdown, configured timeout, expiry, immediate orb
 mute/unmute and failed confirmation delivery. Existing echo, barge-in, background/no-wake,

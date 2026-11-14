@@ -160,6 +160,7 @@ class VoiceLoop:
         self.delay_ms = 0
         self.pending_token = None
         self.capture_token = None
+        self.capture_hold = None
         self.near_end_until = 0.0
         self.probe_pending = threading.Event()
         self.detected_wakes = queue.Queue(maxsize=2)
@@ -250,7 +251,7 @@ class VoiceLoop:
     def say(self, text, token=None, trace=None):
         if self.closed.is_set():
             return
-        hold = self.session.begin() if self.clock() < self.session.until else None
+        hold = self.session.begin_active()
         job = (self.epoch, text[:600], token, trace, hold, self.clock())
         try:
             self.speech.put_nowait(job)
@@ -362,6 +363,8 @@ class VoiceLoop:
             self.last_output = self.clock()
 
     def _clear_capture(self):
+        self.session.finish(self.capture_hold, refresh=False)
+        self.capture_hold = None
         self.frames.clear()
         self.voiced_frames = 0
         self.had_wake = False
@@ -382,6 +385,7 @@ class VoiceLoop:
 
     def process_frame(self, near, far, now, *, output_active=False):
         """Same path for live capture and deterministic, device-free integration tests."""
+        input_epoch = self.epoch
         cleaned = self.echo.process(near, far)
         self.preroll.append(cleaned)
         if np.any(far):
@@ -428,6 +432,8 @@ class VoiceLoop:
             if not accepted_probe:
                 self.on_wake(epoch)
             self.report_state("Checking wake word", epoch)
+            self._clear_capture()
+            self.capture_hold = self.session.begin_active()
             self.frames = self._wake_preroll()
             self.voiced_frames = sum(float(np.sqrt(np.mean(f * f))) >= self.energy_threshold for f in self.frames)
             self.had_wake = True
@@ -444,9 +450,13 @@ class VoiceLoop:
                     self._probe_wake(np.concatenate(list(self.preroll)[-160:]), self.epoch)
             if output_active or now >= self.listen_until or not voiced:
                 return
+            self.capture_hold = self.session.begin_active()
+            if self.capture_hold is None or input_epoch != self.epoch:
+                self._clear_capture()
+                return
             self.frames = list(self.preroll)[-20:]
             self.voiced_frames = 1
-            self.capture_epoch = self.epoch
+            self.capture_epoch = input_epoch
             self.capture_token = self.pending_token
             self.capture_output_context = output_context
         else:
