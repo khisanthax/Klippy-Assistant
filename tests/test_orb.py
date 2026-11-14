@@ -332,6 +332,8 @@ def test_window_integrates_epochs_active_printer_controls_and_cancel(rig, monkey
         assert window.sprite.state == "muted"  # Enabled permission alone is insufficient.
         voice.capture_ready.set()
         window.result("voice_state", VoiceState("Thinking", 5))
+        window.result("voice_state", VoiceState("Speech finished", 5, object()))
+        assert window.sprite.state == "thinking"  # A replaced loop may reuse an epoch number.
         window.result("voice_state", VoiceState("Speech finished", 4))
         assert window.sprite.state == "thinking"
         window.result("voice_wake", 5)

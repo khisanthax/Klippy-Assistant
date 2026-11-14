@@ -856,6 +856,9 @@ class Window(QMainWindow):
                 self.send_button.setEnabled(True)
                 self.sprite.pipeline_event("Checking wake word")
         elif name == "voice_state":
+            owner = getattr(value, "owner", None)
+            if owner is not None and owner is not getattr(self.voice, "state_token", None):
+                return
             if self.voice and getattr(value, "epoch", None) not in {None, getattr(self.voice, "epoch", None)}:
                 return
             self.model_status.setText(value)

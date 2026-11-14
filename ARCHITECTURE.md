@@ -13,7 +13,13 @@ inference do not stop monitoring. All runtime services are local or enrolled LAN
 | Transport | moonraker | Supported HTTP endpoints; no command retries or redirects |
 | Monitoring | monitor | Status queries and deduplicated events only |
 | Persistence | storage | SQLite preferences/configuration, OS vault secrets, bounded event codes |
-| Presentation | app, presentation, printer_names | Management UI, tray, companion, validated factual speech and local name registry |
+| Presentation | app, presentation, printer_names, orb, orb_geometry, orb_settings | Management UI, tray, passive voice orb, factual speech and local names; no write authority |
+
+The Qt orb reads numeric capture/render envelopes and snapshots of existing session,
+processing and exact pending-action state. It cannot open a device, interpret speech or
+dispatch/confirm printer actions. Voice-state events carry loop identity and playback epoch
+so replaced/interrupted loops cannot overwrite newer presentation. Hidden animations stop;
+read-only Windows taskbar/monitor observations keep placement within each monitor work area.
 
 All write operations from the application flow through SafetyEngine. Proposed intents
 are serialized before confirmation. Confirmation is single-use, uses the configured response

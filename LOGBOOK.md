@@ -31,6 +31,12 @@ Next: exact-source Windows frozen/0.5.1 upgrade/reinstall/offline installed qual
 checksum verification and 0.6 engineering preview publication. All physical/acoustic/clean
 desktop VM/actual 16 GB/interactive display-matrix gates remain open.
 
+Final UI review added loop identity alongside playback epoch: replacing a VoiceLoop can
+reuse epoch numbers, so old queued state events must also match the current loop. Added
+that regression to the existing UI case. Candidate 2983975 / run 43593542057 is superseded
+before publication; new exact-source qualification follows the complete rerun.
+Final rerun after this refinement: 568 passed in 59.53s; Ruff and diff checks pass.
+
 ## 2026-11-13 — Published v0.5.1-preview.1 heating/cancellation hotfix
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.1-preview.1 at

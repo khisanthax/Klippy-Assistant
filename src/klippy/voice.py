@@ -24,9 +24,10 @@ WAKE_PREFIX = re.compile(r"^(?:(?:hey|hi)[,\s]+)?(?:klippy|clippy|klippi|clippie
 
 
 class VoiceState(str):
-    def __new__(cls, text, epoch):
+    def __new__(cls, text, epoch, owner=None):
         value = super().__new__(cls, text)
         value.epoch = epoch
+        value.owner = owner
         return value
 
 
@@ -128,6 +129,7 @@ class VoiceLoop:
         self.session = session or Session(clock, followup_seconds)
         self.on_delivery = on_delivery or (lambda token, success: None)
         self.backend, self.on_text, self.on_state = backend, on_text, on_state
+        self.state_token = object()
         self.on_wake = on_wake or (lambda epoch: None)
         self.clock, self.followup_seconds, self.energy_threshold = clock, followup_seconds, energy_threshold
         self.enabled = threading.Event()
@@ -213,7 +215,7 @@ class VoiceLoop:
             thread.start()
 
     def report_state(self, text, epoch=None):
-        self.on_state(VoiceState(text, self.epoch if epoch is None else epoch))
+        self.on_state(VoiceState(text, self.epoch if epoch is None else epoch, self.state_token))
 
     def interrupt(self):
         epoch = self.playback.interrupt()
