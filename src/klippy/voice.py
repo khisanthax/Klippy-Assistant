@@ -14,13 +14,20 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from .audio import FRAME, RATE, EchoFilter, Playback, default_device_pair, resample
+from .audio import FRAME, RATE, AudioLevels, EchoFilter, Playback, default_device_pair, resample
 from .diagnostics import current, timings
 from .models import verify_pack
 from .session import Session
 from .speech_text import normalize_for_speech
 
 WAKE_PREFIX = re.compile(r"^(?:(?:hey|hi)[,\s]+)?(?:klippy|clippy|klippi|clippie|clipy|clip\s+e)\b[\s,.!?]*", re.I)
+
+
+class VoiceState(str):
+    def __new__(cls, text, epoch):
+        value = super().__new__(cls, text)
+        value.epoch = epoch
+        return value
 
 
 @dataclass(frozen=True)
@@ -127,6 +134,8 @@ class VoiceLoop:
         self.closed = threading.Event()
         self.speaking = threading.Event()
         self.playback = Playback()
+        self.levels = AudioLevels(clock)
+        self.capture_ready = threading.Event()
         self.audio = queue.Queue(maxsize=100)
         self.speech = queue.Queue(maxsize=4)
         self.overrun = threading.Event()
@@ -203,8 +212,12 @@ class VoiceLoop:
             self.threads.append(thread)
             thread.start()
 
+    def report_state(self, text, epoch=None):
+        self.on_state(VoiceState(text, self.epoch if epoch is None else epoch))
+
     def interrupt(self):
         epoch = self.playback.interrupt()
+        self.levels.clear()
         self.speaking.clear()
         return epoch
 
@@ -215,6 +228,7 @@ class VoiceLoop:
     def close(self):
         self.closed.set()
         self.enabled.clear()
+        self.capture_ready.clear()
         self.interrupt()
         self.session.clear()
         while not self.speech.empty():
@@ -256,7 +270,7 @@ class VoiceLoop:
                     continue
                 timings.duration("tts_queue", self.clock() - queued)
                 self.speaking.set()
-                self.on_state("Speaking")
+                self.report_state("Speaking", epoch)  # Existing event means preparation; rendered PCM drives the orb.
                 self.output_trace, self.first_render = trace, False
                 with self.spoken_lock:
                     self.spoken.append((self.clock(), text))
@@ -283,18 +297,21 @@ class VoiceLoop:
                 success = not cancelled()
                 timings.mark("playback_complete")
             except Exception:
-                self.interrupt()
-                self.on_state("Speaker or speech model unavailable; text remains accessible")
+                if epoch == self.epoch:
+                    self.interrupt()
+                    self.report_state("Speaker or speech model unavailable; text remains accessible")
             finally:
                 if epoch == self.epoch:
                     self.speaking.clear()
                 self.session.finish(hold, refresh=success)
                 self.on_delivery(token, success)
-                self.on_state("Speech finished" if success else "Speech interrupted or failed")
+                self.report_state("Speech finished" if success else "Speech interrupted or failed", epoch)
                 current.reset(context)
 
     def _render(self, frames):
+        queued = self.playback.remaining
         output = self.playback.render(frames)
+        self.levels.publish("playback", float(np.sqrt(np.mean(output*output))), rendered=queued > 0 or bool(np.any(output)))
         if np.any(output) and not self.first_render:
             self.first_render = True
             timings.mark("first_audio_render", self.output_trace)
@@ -349,6 +366,7 @@ class VoiceLoop:
             self.last_output = now
         output_context = output_active or now - self.last_output < 0.65
         energy = float(np.sqrt(np.mean(cleaned * cleaned)))
+        self.levels.publish("microphone", energy)
         self.last_energy = energy
         voiced = energy >= self.energy_threshold
         self.count("frames")
@@ -387,7 +405,7 @@ class VoiceLoop:
             epoch = self.epoch if accepted_probe else self.interrupt()
             if not accepted_probe:
                 self.on_wake(epoch)
-            self.on_state("Checking wake word")
+            self.report_state("Checking wake word", epoch)
             self.frames = self._wake_preroll()
             self.voiced_frames = sum(float(np.sqrt(np.mean(f * f))) >= self.energy_threshold for f in self.frames)
             self.had_wake = True
@@ -447,7 +465,7 @@ class VoiceLoop:
                     except queue.Full:
                         pass
             except Exception:
-                self.on_state("Wake verification unavailable; keyword detector remains active")
+                self.report_state("Wake verification unavailable; keyword detector remains active", epoch)
             finally:
                 self.probe_pending.clear()
                 self.asr_slots.release()
@@ -456,7 +474,7 @@ class VoiceLoop:
     def _transcribe(self, samples, epoch, woke, output_context, confirmation_token=None):
         if not self.asr_slots.acquire(blocking=False):
             self.reset_session()
-            self.on_state("Speech queue full; please wake Klippy and repeat")
+            self.report_state("Speech queue full; please wake Klippy and repeat")
             return
         trace = timings.new(self.last_voice)
         timings.mark("vad_end", trace)
@@ -472,6 +490,7 @@ class VoiceLoop:
                 if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set():
                     return
                 timings.duration("asr_queue", self.clock() - queued)
+                self.report_state("Thinking", epoch)
                 self.count("asr_started")
                 with timings.span("asr"):
                     text = self.backend.transcribe(samples).strip()
@@ -481,7 +500,7 @@ class VoiceLoop:
                 match = WAKE_PREFIX.match(text)
                 if woke and match is None:
                     self.count("prefix_rejected")
-                    self.on_state("Wake transcript unclear; please repeat Klippy and the request")
+                    self.report_state("Wake transcript unclear; please repeat Klippy and the request", epoch)
                     return
                 if output_context:
                     if self._is_own_text(text):
@@ -496,14 +515,16 @@ class VoiceLoop:
                     accepted = True
                 if woke:
                     self.count("verified")
-                    self.on_state("Listening")
+                    self.report_state("Listening", epoch)
                 self.count("delivered")
                 self.on_text(VoiceInput(text, epoch, woke, confirmation_token, trace))
             except Exception:
-                self.on_state("Speech recognition unavailable; no request sent")
+                self.report_state("Speech recognition unavailable; no request sent", epoch)
             finally:
                 if hold is not None:
                     self.session.finish(hold, refresh=accepted and epoch == self.epoch)
+                if not accepted and epoch == self.epoch:
+                    self.report_state("Speech finished", epoch)
                 current.reset(context)
                 self.asr_slots.release()
         self.asr_pool.submit(run)
@@ -523,7 +544,7 @@ class VoiceLoop:
             if discontinuity or len(near) != FRAME:
                 self.count("discontinuities")
                 self.reset_session()
-                self.on_state("Audio discontinuity; please wake Klippy and repeat")
+                self.report_state("Audio discontinuity; please wake Klippy and repeat")
                 continue
             try:
                 if abs(delay - self.delay_ms) > 20:
@@ -533,7 +554,7 @@ class VoiceLoop:
                 self.process_frame(near, far, now, output_active=active)
             except Exception:
                 self.reset_session()
-                self.on_state("Audio processing unavailable; no request sent")
+                self.report_state("Audio processing unavailable; no request sent")
 
     def _devices(self):
         import sounddevice as sd
@@ -562,20 +583,23 @@ class VoiceLoop:
                                           extra_settings=extra, callback=self._output_callback))
                 with stream:
                     if capturing:
+                        self.capture_ready.set()
                         self.count("device_ready")
-                        self.on_state("Microphone ready")
+                        self.report_state("Microphone ready")
                     while not self.closed.wait(0.25):
                         if self.enabled.is_set() != capturing:
                             break
                         if not capturing and not self.speaking.is_set() and not self.playback.remaining:
                             break
                         if default_endpoint_ids(require_input=capturing) != ids:
-                            self.on_state("Default audio device changed; reconnecting")
+                            self.report_state("Default audio device changed; reconnecting")
                             break
+                self.capture_ready.clear()
                 self.reset_session()
             except Exception as exc:
+                self.capture_ready.clear()
                 self.last_device_error = type(exc).__name__ + ": " + str(exc)
                 self.reset_session()
-                self.on_state("Microphone or speaker unavailable; retrying safely")
+                self.report_state("Microphone or speaker unavailable; retrying safely")
                 last_ids = None
                 self.closed.wait(2)

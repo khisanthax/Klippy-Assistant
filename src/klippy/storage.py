@@ -9,6 +9,7 @@ from functools import wraps
 from pathlib import Path
 
 from .domain import Macro, Printer
+from .orb_settings import preferences as orb_preferences
 
 
 def serialized(method):
@@ -103,7 +104,8 @@ class Store:
         # Macros/addresses are private user configuration. Never export credentials.
         payload = {"version": 2, "preferences": {key: self.get(key, default) for key, default in
                    (("followup_seconds", 30), ("confirmation_seconds", 30), ("spoken", True),
-                    ("monitor_enabled", True), ("wake_threshold", .22), ("response_style", "brief"))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
+                    ("monitor_enabled", True), ("wake_threshold", .22), ("response_style", "brief"),
+                    ("voice_orb", {}))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
                    "selected": self.get("selected"), "listening": self.get("listening", {}),
                    "macros": {p.id: [m.model_dump(mode="json") for m in self.macros(p.id).values()]
                               for p in self.printers()}}
@@ -125,10 +127,12 @@ class Store:
         preferences = payload.get("preferences", {})
         allowed = {"followup_seconds": (10, 120), "confirmation_seconds": (10, 120),
                    "wake_threshold": (.01, 1)}
-        if not isinstance(preferences, dict) or set(preferences) - {*allowed, "spoken", "monitor_enabled", "response_style"}:
+        if not isinstance(preferences, dict) or set(preferences) - {*allowed, "spoken", "monitor_enabled", "response_style", "voice_orb"}:
             raise ValueError("Invalid preferences")
         for key, value in preferences.items():
-            if key == "response_style":
+            if key == "voice_orb":
+                preferences[key] = orb_preferences(value).model_dump(mode="json")
+            elif key == "response_style":
                 if not isinstance(value, str) or value not in {"brief", "conversational", "detailed"}:
                     raise ValueError("Invalid response style")
             elif key in allowed:

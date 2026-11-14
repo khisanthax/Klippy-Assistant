@@ -39,6 +39,13 @@ $smokeReport = Join-Path $PWD 'build\frozen-smoke.txt'
 $process = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--smoke-test', '--smoke-report', ('"' + $smokeReport + '"')) -WindowStyle Hidden -PassThru
 if (-not $process.WaitForExit(30000)) { $process.Kill(); throw 'Frozen application smoke test timed out' }
 if ($process.ExitCode -ne 0) { throw 'Frozen application smoke test failed' }
+$orbReport = Join-Path $PWD 'build\frozen-orb.json'
+$orbProcess = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--orb-self-test', '--smoke-report', ('"' + $orbReport + '"')) -WindowStyle Hidden -PassThru
+if (-not $orbProcess.WaitForExit(30000)) { $orbProcess.Kill(); throw 'Frozen orb self-test timed out' }
+if ($orbProcess.ExitCode -ne 0) {
+    if (Test-Path -LiteralPath $orbReport) { Get-Content -LiteralPath $orbReport -Raw | Write-Output }
+    throw 'Frozen orb self-test failed'
+}
 $voiceReport = Join-Path $PWD 'build\frozen-voice.json'
 $voiceProcess = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--preview-self-test', '--smoke-report', ('"' + $voiceReport + '"')) -WindowStyle Hidden -PassThru
 if (-not $voiceProcess.WaitForExit(180000)) { $voiceProcess.Kill(); throw 'Frozen engineering preview self-test timed out' }

@@ -1,5 +1,36 @@
 # Logbook
 
+## 2026-11-14 — Floating voice orb implementation and actual Qt evidence
+
+Implemented passive circular voice orb: real capture/render numeric envelopes, generation-
+bound pipeline events, exact-engine pending display, muted/error states, existing-session
+fade, taskbar-safe dragging and validated local preferences/backup. Topmost tool flags avoid
+activation/taskbar entries. Native read-only taskbar/monitor/auto-hide observations supplement
+Qt work areas. Qt friendly EDID names differed from GDI identifiers; matching native monitor
+origins fixed the initial fallback. Four attached monitors now return native geometry at
+100/125%. Actual widget state/size captures and measurements: docs/images/orb-states.png,
+benchmarks/preview6-orb-native.json, PREVIEW6_REPORT.md. Issue #12 tracks remaining acceptance.
+
+Preserved the initial 510-test pass. Added 58 regressions for presentation, audio linkage,
+readiness/confirmation, 100/125/150/200%/auto-hide/taskbar-edge geometry, tray/drag/disconnect,
+preferences/recovery and cleanup. Review found empty/own-speech ASR could leave Thinking set;
+fixed it. TTS failure diagnostics now survive their own interrupt while old-generation
+failures cannot interrupt newer work; dedicated regressions cover both. SafetyEngine remains
+the only write authority. No physical printer connection or consequential action performed.
+
+Initial 563-case run passed before final regressions. A subsequent 568-case run completed
+cases but failed to write JUnit when the development drive filled; do not count that as a
+complete check. Moved only explicitly named old generated installers to the larger C: artifact
+archive, preserving them and leaving owner settings/installations/models untouched. Focused
+58 orb regressions and Ruff pass. Full rerun completed successfully: 568 passed in 49.90s,
+zero failures/skips, JUnit written, Ruff and diff whitespace checks pass.
+Native Windows orb probe passes all checks: 30.43 FPS; short active/disabled-audio CPU
+21.94/14.13% of one core, hidden 0.78%/zero paints, widget working-set increase ~0.99 MiB.
+
+Next: exact-source Windows frozen/0.5.1 upgrade/reinstall/offline installed qualification,
+checksum verification and 0.6 engineering preview publication. All physical/acoustic/clean
+desktop VM/actual 16 GB/interactive display-matrix gates remain open.
+
 ## 2026-11-13 — Published v0.5.1-preview.1 heating/cancellation hotfix
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.1-preview.1 at

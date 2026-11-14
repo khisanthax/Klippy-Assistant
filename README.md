@@ -2,6 +2,13 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
+The 0.6 source adds a floating waveform orb using the existing voice streams. It shows wake
+verification, listening, thinking, real playback and pending confirmation above the taskbar
+clock. **Settings → Voice Orb** controls diameter, labels, auto-hide, pinning and motion;
+drag to customize and right-click to reset. It normally stays hidden with the microphone
+off or outside a conversation. See [PREVIEW6_REPORT.md](PREVIEW6_REPORT.md) for actual Qt
+captures, measurements, qualification progress and open desktop acceptance gates.
+
 [Download the 0.5.1 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.5.1-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.

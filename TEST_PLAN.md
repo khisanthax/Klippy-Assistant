@@ -1,5 +1,15 @@
 # Test plan
 
+## Floating voice orb (0.6)
+
+Preserve 510 previous cases; 568 total cover the passive orb and associated stale-event
+fixes. `python -m klippy.app --orb-self-test --smoke-report local/orb.json` uses actual Qt
+widgets, synthetic PCM and isolated settings without opening devices or printers. Inspect
+state/size PNGs, nonactivation, native taskbar observations, cleanup and measured CPU/memory.
+Frozen build and offline installed QA must run this in addition to every existing probe.
+Upgrade/reinstall fixtures include orb preferences. Real Windows 10/11 DPI/auto-hide/
+hot-plug/vertical-taskbar/full-screen/reduced-motion/sleep-resume acceptance remains open.
+
 ## Automated
 
 Run pytest and Ruff, then a Qt startup/clean-shutdown subprocess test. Tests use a simulated

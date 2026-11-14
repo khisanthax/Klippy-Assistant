@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QPoint, Qt, QTimer, Signal
+from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -28,6 +29,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QScrollArea,
+    QSpinBox,
     QSystemTrayIcon,
     QTableWidget,
     QTableWidgetItem,
@@ -46,6 +48,7 @@ from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
 from .monitor import Monitor
 from .moonraker import ConnectionFailure, Moonraker
+from .orb import VoiceOrb
 from .presentation import friendly_error
 from .printer_names import matching, rename, validate_names
 from .queries import QueryService
@@ -105,66 +108,6 @@ def companion_icon(state="idle", frame=0):
     return QIcon(pixmap)
 
 
-class Sprite(QWidget):
-    def __init__(self, summon, store):
-        super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint |
-                         Qt.WindowType.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        layout = QVBoxLayout(self)
-        self.icon = QLabel()
-        self.icon.setPixmap(companion_icon().pixmap(64, 64))
-        self.icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label = QLabel("Klippy")
-        self.label.setStyleSheet("background:#17352f;color:#c4f6e5;padding:8px;border-radius:8px")
-        layout.addWidget(self.icon)
-        layout.addWidget(self.label)
-        self.timer = QTimer(self)
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.hide)
-        self.summon = summon
-        self.store = store
-        self.hide_seconds = store.get("companion_seconds", 10)
-        self.notifications = store.get("companion_notifications", True)
-        self.offset = QPoint()
-        position = store.get("companion_position", [60, 100])
-        point = QPoint(*position)
-        if not any(screen.availableGeometry().contains(point) for screen in QApplication.screens()):
-            point = QPoint(60, 100)
-        self.move(point)
-        self.state = "idle"
-        self.frame = 0
-        self.animation = QTimer(self)
-        self.animation.timeout.connect(self.animate)
-        self.animation.start(180)
-
-    def animate(self):
-        if self.isVisible():
-            self.frame += 1
-            self.icon.setPixmap(companion_icon(self.state, self.frame).pixmap(64, 64))
-
-    def announce(self, text, state="idle", *, force=False):
-        if not self.notifications and not force:
-            return
-        self.state = state
-        self.label.setText(text[:100])
-        self.adjustSize()
-        self.show()
-        self.timer.start(int(self.hide_seconds * 1000))
-
-    def mousePressEvent(self, event):
-        self.offset = event.globalPosition().toPoint() - self.pos()
-
-    def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.MouseButton.LeftButton:
-            self.move(event.globalPosition().toPoint() - self.offset)
-
-    def mouseReleaseEvent(self, event):
-        self.store.set("companion_position", [self.x(), self.y()])
-
-    def mouseDoubleClickEvent(self, event):
-        self.summon()
-
-
 class Window(QMainWindow):
     def __init__(self, store, *, smoke=False):
         super().__init__()
@@ -192,7 +135,8 @@ class Window(QMainWindow):
         self.setWindowTitle(f"Klippy Assistant · {__version__} · Engineering preview")
         self.setWindowIcon(companion_icon())
         self.resize(940, 680)
-        self.sprite = Sprite(self.summon, store)
+        self.sprite = VoiceOrb(self.summon, store, companion_icon(), source=self.orb_snapshot,
+                               tray_geometry=lambda: self.tray.geometry() if hasattr(self, "tray") else None)
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
         self.make_console()
@@ -205,7 +149,7 @@ class Window(QMainWindow):
         self.make_settings()
         self.tray = QSystemTrayIcon(companion_icon(), self)
         menu = QMenu()
-        for title, slot in [("Show Klippy", self.summon), ("Show companion", self.show_sprite),
+        for title, slot in [("Show Klippy", self.summon), ("Show voice orb", self.show_sprite),
                             ("Microphone on/off", self.toggle_listening), ("Quit", self.quit)]:
             action = QAction(title, self)
             action.triggered.connect(slot)
@@ -220,6 +164,17 @@ class Window(QMainWindow):
         self.timer.start(1000)
         self.ticks = 0
         self.last_session_until = 0.0
+
+    def orb_snapshot(self):
+        voice = self.voice
+        enabled, ready = getattr(voice, "enabled", None), getattr(voice, "capture_ready", None)
+        levels = getattr(voice, "levels", None)
+        pending = self.engine.pending
+        return {**(levels.snapshot() if levels else {}),
+                "microphone_ready": bool(enabled and ready and enabled.is_set() and ready.is_set()),
+                "session_active": self.conversation.clock() < self.conversation.until,
+                "busy": self.command_busy,
+                "pending": pending is not None and self.engine.clock() < pending.expires}
 
     def client(self, printer):
         key = Credentials.get(printer.id)
@@ -450,21 +405,64 @@ class Window(QMainWindow):
                                 "addresses and definitions; keep them private. Credentials stay in the Windows vault.\n"
                                 "Voice interruption uses local echo cancellation. Microphone/room calibration remains necessary.\n"
                                 "Optional speaker enrollment is not enabled."))
-        companion = QCheckBox("Show companion notifications")
-        companion.setChecked(self.sprite.notifications)
-        companion.toggled.connect(lambda value: (self.store.set("companion_notifications", value),
-                                                  setattr(self.sprite, "notifications", value)))
-        layout.addWidget(companion)
-        duration = QDoubleSpinBox()
-        duration.setRange(2, 120)
-        duration.setValue(self.sprite.hide_seconds)
-        duration.valueChanged.connect(lambda value: (self.store.set("companion_seconds", value),
-                                                       setattr(self.sprite, "hide_seconds", value)))
-        layout.addWidget(QLabel("Companion auto-hide delay (seconds)"))
-        layout.addWidget(duration)
+        self.make_orb_settings(layout)
         for label in layout.parentWidget().findChildren(QLabel):
             label.setWordWrap(True)
         layout.addStretch()
+
+    def make_orb_settings(self, layout):
+        group = QGroupBox("Voice Orb")
+        form = QFormLayout(group)
+        self.orb_controls = {}
+        for key, title in (("enabled", "Enable floating orb"), ("pinned", "Pin open"),
+                           ("show_printer", "Show printer name"), ("show_status", "Show status labels"),
+                           ("animations", "Animate waveform and glow (respects Windows reduced motion)")):
+            control = QCheckBox(title)
+            control.setObjectName("orb_"+key)
+            control.setChecked(getattr(self.sprite.prefs, key))
+            control.toggled.connect(lambda value, setting=key: self.sprite.configure(**{setting:value}))
+            self.orb_controls[key] = control
+            form.addRow(control)
+        for key, title, low, high in (("diameter", "Diameter (logical pixels; 192 ≈ 2 nominal inches)", 128, 384),
+                                      ("hide_delay", "Auto-hide delay after session (seconds)", 0, 30),
+                                      ("intensity", "Animation intensity", 0, 1)):
+            control = QSpinBox() if key == "diameter" else QDoubleSpinBox()
+            control.setObjectName("orb_"+key)
+            control.setRange(low, high)
+            if key == "intensity":
+                control.setSingleStep(.1)
+            control.setValue(getattr(self.sprite.prefs, key))
+            control.valueChanged.connect(lambda value, setting=key: self.sprite.configure(**{setting:value}))
+            self.orb_controls[key] = control
+            form.addRow(title, control)
+        position = QComboBox()
+        position.addItem("Above Taskbar Clock", "clock")
+        position.addItem("Custom (drag the orb)", "custom")
+        position.setCurrentIndex(position.findData(self.sprite.prefs.position))
+        def move_position():
+            value = position.currentData()
+            self.sprite.configure(position=value, custom_position=([self.sprite.x(), self.sprite.y()] if value == "custom" else None),
+                                  custom_monitor=self.sprite.monitor_name if value == "custom" else "")
+        position.currentIndexChanged.connect(move_position)
+        self.orb_controls["position"] = position
+        form.addRow("Position", position)
+        form.addRow(self.button("Reset above taskbar clock", lambda: self.sprite.configure(position="clock", custom_position=None)))
+        form.addRow(self.button("Show orb now", self.show_sprite))
+        form.addRow(QLabel("Uses the existing audio streams. Disabling the orb never changes microphone or printer permissions."))
+        self.sprite.preferences_changed.connect(self.sync_orb_controls)
+        layout.addWidget(group)
+
+    def sync_orb_controls(self):
+        for key, control in self.orb_controls.items():
+            control.blockSignals(True)
+            value = getattr(self.sprite.prefs, key)
+            if isinstance(control, QCheckBox):
+                control.setChecked(value)
+            elif isinstance(control, QComboBox):
+                control.setCurrentIndex(control.findData(value))
+            else:
+                control.setValue(value)
+            control.blockSignals(False)
 
     def review_heater_limits(self):
         printer = self.target()
@@ -556,6 +554,7 @@ class Window(QMainWindow):
         self.reload_macros()
         if hasattr(self, "query_manager"):
             self.query_manager.reload()
+        self.sprite.set_printer(self.active_name())
 
     def select_printer(self):
         printer_id = self.selected.currentData()
@@ -569,6 +568,9 @@ class Window(QMainWindow):
             self.voice.pending_token = None
             self.voice.reset_session()
         self.reload_macros()
+
+        self.sprite.set_printer(self.active_name())
+        self.sprite.clear_activity()
 
     def target(self):
         return next((p for p in self.store.printers() if p.id == self.store.get("selected")), None)
@@ -751,6 +753,7 @@ class Window(QMainWindow):
         self.turn += 1
         turn = self.turn
         self.command_busy = True
+        self.sprite.pipeline_event("Thinking")
         self.send_button.setEnabled(False)
         trace = trace or timings.new()
         self.reaction_trace = trace
@@ -781,12 +784,14 @@ class Window(QMainWindow):
             self.voice.pending_token = None
             self.voice.interrupt()
         self.command_busy = False
+        self.sprite.clear_activity()
         self.send_button.setEnabled(True)
         self.write_message("Pending action canceled.")
 
     def stop_speaking(self):
         if self.voice:
             self.voice.interrupt()
+        self.sprite.clear_activity()
 
     def write_message(self, text):
         self.output.insertPlainText(str(text) + "\n")
@@ -849,16 +854,12 @@ class Window(QMainWindow):
                 self.voice.pending_token = self.engine.pending.token if self.engine.pending else None
                 self.command_busy = False
                 self.send_button.setEnabled(True)
+                self.sprite.pipeline_event("Checking wake word")
         elif name == "voice_state":
+            if self.voice and getattr(value, "epoch", None) not in {None, getattr(self.voice, "epoch", None)}:
+                return
             self.model_status.setText(value)
-            if value == "Listening":
-                self.sprite.announce(self.active_name() + " · Listening", "listening")
-            elif value == "Checking wake word":
-                self.sprite.announce(self.active_name() + " · Checking wake word…", "listening")
-            elif value == "Speaking":
-                self.sprite.state = "speaking"
-            elif value == "Speech finished" and self.conversation.until:
-                self.sprite.announce(self.active_name() + " · Listening", "listening")
+            self.sprite.pipeline_event(value)
         elif name == "voice_input":
             if self.voice and self.voice.enabled.is_set() and value.epoch == self.voice.epoch:
                 self.submit_turn(value.text, source="voice", confirmation_token=value.confirmation_token, trace=value.trace)
@@ -873,7 +874,7 @@ class Window(QMainWindow):
                 return
             if value and value != "speech_stopped":
                 self.write_message(value)
-                self.sprite.announce(self.active_name() + " · Responding", "speaking")
+                self.sprite.pipeline_event("Thinking" if self.voice and self.spoken.isChecked() else "Speech finished")
                 self.say(value, confirmation=True)
             elif value == "speech_stopped":
                 self.stop_speaking()
@@ -942,6 +943,8 @@ class Window(QMainWindow):
         self.conversation.clear()
         if self.voice:
             self.voice.reset_session()
+            (self.voice.enabled.set if settings["override"] else self.voice.enabled.clear)()
+        self.sprite.clear_activity()
 
     def clear_override(self):
         settings = self.store.get("listening", {})
@@ -967,6 +970,7 @@ class Window(QMainWindow):
                     self.findChild(QDoubleSpinBox, key).setValue(self.store.get(key, 30))
                 self.spoken.setChecked(self.store.get("spoken", True))
                 self.response_style.setCurrentText(self.store.get("response_style", "brief").title())
+                self.sprite.reload_preferences()
                 self.monitor_enabled.setChecked(self.store.get("monitor_enabled", True))
                 self.listening.setCurrentText("manual")
                 self.schedule.setText("[]")
@@ -980,7 +984,7 @@ class Window(QMainWindow):
         return printer.name if printer else "No active printer"
 
     def show_sprite(self):
-        self.sprite.announce(self.active_name(), force=True)
+        self.sprite.summon()
 
     def tick(self):
         self.ticks += 1
@@ -1019,6 +1023,8 @@ class Window(QMainWindow):
             self.output.clear()
             self.conversation.clear()
 
+        self.sprite.refresh()
+
     def summon(self):
         self.showNormal()
         self.raise_()
@@ -1045,7 +1051,7 @@ class Window(QMainWindow):
         self.worker.close()
         self.runtime.close()
         self.tray.hide()
-        self.sprite.hide()
+        self.sprite.close()
         QApplication.instance().quit()
 
 
@@ -1055,6 +1061,7 @@ def main():
     parser.add_argument("--smoke-test", action="store_true", help="Launch/close UI using isolated temporary settings")
     parser.add_argument("--smoke-report", type=Path, help="Write isolated startup diagnostic result")
     modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--orb-self-test", action="store_true", help="Render and measure isolated orb with synthetic audio; no devices or printers")
     modes.add_argument("--voice-self-test", action="store_true", help="Full voice acceptance probe without opening devices or live printers")
     modes.add_argument("--preview-self-test", action="store_true",
                         help="Qualify engineering query/wake-then-request flow; retain full-voice acceptance diagnostics")
@@ -1081,6 +1088,17 @@ def main():
     app.setStyle("Fusion")
     from .theme import STYLE
     app.setStyleSheet(STYLE)
+    if args.orb_self_test:
+        from .orb_probe import run
+        report_path = args.smoke_report or Path("orb-self-test.json")
+        try:
+            report = run(app, companion_icon(), report_path)
+            report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+            return 0 if report["passed"] else 1
+        except Exception:
+            import traceback
+            report_path.write_text(traceback.format_exc(), encoding="utf-8")
+            return 1
     import tempfile
     with tempfile.TemporaryDirectory(prefix="klippy-smoke-") as temp:
         try:

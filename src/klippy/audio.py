@@ -1,11 +1,49 @@
 """Testable duplex audio primitives. No model, network, device, or printer control here."""
 import threading
+import time
 from collections import deque
 
 import numpy as np
 
 RATE = 16000
 FRAME = 160  # WebRTC AEC uses 10 ms frames.
+
+
+class AudioLevels:
+    """Best-effort numeric telemetry. Never blocks audio or retains PCM/transcripts."""
+
+    def __init__(self, clock=time.monotonic):
+        self.clock = clock
+        self.lock = threading.Lock()
+        self.values = {"microphone": [0.0, float("-inf")], "playback": [0.0, float("-inf")]}
+        self.playing_until = float("-inf")
+
+    def publish(self, source, level, *, rendered=False):
+        if not self.lock.acquire(blocking=False):
+            return  # Drop visualization data, never delay a voice frame.
+        try:
+            now = self.clock()
+            row = self.values[source]
+            row[0] = max(row[0] if now-row[1] < .2 else 0, min(1.0, max(0.0, float(level))))
+            row[1] = now
+            if rendered:
+                self.playing_until = now + .15
+        finally:
+            self.lock.release()
+
+    def snapshot(self):
+        with self.lock:
+            now = self.clock()
+            values = {key: row[0] if now-row[1] < .2 else 0.0 for key, row in self.values.items()}
+            for row in self.values.values():
+                row[0] = 0.0
+            return {**values, "playing": now < self.playing_until}
+
+    def clear(self):
+        with self.lock:
+            for row in self.values.values():
+                row[:] = [0.0, float("-inf")]
+            self.playing_until = float("-inf")
 
 
 def resample(samples, source_rate, target_rate=RATE):

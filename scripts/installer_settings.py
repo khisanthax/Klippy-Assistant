@@ -18,6 +18,7 @@ try:
                                   url="http://127.0.0.1:17125"))
         store.set("selected", "qa-simulation")
         store.set("response_style", "detailed")
+        store.set("voice_orb", {"diameter": 256, "position": "custom", "custom_position": [40, 50], "animations": False})
         # Emulate the v0.2 record shape, before optional review-history fields existed.
         legacy = Macro(name="QA_STATUS", definition="M105").model_dump(mode="json")
         legacy.pop("previous_definition")
@@ -30,6 +31,7 @@ try:
         assert any(p.id == "qa-simulation" and not p.approved for p in store.printers())
         assert next(p for p in store.printers() if p.id == "qa-simulation").aliases == ("QA One", "Q1")
         assert store.get("selected") == "qa-simulation" and store.get("response_style") == "detailed"
+        assert store.get("voice_orb") == {"diameter": 256, "position": "custom", "custom_position": [40, 50], "animations": False}
         macro = store.macros("qa-simulation")["QA_STATUS"]
         assert macro.definition == "M105" and not macro.approved and macro.previous_definition is None
     else:

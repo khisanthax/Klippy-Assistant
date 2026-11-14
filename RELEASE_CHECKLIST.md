@@ -2,6 +2,11 @@
 
 Stable release is blocked until every applicable item has evidence.
 
+For the 0.6 orb preview, preserve all prior 510 regressions and require the complete extended
+suite/Ruff, frozen and offline-installed `--orb-self-test` reports/captures and upgrade/reinstall
+orb-preference preservation. Record measured CPU/memory and current native geometry without
+claiming the full Windows 10/11 interactive DPI/auto-hide/hot-plug/focus/sleep-resume matrix.
+
 - [x] Private repository pushed; CI passes on Windows.
 - [ ] Current LOGBOOK, roadmap, architecture, user guide, license notices.
 - [x] Application launches and closes cleanly from installed package (development host).

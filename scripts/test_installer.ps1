@@ -1,4 +1,4 @@
-param([string]$Installer = 'dist\Klippy-Setup-0.5.1-preview.1.exe', [string]$PreviousInstaller = '',
+param([string]$Installer = 'dist\Klippy-Setup-0.6.0-preview.1.exe', [string]$PreviousInstaller = '',
       [string]$Python = '.venv\Scripts\python.exe', [switch]$BlockExternalNetwork,
       [switch]$MeasurePerformance)
 $ErrorActionPreference = 'Stop'
@@ -56,6 +56,11 @@ try {
     $taskApp = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '--smoke-test','--smoke-report',('"' + $taskSmokeReport + '"'))
     if (-not $taskApp.WaitForExit(30000) -or $taskApp.ExitCode -ne 0) { throw 'Installed startup failed' }
+    $taskOrbReport = Join-Path $taskQaRoot 'installed-orb.json'
+    $taskOrb = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
+        '--orb-self-test','--smoke-report',('"' + $taskOrbReport + '"'))
+    Wait-QaProcess $taskOrb 30
+    if (-not (Get-Content -LiteralPath $taskOrbReport -Raw | ConvertFrom-Json).passed) { throw 'Installed orb gate failed' }
     $taskVoiceReport = Join-Path $taskQaRoot 'installed-voice.json'
     $taskVoice = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '--preview-self-test','--smoke-report',('"' + $taskVoiceReport + '"'))
@@ -78,6 +83,7 @@ try {
         performance_budget_test=[bool]$MeasurePerformance;
         firewall_profiles=$(if ($BlockExternalNetwork) { @(Get-NetFirewallProfile | Select-Object Name,Enabled) } else { @() });
         installers=$taskInstallers; tests=@('per-user install','same-version reinstall preserving isolated data','installed application smoke test',
+                'installed synthetic audio orb states/rendering/geometry/cleanup and performance',
                 'installed offline engineering query/wake-followup preview; full voice diagnostics retained separately',
                 'uninstall removes executable','uninstall preserves isolated user data');
         limitations=@('not clean Windows desktop VM qualification','not physical microphone accuracy')
