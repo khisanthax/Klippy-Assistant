@@ -36,6 +36,9 @@ reuse epoch numbers, so old queued state events must also match the current loop
 that regression to the existing UI case. Candidate 2983975 / run 43593542057 is superseded
 before publication; new exact-source qualification follows the complete rerun.
 Final rerun after this refinement: 568 passed in 59.53s; Ruff and diff checks pass.
+Packaging review found the inherited installer information page still said 0.2.0. Corrected
+it to 0.6.0-preview.1 and the orb's actual scope. Source 9a03ca1 / run 43593800687 is also
+superseded before publication; this notice-only correction requires a new exact-source build.
 
 ## 2026-11-13 — Published v0.5.1-preview.1 heating/cancellation hotfix
 

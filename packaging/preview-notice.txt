@@ -1,4 +1,4 @@
-Klippy Assistant 0.2.0 Offline Voice Engineering Preview
+Klippy Assistant 0.6.0-preview.1 — Floating Voice Orb Engineering Preview
 
 This package is unsigned and is not a stable v1.0 release.
 
@@ -6,6 +6,10 @@ It includes the desktop app, manual commands, safety confirmations, macro review
 notification-only printer monitoring. It includes local speech and language models;
 no cloud service or post-install model download is required. Enable listening to load
 the bundled engines. The microphone starts off unless configured otherwise.
+
+The floating orb visualizes the existing microphone/playback streams and pending reviews.
+Configure size, position, pinning, labels and reduced-motion behavior under Settings.
+Desktop DPI/auto-hide/hot-plug acceptance remains open; see PREVIEW6_REPORT.md.
 
 Hardware actuation and broad microphone/room accuracy have not been qualified. Test safely with a
 simulated printer first. Firmware and physical emergency controls remain essential.
