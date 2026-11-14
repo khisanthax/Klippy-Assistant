@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-import argparse
+# CLI errors/help must not wait for native GUI/model imports on a loaded machine.
+# ruff: noqa: E402
+from .cli import parse_args
+
+_startup_args = parse_args() if __name__ == "__main__" else None
+
 import asyncio
 import json
 import sys
@@ -769,6 +774,9 @@ class Window(QMainWindow):
             except (Rejected, ConnectionFailure) as exc:
                 timings.error(getattr(exc, "code", "connection_unavailable"))
                 return turn, str(exc), True
+            except Exception:
+                timings.error("request_unexpected_failure")
+                return turn, "Operation failed safely. No automatic command retry; check the printer if a request was sent.", True
             finally:
                 current.reset(context)
         self.worker.submit("turn", request())
@@ -944,8 +952,12 @@ class Window(QMainWindow):
         settings = self.store.get("listening", {})
         settings["override"] = not listening_enabled(settings, datetime.now())
         self.store.set("listening", settings)
+        self.turn += 1
+        self.command_busy = False
+        self.send_button.setEnabled(True)
         self.conversation.clear()
         if self.voice:
+            self.voice.pending_token = None
             (self.voice.enabled.set if settings["override"] else self.voice.enabled.clear)()
             self.voice.reset_session()
         self.sprite.clear_activity()
@@ -996,6 +1008,9 @@ class Window(QMainWindow):
         if self.voice:
             self.diagnostics.setText(timings.compact() + "\nWake pipeline (counts): " +
                                      "; ".join(f"{k}: {v}" for k, v in self.voice.wake_diagnostics().items()))
+            if hasattr(self.voice,'playback_diagnostics'):
+                self.diagnostics.setText(self.diagnostics.text()+"\nPlayback: "+
+                                         "; ".join(f"{key}: {value:.3f}" for key,value in self.voice.playback_diagnostics().items()))
         enabled = listening_enabled(self.store.get("listening", {}), datetime.now())
         if self.voice:
             (self.voice.enabled.set if enabled else self.voice.enabled.clear)()
@@ -1059,18 +1074,8 @@ class Window(QMainWindow):
         QApplication.instance().quit()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--show", action="store_true", help="Open control panel on startup")
-    parser.add_argument("--smoke-test", action="store_true", help="Launch/close UI using isolated temporary settings")
-    parser.add_argument("--smoke-report", type=Path, help="Write isolated startup diagnostic result")
-    modes = parser.add_mutually_exclusive_group()
-    modes.add_argument("--orb-self-test", action="store_true", help="Render and measure isolated orb with synthetic audio; no devices or printers")
-    modes.add_argument("--voice-self-test", action="store_true", help="Full voice acceptance probe without opening devices or live printers")
-    modes.add_argument("--preview-self-test", action="store_true",
-                        help="Qualify engineering query/wake-then-request flow; retain full-voice acceptance diagnostics")
-    parser.add_argument("--voice-pack", type=Path, help="Override the voice model pack for a device-free self-test")
-    args = parser.parse_args()
+def main(args=None):
+    args = parse_args() if args is None else args
     if args.voice_self_test or args.preview_self_test:
         from .models import bundled_pack
         from .voice_probe import run
@@ -1134,4 +1139,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(_startup_args))

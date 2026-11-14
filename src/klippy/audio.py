@@ -9,6 +9,13 @@ RATE = 16000
 FRAME = 160  # WebRTC AEC uses 10 ms frames.
 
 
+def synthesis_reserve(elapsed, chunk_seconds, progress):
+    """Bounded first-chunk reserve for a producer slower than real-time speech."""
+    if not (np.isfinite(progress) and 0<progress<1 and elapsed>=0 and chunk_seconds>0):
+        return 0.0
+    return min(2.0,max(0.0,elapsed/progress-chunk_seconds/progress+chunk_seconds+.12-elapsed))
+
+
 class AudioLevels:
     """Best-effort numeric telemetry. Never blocks audio or retains PCM/transcripts."""
 
@@ -58,34 +65,96 @@ def resample(samples, source_rate, target_rate=RATE):
 class Playback:
     """Generation-bound PCM buffer. Interrupting flushes the next render frame immediately."""
 
-    def __init__(self):
+    def __init__(self, clock=time.monotonic):
         self.lock = threading.Lock()
+        self.clock = clock
         self.generation = 0
         self.blocks = deque()
         self.offset = 0
         self.remaining = 0
+        self.stream_token = 0
+        self.producing = self.started = self.faulted = False
+        self.starving = False
+        self.audible_samples = self.prefill = 0
+        self.not_before = 0.0
+        self.stats = dict.fromkeys(('queue_underruns','missing_samples','device_underflows','device_overflows','device_status_events',
+                                   'clipped_samples','invalid_pcm','prefill_frames'),0)
+
+    def begin(self, generation, prefill=RATE*120//1000):
+        with self.lock:
+            if generation != self.generation or self.remaining:
+                return None
+            self.stream_token += 1
+            self.producing, self.started, self.faulted = True, False, False
+            self.starving = False
+            self.audible_samples = 0
+            self.prefill, self.not_before = prefill, 0.0
+            return self.stream_token
+
+    def defer_start(self, generation, stream, when):
+        with self.lock:
+            if (generation,stream) == (self.generation,self.stream_token) and not self.started:
+                self.not_before = when
+
+    def receipt(self, generation, stream):
+        with self.lock:
+            return ((generation,stream) == (self.generation,self.stream_token) and
+                    not self.producing and not self.remaining and not self.faulted and self.audible_samples>0)
+
+    def mark_fault(self, generation, stream, kind, count=1):
+        with self.lock:
+            self.stats[kind] += count
+            if (generation,stream) == (self.generation,self.stream_token) and self.audible_samples:
+                self.faulted = True
+
+    def diagnostics(self):
+        with self.lock:
+            return dict(self.stats)
 
     def interrupt(self):
         with self.lock:
             self.generation += 1
             self.blocks.clear()
             self.offset = self.remaining = 0
+            self.producing = self.started = self.faulted = False
+            self.starving = False
+            self.audible_samples = 0
+            self.not_before = 0.0
             return self.generation
 
-    def enqueue(self, samples, generation):
+    def enqueue(self, samples, generation, *, stream=None, final=False):
         samples = np.asarray(samples, dtype=np.float32).reshape(-1)
+        if not np.isfinite(samples).all():
+            with self.lock:
+                self.stats['invalid_pcm'] += 1
+            raise ValueError('Nonfinite TTS PCM')
+        samples = samples.copy()
         with self.lock:
-            if generation != self.generation:
+            if generation != self.generation or (stream is not None and stream != self.stream_token):
                 return False
             if self.remaining + len(samples) > RATE * 60:
                 raise ValueError("Speech playback buffer exceeded its limit")
-            self.blocks.append(samples.copy())
+            if len(samples):
+                self.blocks.append(samples)
             self.remaining += len(samples)
+            if final:
+                self.producing = False
             return True
 
     def render(self, size=FRAME):
+        return self.render_packet(size)[0]
+
+    def render_packet(self, size=FRAME):
         output = np.zeros(size, dtype=np.float32)
         with self.lock:
+            if not self.started and (self.clock()<self.not_before or
+                                     (self.producing and self.remaining<self.prefill)):
+                self.stats['prefill_frames'] += size
+                if self.starving and self.producing:
+                    self.stats['missing_samples'] += size
+                return output, 0, self.generation, self.stream_token
+            if self.remaining:
+                self.started = True
             at = 0
             while self.blocks and at < size:
                 block = self.blocks[0]
@@ -97,7 +166,58 @@ class Playback:
                 if self.offset == len(block):
                     self.blocks.popleft()
                     self.offset = 0
-        return output
+            self.audible_samples += int(np.count_nonzero(np.abs(output)>1e-5))
+            if self.producing and (self.started or self.starving) and at<size:
+                if not self.starving:
+                    self.stats['queue_underruns'] += 1
+                self.stats['missing_samples'] += size-at
+                self.faulted = True
+                self.started = False
+                self.starving = True
+            elif at:
+                self.starving = False
+            return output, at, self.generation, self.stream_token
+
+
+class AudioDiagnostics:
+    """Numeric playback-only observations; producer never waits for the UI reader."""
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.last_callback = None
+        self.values = {'callbacks':0,'max_callback_gap_ms':0.0,'max_callback_work_ms':0.0,
+                       'source_peak':0.0,'preclip_peak':0.0,'render_peak':0.0,'input_latency_ms':0.0,'output_latency_ms':0.0}
+
+    def callback(self, began, elapsed):
+        if not self.lock.acquire(False):
+            return
+        try:
+            if self.last_callback is not None:
+                self.values['max_callback_gap_ms'] = max(self.values['max_callback_gap_ms'],
+                                                        (began-self.last_callback)*1000)
+            self.last_callback = began
+            self.values['callbacks'] += 1
+            self.values['max_callback_work_ms'] = max(self.values['max_callback_work_ms'],elapsed*1000)
+        finally:
+            self.lock.release()
+
+    def peak(self, kind, value):
+        if self.lock.acquire(False):
+            try:
+                self.values[kind] = max(self.values[kind],value)
+            finally:
+                self.lock.release()
+
+    def device(self, latency):
+        with self.lock:
+            self.last_callback = None
+            near, far = latency if isinstance(latency,tuple) else (0,latency)
+            if not all(np.isfinite(value) and 0<=value<=5 for value in (near,far)):
+                raise ValueError('Unsupported audio device latency')
+            self.values.update(input_latency_ms=near*1000,output_latency_ms=far*1000)
+
+    def snapshot(self):
+        with self.lock:
+            return dict(self.values)
 
 
 class EchoFilter:

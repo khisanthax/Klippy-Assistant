@@ -1,0 +1,123 @@
+{
+  "scope": "Speaker-only quiet synthetic speech; no input stream, recording or printer connection",
+  "api": "Windows WASAPI",
+  "shared_mode": true,
+  "auto_convert": true,
+  "device_default_sample_rate": 96000.0,
+  "application_sample_rate": 16000,
+  "device_default_high_latency": 0.01,
+  "profiles": [
+    {
+      "case": "legacy_default",
+      "requested_output_latency": "high",
+      "reported_output_latency": 0.026125,
+      "portaudio_cpu_load": 0.02358489118592745,
+      "wall_seconds": 3.123322500148788,
+      "injected_callback_stalls": 0,
+      "injected_stall_seconds": 0,
+      "diagnostics": {
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 0,
+        "callbacks": 311,
+        "max_callback_gap_ms": 12.376599945127964,
+        "max_callback_work_ms": 0.32430002465844154,
+        "source_peak": 0.0,
+        "preclip_peak": 0.08875293284654617,
+        "render_peak": 0.08875293284654617,
+        "input_latency_ms": 0,
+        "output_latency_ms": 26.125
+      }
+    },
+    {
+      "case": "sinc_buffered",
+      "requested_output_latency": 0.08,
+      "reported_output_latency": 0.09,
+      "portaudio_cpu_load": 0.01721087088078392,
+      "wall_seconds": 3.0914718999993056,
+      "injected_callback_stalls": 0,
+      "injected_stall_seconds": 0,
+      "diagnostics": {
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 0,
+        "callbacks": 316,
+        "max_callback_gap_ms": 19.90860002115369,
+        "max_callback_work_ms": 0.28799986466765404,
+        "source_peak": 0.0,
+        "preclip_peak": 0.0893528014421463,
+        "render_peak": 0.0893528014421463,
+        "input_latency_ms": 0,
+        "output_latency_ms": 90.0
+      }
+    },
+    {
+      "case": "default_stall",
+      "requested_output_latency": "high",
+      "reported_output_latency": 0.026125,
+      "portaudio_cpu_load": 0.022585929296863674,
+      "wall_seconds": 3.1349937000777572,
+      "injected_callback_stalls": 2,
+      "injected_stall_seconds": 0.03,
+      "diagnostics": {
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 0,
+        "callbacks": 311,
+        "max_callback_gap_ms": 42.6320000551641,
+        "max_callback_work_ms": 0.2902999985963106,
+        "source_peak": 0.0,
+        "preclip_peak": 0.0893528014421463,
+        "render_peak": 0.0893528014421463,
+        "input_latency_ms": 0,
+        "output_latency_ms": 26.125
+      }
+    },
+    {
+      "case": "buffered_stall",
+      "requested_output_latency": 0.08,
+      "reported_output_latency": 0.09,
+      "portaudio_cpu_load": 0.022935266192429297,
+      "wall_seconds": 3.0935931999702007,
+      "injected_callback_stalls": 2,
+      "injected_stall_seconds": 0.03,
+      "diagnostics": {
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 0,
+        "callbacks": 316,
+        "max_callback_gap_ms": 40.59040010906756,
+        "max_callback_work_ms": 0.2812999300658703,
+        "source_peak": 0.0,
+        "preclip_peak": 0.0893528014421463,
+        "render_peak": 0.0893528014421463,
+        "input_latency_ms": 0,
+        "output_latency_ms": 90.0
+      }
+    }
+  ],
+  "limitations": [
+    "Precomputed synthetic speech; does not measure subjective listening quality",
+    "Injected stalls are a controlled robustness test, not proof of the owner incident"
+  ]
+}

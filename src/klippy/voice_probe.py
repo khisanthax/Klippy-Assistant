@@ -59,6 +59,14 @@ def qualify_preview_report(report):
     report["preview_gates"]["paced_captured_status"] = (
         bool(report.get("paced_pipeline_transcripts")) and "63%" in (report.get("paced_status_response") or ""))
     query = report.get("query_catalog", {})
+    if "audio_quality" in report:
+        quality=report['audio_quality']
+        report['preview_gates']['audio_signal_and_delivery']=(
+            quality.get('passed') is True and all(quality.get('checks',{}).get(key) is True for key in (
+                'original_is_finite_unclipped','callback_chunks_match_original','converted_length',
+                'chunk_invariance','antialias_rejection','render_preserves_converted_pcm',
+                'buffered_generation_has_no_starvation','non_silent_render_receipt'))
+            and quality.get('production_cached_pipeline',{}).get('passed') is True)
     if "followup_capture_count" in report:
         report["preview_gates"]["three_unprefixed_followups"] = (
             report["followup_capture_count"] == 3 and len(report.get("paced_responses", [])) == 4
@@ -247,6 +255,8 @@ def run(pack):
         report["wake_pipeline_counts"] = voice.wake_diagnostics()
     finally:
         voice.close()
+    from .audio_probe import run as audio_probe
+    report['audio_quality']=audio_probe(backend)
     async def language_probe():
         runtime = LlamaRuntime()
         try:
@@ -302,7 +312,7 @@ def run(pack):
         report["printer_writes"] = len(writes)
         store.close()
     qualify_report(report)
-    report["passed"] = report["passed"] and report["query_catalog"]["passed"]
+    report["passed"] = report["passed"] and report["query_catalog"]["passed"] and report['audio_quality']['passed']
     qualify_preview_report(report)
     report["homophone_note"] = "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
     return report

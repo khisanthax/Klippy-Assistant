@@ -95,3 +95,8 @@ Cross-version installer qualification upgrades 0.3 to 0.4 while preserving priva
 fixtures. Hardware, acoustics, real fleet/authentication, clean desktop VM and actual 16 GB
 host gates remain open regardless of synthetic passes. API coverage/exclusions and expected
 fields: docs/MOONRAKER_QUERIES.md and docs/query_catalog.json.
+
+Speech playback qualification additionally requires original/chunk equality, phase continuity,
+antialias rejection, finite/unclipped PCM, producer schedule without starvation, non-silent
+delivery receipt and actual cached production worker/callback equality. Retain original
+acoustic results independently; human perceived quality and hardware acceptance remain open.

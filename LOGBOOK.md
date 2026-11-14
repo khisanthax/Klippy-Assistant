@@ -1,5 +1,57 @@
 # Logbook
 
+## 2026-11-14 - PCM conversion and producer starvation corrected
+
+Original synthetic Kokoro PCM finite/unclipped and equal to SDK chunks; renderer bit-exact.
+Independent linear chunk conversion had peak phase error 0.139 and -2.73 dB 10 kHz alias.
+Stateful 97-tap sinc gives zero chunk/batch error and -107.42 dB alias. Generation RTF 1.2006
+starved replay by 0.70 s; bounded producer reserve removes gaps; first audio 3.64 -> 4.95 s.
+Extra converter CPU about 0.11% of one core (short quantized timing); cached production
+callback delivered all 136607 expected samples. Evidence: benchmarks/audio61-*.json.
+Four quiet WASAPI speaker-only tests, including 30 ms stalls, showed no hardware underrun
+or clipping. Output-only latency 26.125 -> 90 ms; brief duplex check reported unchanged
+input 22.25/output 36.125 ms, discarding all input immediately. Driver did not honor output
+increase in duplex. AEC/mic preserved; no callback buffering waits. Silent/empty/clipped/
+starved prompts cannot authorize actions. Human perceived crackle acceptance remains open.
+Early CLI parsing corrects import timeout without weakening test. All 608 tests passed in
+55.81 s; Ruff clean. Existing audio_device_probe.py preserved, speaker audit separately named.
+No owner audio recordings or physical printer actions. Next: exact-source Windows packaging.
+
+
+## 2026-11-14 — Audio distortion investigation added to the pending hotfix
+
+Owner added static/crackling investigation before the follow-up hotfix was published.
+Keep both scopes in the next qualified preview. Read audio.py Playback/resample and
+voice.py SherpaBackend.synthesize, render/callback/device lifecycle. Current output converts
+each Kokoro chunk independently with numpy.interp to 16 kHz, without an antialias filter or
+cross-chunk phase state. Device block size is 10 ms with default latency and WASAPI shared
+auto-conversion; playback begins on any queued PCM without a prefill. These are candidate
+causes requiring PCM reproduction/measurement, not yet established owner-device findings.
+Next: compare original synthetic Kokoro PCM with chunked and rendered output, measure alias,
+chunk continuity, peaks, queue/device underruns and callback timing; test stateful quality
+resampling and bounded output buffering while preserving 16 kHz AEC capture and interruption.
+Do not use a denoiser to conceal artifacts. No audio-quality fix or benchmark is claimed yet.
+
+The pending UI mute refinement now also tags unexpected request errors with their turn so
+neither stale success nor stale error speech can reappear after mute. Latest local run:
+581 passed, one existing CLI argument-conflict subprocess timed out at 15 s; focused retry
+also timed out. A 90 s diagnostic invocation completed correctly with argparse exit 2 after
+26.99 s; import timing shows heavy module imports before argument validation. Host free RAM
+was about 260 MiB of 64 GiB. Do not relax the test or treat it as a pass; address early
+argument validation and record resource conditions for audio benchmarks. No user apps were
+closed to free memory. Current committed source remains 54af64b; UI changes are uncommitted.
+Runs 43601805764 and 43602816507 were cancelled/superseded before publication. The latter's
+frozen native three-follow-up gate passed and diagnostics are retained under the C: artifact
+folder klippy-preview61-final; use a fresh source-specific folder for final qualification
+to avoid mixing candidates. There is no published/tagged 0.6.1 yet. Owner install remains
+0.6.0. No physical printer actions or owner audio recording occurred.
+
+Final mute-path review also invalidated the UI request generation and cleared busy/pending
+delivery state on microphone toggles. A slow response completing after mute is now ignored
+rather than reappearing or speaking. Extended the orb regression with an in-flight request.
+Candidate 54af64b / run 43602816507 passed frozen native three-follow-up gates, but is
+superseded before publication for this UI boundary correction; retain its cancelled record.
+
 ## 2026-11-14 — Near-expiry capture hold refinement
 
 Final boundary review found capture had no session hold until VAD completed. A question

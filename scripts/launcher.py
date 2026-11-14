@@ -1,4 +1,4 @@
-from klippy.app import main
+from klippy.cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())

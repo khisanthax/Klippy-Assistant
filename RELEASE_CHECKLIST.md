@@ -42,3 +42,8 @@ in frozen/installed/memory reports, with zero HTTP writes, supported-request LLM
 pending action. Check converted Celsius targets, configured-name/unit separation, explicit
 cancellation and clarification-safe confirmation. Keep initial failure reproductions and
 cancelled code candidates visible. Physical heater acceptance remains supervised and open.
+
+Speech playback qualification additionally requires original/chunk equality, phase continuity,
+antialias rejection, finite/unclipped PCM, producer schedule without starvation, non-silent
+delivery receipt and actual cached production worker/callback equality. Retain original
+acoustic results independently; human perceived quality and hardware acceptance remain open.

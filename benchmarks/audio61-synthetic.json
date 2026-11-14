@@ -1,0 +1,150 @@
+{
+  "scope": "Synthetic model speech only; no microphone, speaker or printer devices opened",
+  "synthetic_text": "A quiet afternoon is a good time to check the sound. Smooth speech should remain clear across every sentence. Listen for crisp consonants and steady vowels.",
+  "source_rate": 24000,
+  "render_rate": 16000,
+  "source_samples": 204910,
+  "callback_chunks": [
+    73038,
+    68468,
+    63404
+  ],
+  "chunk_arrival_seconds": [
+    3.633606499992311,
+    6.983553800033405,
+    10.241384299937636
+  ],
+  "generation_seconds": 10.250295599922538,
+  "generation_cpu_seconds": 17.5,
+  "chunk_progress": [
+    0.3333333432674408,
+    0.6666666865348816,
+    1.0
+  ],
+  "original_peak": 0.33694136142730713,
+  "original_over_range_samples": 0,
+  "original_finite": true,
+  "callback_concat_equals_original": true,
+  "legacy_render_equals_chunked_conversion": true,
+  "legacy_chunk_sample_count_error": -1,
+  "legacy_chunk_vs_batch_rms_error": 0.005488559603691101,
+  "legacy_chunk_vs_batch_peak_error": 0.13861948251724243,
+  "legacy_10khz_alias_db": -2.728707575288005,
+  "model_assets": [
+    {
+      "path": "tts/model.int8.onnx",
+      "sha256": "75635ea3b85a32d00094dcdd61a258aba87c160f7c264c304a7b3ae9d734195e",
+      "version": "72c347230107ef8a31098ec4d468a605244beef5f1ed00db97efa13518800653"
+    }
+  ],
+  "quality": {
+    "passed": true,
+    "checks": {
+      "original_is_finite_unclipped": true,
+      "callback_chunks_match_original": true,
+      "converted_length": true,
+      "chunk_invariance": true,
+      "antialias_rejection": true,
+      "render_preserves_converted_pcm": true,
+      "legacy_render_preserves_legacy_pcm": true,
+      "buffered_generation_has_no_starvation": true,
+      "non_silent_render_receipt": true
+    },
+    "source_rate": 24000,
+    "target_rate": 16000,
+    "source_samples": 204910,
+    "chunk_samples": [
+      73038,
+      68468,
+      63404
+    ],
+    "arrivals_seconds": [
+      3.633606499992311,
+      6.983553800033405,
+      10.241384299937636
+    ],
+    "chunk_progress": [
+      0.3333333432674408,
+      0.6666666865348816,
+      1.0
+    ],
+    "generation_seconds": 10.250295599922538,
+    "generation_realtime_factor": 1.200561682680889,
+    "source_peak": 0.33694136142730713,
+    "legacy_chunk_vs_batch_peak_error": 0.13861948251724243,
+    "new_chunk_vs_batch_peak_error": 0.0,
+    "legacy_10khz_alias_db": -2.728707575288005,
+    "new_10khz_alias_db": -107.41921395092012,
+    "before": {
+      "first_pcm_render_seconds": 3.64,
+      "queue_gap_seconds": 0.7,
+      "receipt": false,
+      "queue_underruns": 2,
+      "missing_samples": 11423,
+      "device_underflows": 0,
+      "device_overflows": 0,
+      "device_status_events": 0,
+      "clipped_samples": 0,
+      "invalid_pcm": 0,
+      "prefill_frames": 0
+    },
+    "after": {
+      "first_pcm_render_seconds": 4.95,
+      "queue_gap_seconds": 0.0,
+      "receipt": true,
+      "queue_underruns": 0,
+      "missing_samples": 0,
+      "device_underflows": 0,
+      "device_overflows": 0,
+      "device_status_events": 0,
+      "clipped_samples": 0,
+      "invalid_pcm": 0,
+      "prefill_frames": 79200
+    },
+    "conversion_cpu": {
+      "legacy": {
+        "iterations": 32,
+        "wall_seconds": 0.06279680016450584,
+        "cpu_seconds": 0.0625,
+        "audio_seconds_processed": 273.2133333333333
+      },
+      "sinc": {
+        "iterations": 32,
+        "wall_seconds": 0.36460860003717244,
+        "cpu_seconds": 0.359375,
+        "audio_seconds_processed": 273.2133333333333
+      }
+    },
+    "scope": "Synthetic Kokoro PCM and a 10 ms device-free sink; no microphone or printers",
+    "limitations": [
+      "Numeric signal/queue evidence is not human perceived-quality acceptance",
+      "Short CPU timings depend on host load; Windows CPU time is quantized",
+      "16 kHz AEC/output retained; shared WASAPI mix conversion remains in Windows"
+    ],
+    "production_cached_pipeline": {
+      "passed": true,
+      "rendered_samples": 136607,
+      "expected_samples": 136607,
+      "wall_seconds": 1.9957592999562621,
+      "diagnostics": {
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 1280,
+        "callbacks": 1292,
+        "max_callback_gap_ms": 2.4824999272823334,
+        "max_callback_work_ms": 0.25649997405707836,
+        "source_peak": 0.33694136142730713,
+        "preclip_peak": 0.3367857038974762,
+        "render_peak": 0.3367857038974762,
+        "input_latency_ms": 0.0,
+        "output_latency_ms": 0.0
+      },
+      "scope": "Production cached TTS worker and output callback; accelerated synthetic sink, no devices"
+    }
+  }
+}

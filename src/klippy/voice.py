@@ -14,9 +14,19 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from .audio import FRAME, RATE, AudioLevels, EchoFilter, Playback, default_device_pair, resample
+from .audio import (
+    FRAME,
+    RATE,
+    AudioDiagnostics,
+    AudioLevels,
+    EchoFilter,
+    Playback,
+    default_device_pair,
+    synthesis_reserve,
+)
 from .diagnostics import current, timings
 from .models import verify_pack
+from .resampling import SpeechResampler
 from .session import Session
 from .speech_text import normalize_for_speech
 
@@ -86,7 +96,7 @@ class SherpaBackend:
         self.asr.decode_stream(stream)
         return stream.result.text
 
-    def synthesize(self, text, cancelled=None, on_chunk=None):
+    def synthesize(self, text, cancelled=None, on_chunk=None, on_progress=None):
         # Only this process's serialized TTS worker uses the bounded PCM cache.
         with timings.span("normalization"):
             normalized = normalize_for_speech(text, self.vocabulary or None)
@@ -96,12 +106,16 @@ class SherpaBackend:
             audio = self.cache[key]
             timings.duration("tts_cache_hit", 0)
             if on_chunk and not (cancelled and cancelled()):
+                if on_progress:
+                    on_progress(1.0)
                 on_chunk(audio.samples, audio.sample_rate)
             return audio
         def callback(samples, progress):
             if cancelled and cancelled():
                 return 0
             if on_chunk:
+                if on_progress:
+                    on_progress(progress)
                 on_chunk(samples, self.tts.sample_rate)
             return 1
         with timings.span("tts_generation"):
@@ -138,7 +152,10 @@ class VoiceLoop:
         self.playback = Playback()
         self.levels = AudioLevels(clock)
         self.capture_ready = threading.Event()
-        self.render_fault = threading.Event()
+        self.audio_metrics = AudioDiagnostics()
+        self.output_latency = 0.0
+        self.output_key = None
+        self.render_key = (0,0)
         self.audio = queue.Queue(maxsize=100)
         self.speech = queue.Queue(maxsize=4)
         self.overrun = threading.Event()
@@ -277,32 +294,67 @@ class VoiceLoop:
                     continue
                 timings.duration("tts_queue", self.clock() - queued)
                 self.speaking.set()
-                self.render_fault.clear()
+                stream = self.playback.begin(epoch)
+                if stream is None:
+                    raise RuntimeError('Previous speech buffer did not drain')
+                self.output_key = (epoch,stream)
                 self.report_state("Speaking", epoch)  # Existing event means preparation; rendered PCM drives the orb.
                 self.output_trace, self.first_render = trace, False
                 with self.spoken_lock:
                     self.spoken.append((self.clock(), text))
+                converter = None
+                progress = 0.0
+                first_chunk = True
+                synth_began = time.monotonic()
+                def observed_progress(value):
+                    nonlocal progress
+                    if np.isfinite(value) and 0 < value <= 1:
+                        progress = float(value)
                 def chunk(samples, rate):
+                    nonlocal converter, first_chunk
                     if epoch == self.epoch and not self.closed.is_set():
+                        pcm = np.asarray(samples,dtype=np.float32)
+                        if pcm.size and np.isfinite(pcm).all():
+                            self.audio_metrics.peak('source_peak',float(np.max(np.abs(pcm))))
+                        if converter is None:
+                            converter = SpeechResampler(rate)
+                        elif rate != converter.source:
+                            raise ValueError('TTS changed sample rate mid-utterance')
+                        # SDK progress describes completed sentence groups. Under slow
+                        # generation, reserve bounded time for future chunks; never sleep
+                        # or resample inside capture/render callbacks.
+                        if first_chunk and 0 < progress < 1 and len(pcm):
+                            now = time.monotonic()
+                            duration = len(pcm)/rate
+                            self.playback.defer_start(epoch,stream,now+synthesis_reserve(now-synth_began,duration,progress))
+                        first_chunk = False
                         timings.mark("tts_first_pcm")
-                        self.playback.enqueue(resample(samples, rate), epoch)
+                        self.playback.enqueue(converter.push(pcm),epoch,stream=stream)
                 def cancelled():
                     return epoch != self.epoch or self.closed.is_set()
                 if isinstance(self.backend, SherpaBackend):
-                    self.backend.synthesize(text, cancelled=cancelled, on_chunk=chunk)
+                    audio = self.backend.synthesize(text, cancelled=cancelled, on_chunk=chunk,
+                                                    on_progress=observed_progress)
+                    if converter is None:
+                        chunk(audio.samples,audio.sample_rate)
+                    self.playback.enqueue(converter.finish(),epoch,stream=stream,final=True)
                 else:
                     audio = self.backend.synthesize(text, cancelled=cancelled)
-                    chunk(audio.samples, audio.sample_rate)
+                    pcm = np.asarray(audio.samples,dtype=np.float32)
+                    if pcm.size and np.isfinite(pcm).all():
+                        self.audio_metrics.peak('source_peak',float(np.max(np.abs(pcm))))
+                    converted = SpeechResampler(audio.sample_rate).push(pcm,final=True)
+                    self.playback.enqueue(converted,epoch,stream=stream,final=True)
                 deadline = time.monotonic() + 90
                 while self.playback.remaining and not cancelled():
                     if time.monotonic() >= deadline:
                         raise TimeoutError("Playback did not drain")
                     self.closed.wait(0.02)
                 # PortAudio has consumed PCM, but the DAC and echo tail must finish too.
-                tail_end = time.monotonic() + max(.65, self.delay_ms / 1000 + .1)
+                tail_end = time.monotonic() + max(.65, self.delay_ms / 1000 + .1, self.output_latency+.1)
                 while time.monotonic() < tail_end and not cancelled():
                     self.closed.wait(.02)
-                success = not cancelled() and not self.render_fault.is_set()
+                success = not cancelled() and self.playback.receipt(epoch,stream)
                 timings.mark("playback_complete")
             except Exception:
                 if epoch == self.epoch:
@@ -317,10 +369,16 @@ class VoiceLoop:
                 current.reset(context)
 
     def _render(self, frames):
-        queued = self.playback.remaining
-        output = self.playback.render(frames)
-        self.levels.publish("playback", float(np.sqrt(np.mean(output*output))), rendered=queued > 0 or bool(np.any(output)))
-        if np.any(output) and not self.first_render:
+        output, consumed, generation, stream = self.playback.render_packet(frames)
+        self.render_key = (generation,stream)
+        peak = float(np.max(np.abs(output),initial=0))
+        self.audio_metrics.peak('preclip_peak',peak)
+        if peak>1:
+            self.playback.mark_fault(generation,stream,'clipped_samples',int(np.count_nonzero(np.abs(output)>1)))
+            np.clip(output,-1,1,out=output)  # AEC receives precisely these DAC-bound samples.
+        self.audio_metrics.peak('render_peak',min(1.0,peak))
+        self.levels.publish("playback", float(np.sqrt(np.mean(output*output))), rendered=consumed>0)
+        if np.any(output) and not self.first_render and (self.output_key is None or self.output_key==self.render_key):
             self.first_render = True
             timings.mark("first_audio_render", self.output_trace)
             timings.mark("first_audible_estimate", self.output_trace,
@@ -328,6 +386,13 @@ class VoiceLoop:
         return output
 
     def _callback(self, indata, outdata, frames, timing, status):
+        began = time.perf_counter()
+        try:
+            self._capture_callback(indata,outdata,frames,timing,status)
+        finally:
+            self.audio_metrics.callback(began,time.perf_counter()-began)
+
+    def _capture_callback(self, indata, outdata, frames, timing, status):
         output = self._render(frames)
         outdata[:, 0] = output
         if not self.enabled.is_set():
@@ -336,7 +401,7 @@ class VoiceLoop:
         try:
             fault = self.callback_fault(status)
             if fault == 2:
-                self.render_fault.set()
+                self.record_output_status(status)
             delay = max(0, min(500, round((timing.outputBufferDacTime - timing.inputBufferAdcTime) * 1000)))
             self.audio.put_nowait((indata[:, 0].copy(), output, self.clock(),
                                    self.speaking.is_set(), delay, fault))
@@ -355,12 +420,24 @@ class VoiceLoop:
         return 2 if status.output_underflow or status.output_overflow else 1
 
     def _output_callback(self, outdata, frames, timing, status):
-        if status:
-            self.render_fault.set()
-        output = self._render(frames)
-        outdata[:, 0] = output
-        if np.any(output):
-            self.last_output = self.clock()
+        began = time.perf_counter()
+        try:
+            output = self._render(frames)
+            if status:
+                self.record_output_status(status)
+            outdata[:, 0] = output
+            if np.any(output):
+                self.last_output = self.clock()
+        finally:
+            self.audio_metrics.callback(began,time.perf_counter()-began)
+
+    def playback_diagnostics(self):
+        return {**self.playback.diagnostics(), **self.audio_metrics.snapshot()}
+
+    def record_output_status(self, status):
+        kind = ('device_underflows' if getattr(status,'output_underflow',False) else
+                'device_overflows' if getattr(status,'output_overflow',False) else 'device_status_events')
+        self.playback.mark_fault(*self.render_key,kind)
 
     def _clear_capture(self):
         self.session.finish(self.capture_hold, refresh=False)
@@ -616,12 +693,19 @@ class VoiceLoop:
                     sd._initialize()
                     last_ids = ids
                 pair = default_device_pair(sd)
-                extra = sd.WasapiSettings(auto_convert=True) if sd.query_hostapis(sd.query_devices(pair[1])["hostapi"])["name"] == "Windows WASAPI" else None
+                output_info = sd.query_devices(pair[1])
+                extra = sd.WasapiSettings(auto_convert=True) if sd.query_hostapis(output_info["hostapi"])["name"] == "Windows WASAPI" else None
+                default_latency = getattr(getattr(sd,'default',None),'latency',('low','low'))
+                input_latency = default_latency if isinstance(default_latency,str) else default_latency[0]
+                output_latency = max(.08,output_info.get('default_high_output_latency',0))
                 stream = (sd.Stream(device=pair, samplerate=RATE, channels=1, dtype="float32", blocksize=FRAME,
-                                    extra_settings=extra, callback=self._callback) if capturing else
+                                    extra_settings=extra, latency=(input_latency,output_latency), callback=self._callback) if capturing else
                           sd.OutputStream(device=pair[1], samplerate=RATE, channels=1, dtype="float32", blocksize=FRAME,
-                                          extra_settings=extra, callback=self._output_callback))
+                                          extra_settings=extra, latency=output_latency, callback=self._output_callback))
                 with stream:
+                    latency = getattr(stream,'latency',(0,0) if capturing else 0)
+                    self.audio_metrics.device(latency)
+                    self.output_latency = latency[1] if isinstance(latency,tuple) else latency
                     if capturing:
                         self.capture_ready.set()
                         self.count("device_ready")

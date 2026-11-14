@@ -1,0 +1,25 @@
+{
+  "scope": "Silent duplex format/latency check; microphone input discarded immediately, no recording or inference",
+  "api": "Windows WASAPI",
+  "sample_rate": 16000,
+  "rows": [
+    {
+      "case": "previous_default",
+      "reported_input_latency_seconds": 0.02225,
+      "reported_output_latency_seconds": 0.036125,
+      "callbacks": 60,
+      "portaudio_cpu_load": 0.011163620071825753
+    },
+    {
+      "case": "buffered",
+      "reported_input_latency_seconds": 0.02225,
+      "reported_output_latency_seconds": 0.036125,
+      "callbacks": 60,
+      "portaudio_cpu_load": 0.009129687527921822
+    }
+  ],
+  "input_latency_unchanged": true,
+  "limitations": [
+    "Reported driver latencies, not acoustic end-to-end measurements"
+  ]
+}

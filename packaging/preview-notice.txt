@@ -1,4 +1,4 @@
-Klippy Assistant 0.6.1-preview.1 — Follow-up Conversation Engineering Preview
+Klippy Assistant 0.6.1-preview.1 — Conversation and Playback Engineering Preview
 
 This package is unsigned and is not a stable v1.0 release.
 
