@@ -1,5 +1,27 @@
 # Logbook
 
+## 2026-11-14 — Published v0.6.0-preview.1 floating voice orb
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.0-preview.1
+at annotated exact-source tag 0fbab095214e109240d069746e00f9fea3d429e0 after every job
+in Windows run 43593883215 attempt 1 passed. Verified all nine uploaded asset sizes and
+GitHub SHA-256 digests against local files before publication, and verified the remote tag
+resolves to the qualified source. Published prerelease=true, draft=false, unsigned and
+not latest/stable. Installer SHA-256 matches CI/sidecar/installed QA:
+02f2ea49ea9df3f371d2ddd7380dbc6f05f06c869988c41e9b58d2297f9b0e9b.
+
+568 tests (prior 510 retained), 28 orb checks per packaged process and all native preview
+query/command/Hey gates pass. Actual animated Qt evidence is 30.43 FPS; packaged CI correctly
+respects Windows reduced motion. Broad original voice False/False/True diagnostics remain
+separate. Current models/license-qualified payload unchanged. README and roadmap point to
+the new release; issues #6/#8/#12 track implementation and remaining acceptance.
+No physical printer action/connection, owner recording or owner-installation change occurred.
+
+Next: preserve 568 regressions and perform the supervised human microphone/room and actual
+interactive Windows desktop matrix, clean desktop VM and actual 16 GB gates when available.
+Physical printer/fleet/MMU acceptance remains separately supervised. Do not infer stable
+acceptance from fresh-runner or synthetic evidence; see PREVIEW6_REPORT.md for exact limits.
+
 ## 2026-11-14 — Qualified 0.6 floating orb preview
 
 Exact application source 0fbab095214e109240d069746e00f9fea3d429e0 passed all jobs in

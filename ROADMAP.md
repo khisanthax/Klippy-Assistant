@@ -1,6 +1,10 @@
 # Roadmap
 
-## Floating voice orb — 0.6 candidate
+## Floating voice orb — 0.6 preview published
+
+Published [v0.6.0-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.0-preview.1)
+at exact qualified source 0fbab095214e109240d069746e00f9fea3d429e0. All nine release asset
+sizes/digests were verified before publication; unsigned prerelease, not latest/stable.
 
 Implemented real existing-stream waveform telemetry, wake verification/listening/thinking/
 rendered playback/confirmation/error/muted presentation, session fade, active-printer label,
@@ -9,7 +13,7 @@ local settings/recovery, drag/reset/pin/reduced motion and per-monitor taskbar-s
 attempt 1 passed at source 0fbab09, including 28 frozen/installed orb checks, actual 0.5.1
 upgrade/reinstall, offline probes, settings/uninstall preservation and memory budget.
 Actual Qt captures, short CPU/memory evidence and retained broad voice False/False/True
-results are in PREVIEW6_REPORT.md. Release publication/checksum verification follows.
+results are in PREVIEW6_REPORT.md.
 Issue #12 stays open for the interactive Windows 10/11 DPI/auto-hide/hot-plug/
 focus/sleep-resume matrix. Physical/acoustic/clean desktop VM/actual 16 GB gates stay open.
 
