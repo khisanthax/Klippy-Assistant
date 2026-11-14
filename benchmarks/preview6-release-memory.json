@@ -1,0 +1,17 @@
+{
+  "peak_job_commit_bytes": 1958367232,
+  "wall_seconds": 130.083,
+  "peak_active_processes": 3,
+  "memory_budget_gib": 16,
+  "passed": true,
+  "host_ram_bytes": 8584425472,
+  "scope": "Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM",
+  "os": "Microsoft Windows NT 10.0.26100.0",
+  "cpu_seconds": 210.75,
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "limitations": [
+    "Total VM RAM/cache is not controlled by the process-tree commit budget",
+    "No human microphone accuracy",
+    "No real printer connections"
+  ]
+}

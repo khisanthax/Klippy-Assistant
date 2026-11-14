@@ -1,5 +1,31 @@
 # Logbook
 
+## 2026-11-14 — Qualified 0.6 floating orb preview
+
+Exact application source 0fbab095214e109240d069746e00f9fea3d429e0 passed all jobs in
+Windows run 43593883215 attempt 1: 568 tests, no failures/skips, Ruff, frozen startup,
+28 orb checks in each frozen/installed process, native offline probes, actual 0.5.1
+upgrade/reinstall preserving SQLite/name/alias/style/orb settings, uninstall preservation
+and process-tree budget. All firewall profiles enabled with external app/llama egress
+blocked. The installer digest matches CI, sidecar and installed QA:
+02f2ea49ea9df3f371d2ddd7380dbc6f05f06c869988c41e9b58d2297f9b0e9b (1,489,813,453 bytes).
+
+All 21 command and seven query cases passed in frozen/installed/budgeted native reports,
+zero printer writes. Hey single-attempt wake-only and combined request/ack/follow-up gates
+passed. Original broader voice flags False/False/True are retained: frozen and installed
+continuous bare-Klippy speech became Clibby and was rejected; budgeted Clippy passed.
+No acoustic/prefix gate was changed. Native orb captures reviewed: CI has Windows reduced
+motion enabled, correctly static with zero hidden/disabled paints. Installed short static
+CPU 5.23% vs disabled-audio 4.70% of one core; widget increment ~0.57 MiB. Development
+animation evidence remains 30.43 FPS. Budgeted voice peak commit 1.82 GiB on an 8 GiB runner
+is not actual 16 GB hardware acceptance. Full evidence: PREVIEW6_REPORT.md and
+benchmarks/preview6-release-qualification.json plus raw reports.
+
+Next: tag this exact source, verify uploaded release assets and publish the unsigned
+engineering prerelease. All physical/acoustic/clean desktop VM/actual 16 GB/interactive
+desktop matrix gates remain open. No physical printer connection/action or owner install
+change occurred. The two superseded code/build candidates are retained in the evidence.
+
 ## 2026-11-14 — Floating voice orb implementation and actual Qt evidence
 
 Implemented passive circular voice orb: real capture/render numeric envelopes, generation-

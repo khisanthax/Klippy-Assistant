@@ -5,9 +5,12 @@
 Implemented real existing-stream waveform telemetry, wake verification/listening/thinking/
 rendered playback/confirmation/error/muted presentation, session fade, active-printer label,
 local settings/recovery, drag/reset/pin/reduced motion and per-monitor taskbar-safe placement.
-58 new regressions preserve the previous 510. Actual Windows Qt captures and short CPU/memory
-evidence are in PREVIEW6_REPORT.md. Frozen and installed probes are required before publishing
-the next preview. Issue #12 stays open for the interactive Windows 10/11 DPI/auto-hide/hot-plug/
+58 new regressions preserve the previous 510. All 568 tests/Ruff and Windows run 43593883215
+attempt 1 passed at source 0fbab09, including 28 frozen/installed orb checks, actual 0.5.1
+upgrade/reinstall, offline probes, settings/uninstall preservation and memory budget.
+Actual Qt captures, short CPU/memory evidence and retained broad voice False/False/True
+results are in PREVIEW6_REPORT.md. Release publication/checksum verification follows.
+Issue #12 stays open for the interactive Windows 10/11 DPI/auto-hide/hot-plug/
 focus/sleep-resume matrix. Physical/acoustic/clean desktop VM/actual 16 GB gates stay open.
 
 Each phase stays open until its exit gate is verified. Implementation is not acceptance.

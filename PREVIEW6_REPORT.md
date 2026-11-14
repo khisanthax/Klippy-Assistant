@@ -1,7 +1,7 @@
 # 0.6 preview — floating voice waveform orb
 
-Software candidate; publication awaits exact-source Windows build and installed
-qualification. All 510 previous regressions and the 0.5.1 safety foundation are preserved.
+Qualified engineering-preview application source: `0fbab095214e109240d069746e00f9fea3d429e0`.
+All 510 previous regressions and the 0.5.1 safety foundation are preserved.
 No physical printer actions, owner recordings or owner-installation changes.
 
 ## Behavior
@@ -59,7 +59,7 @@ verification, interruption/cancellation, rejected ASR, late synthesis failures, 
 confirmation, microphone readiness, timeouts, malformed preferences/atomic restore,
 active-printer/settings controls, window flags and cleanup. Geometry tests cover four DPI
 scales, four taskbar edges, auto-hide, tray monitor selection, dragging and disconnects.
-The complete 568-case suite and Ruff must pass before packaging.
+The complete 568-case suite and Ruff passed locally and on Windows before packaging.
 
 `--orb-self-test --smoke-report PATH` renders the actual Qt widget using synthetic PCM,
 asserts eight states, nonactivation, transparent corners, three sizes, rendered-level
@@ -83,11 +83,33 @@ geometry/rendering, not every interactive desktop scenario.
 
 ## Qualification and remaining gates
 
-Next: exact-source Windows CI, frozen startup/orb/native probes, actual 0.5.1 upgrade and
-reinstall preserving SQLite/preferences, installed offline probes, uninstall preservation
-and process-tree memory budget. Publish only an unsigned engineering prerelease after
-matching CI/installer/sidecar digests, tagging the qualified source and verifying all
-uploaded assets. The same AppId/settings path upgrades the existing preview.
+All jobs in [Windows run 43593883215 attempt 1](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43593883215)
+passed at that exact source: 568 tests, no failures/skips, Ruff, frozen startup, all 28 orb
+checks in each frozen/installed process, native model/query/command probes, actual 0.5.1
+upgrade/reinstall preserving SQLite/name/alias/style/orb fixtures, offline installed runtime,
+uninstall preservation and process-tree memory budget. All three Windows firewall profiles
+were enabled and external app/language-runtime egress blocked. Both packaged Qt probes
+observed Windows reduced motion enabled and correctly used static indicators (one active
+state paint, zero hidden/disabled paints); they are not additional 30-FPS animation results.
+Installed static CPU was 5.23% of one core versus 4.70% for the same audio producer with orb
+disabled; widget creation added about 0.57 MiB working set. Short-sample caveats still apply.
+
+All 21 command cases and seven query cases passed in each frozen/installed/budgeted native
+process, with zero printer writes. Both single-attempt Hey wake cases, acknowledgement and
+follow-up gates passed. Original broader voice flags were **False / False / True**: frozen
+and installed continuous bare-Klippy speech transcribed as “Clibby” and was safely rejected;
+the budgeted process transcribed “Clippy” and passed. Original results remain separate and
+no prefix or acoustic gate was loosened. Process-tree peak commit was **1.82 GiB** under a
+16 GiB budget on an **8 GiB runner**; this is not actual 16 GB hardware qualification.
+
+Installer: `Klippy-Setup-0.6.0-preview.1.exe`, **1,489,813,453 bytes**. SHA-256 matches CI,
+the sidecar and installed-QA evidence:
+`02f2ea49ea9df3f371d2ddd7380dbc6f05f06c869988c41e9b58d2297f9b0e9b`.
+See [aggregate evidence](benchmarks/preview6-release-qualification.json) and retained raw
+reports. Earlier candidates 2983975/run 43593542057 and 9a03ca1/run 43593800687 were cancelled
+before publication for loop-identity protection and the inherited installer notice label.
+The same AppId/settings path upgrades the existing preview. Publication must verify all
+uploaded assets and label this unsigned engineering prerelease, never stable.
 Issue [#12](https://github.com/khisanthax/Klippy-Assistant/issues/12) tracks acceptance.
 
 Open: real interactive Windows 10/11 100/125/150/200% scaling, auto-hide reveal/retract,
