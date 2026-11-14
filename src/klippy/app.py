@@ -1084,7 +1084,7 @@ def main(args=None):
             root = args.voice_pack or bundled_pack()
             if root is None:
                 raise ModelUnavailable("Bundled model pack is missing")
-            report = run(root.resolve())
+            report = run(root.resolve(), checkpoint=report_path)
             report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
             passed = report["engineering_preview_passed"] if args.preview_self_test else report["passed"]
             return 0 if passed else 1

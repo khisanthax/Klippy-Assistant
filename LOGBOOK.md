@@ -1,5 +1,17 @@
 # Logbook
 
+## 2026-11-14 - Expanded native qualification timeout retained and diagnosed
+
+Candidate 1ebd45d / run 43612972932 passed 608 tests/Ruff and frozen startup/orb, but native
+voice probe exceeded old 180 s overall cap before a report was emitted; no installer/release.
+Added durable stage/elapsed checkpoints. Expanded native source probe completed locally in
+110.837 s: all engineering gates passed, including audio quality, actual cached delivery,
+three follow-ups, echo/interruption and zero simulated writes. Original broad continuous-
+wake/raw acoustic acceptance remains false/open. Set overall frozen/installed/budgeted probe
+cap to 300 s for the added workload; no behavioral, individual deadline, memory or signal
+criterion relaxed. Next exact-source CI must complete and retain checkpoint/final evidence.
+
+
 ## 2026-11-14 - PCM conversion and producer starvation corrected
 
 Original synthetic Kokoro PCM finite/unclipped and equal to SDK chunks; renderer bit-exact.

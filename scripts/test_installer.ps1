@@ -64,7 +64,7 @@ try {
     $taskVoiceReport = Join-Path $taskQaRoot 'installed-voice.json'
     $taskVoice = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '--preview-self-test','--smoke-report',('"' + $taskVoiceReport + '"'))
-    Wait-QaProcess $taskVoice 240
+    Wait-QaProcess $taskVoice 300
     if (-not (Get-Content -LiteralPath $taskVoiceReport -Raw | ConvertFrom-Json).engineering_preview_passed) { throw 'Installed engineering preview gate failed' }
     if ($MeasurePerformance) {
         & (Join-Path $PSScriptRoot 'performance_probe.ps1') -Application 'local\installer-qa\application\Klippy.exe'

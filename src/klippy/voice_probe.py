@@ -88,7 +88,13 @@ def qualify_preview_report(report):
     report["continuous_wake_status_passed"] = report["gates"]["captured_status"]
 
 
-def run(pack):
+def run(pack, checkpoint=None):
+    probe_started = time.perf_counter()
+    def progress(stage):
+        report['probe_stage'] = stage
+        report['probe_elapsed_seconds'] = round(time.perf_counter()-probe_started,3)
+        if checkpoint is not None:
+            checkpoint.write_text(json.dumps(report,indent=2),encoding='utf-8')
     from .offline_probe import deny_external_network
     deny_external_network()
     manifest = verify_pack(pack, require_qualified=True)
@@ -98,6 +104,7 @@ def run(pack):
               "speech_load_seconds": round(time.perf_counter() - started, 3),
               "python_external_network_denied": True, "wake_threshold": backend.wake_threshold,
               "keywords_score": 2.0, "wake_cases": []}
+    progress('models_loaded')
     def audio(text, voice=3, speed=1.0):
         # Probe alternate public synthetic voices without opening playback devices.
         from klippy.speech_text import normalize_for_speech
@@ -255,8 +262,10 @@ def run(pack):
         report["wake_pipeline_counts"] = voice.wake_diagnostics()
     finally:
         voice.close()
+    progress('acoustic_probes_complete')
     from .audio_probe import run as audio_probe
     report['audio_quality']=audio_probe(backend)
+    progress('audio_quality_complete')
     async def language_probe():
         runtime = LlamaRuntime()
         try:
@@ -268,6 +277,7 @@ def run(pack):
         finally:
             runtime.close()
     asyncio.run(language_probe())
+    progress('language_queries_complete')
     from .command_probe import run as command_probe
     report["heat_fix_probe"] = asyncio.run(command_probe())
     # All inference integration above has no command transport. Verify read-only conversation
@@ -315,6 +325,7 @@ def run(pack):
     report["passed"] = report["passed"] and report["query_catalog"]["passed"] and report['audio_quality']['passed']
     qualify_preview_report(report)
     report["homophone_note"] = "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
+    progress('complete')
     return report
 
 

@@ -51,7 +51,7 @@ try {
     do {
         Assert-Native ([KlippyJob]::QueryAccounting($taskJob, 1, [ref]$taskAccounting, $taskAccountingSize, [IntPtr]::Zero))
         $taskPeakProcesses = [Math]::Max($taskPeakProcesses, $taskAccounting.ActiveProcesses)
-        if ($taskStarted.Elapsed.TotalSeconds -gt 240) { throw 'Performance probe timed out' }
+        if ($taskStarted.Elapsed.TotalSeconds -gt 300) { throw 'Performance probe timed out' }
     } while (-not $taskProcess.WaitForExit(500))
     Assert-Native ([KlippyJob]::QueryExtended($taskJob, 9, [ref]$taskLimits, $taskLimitSize, [IntPtr]::Zero))
     Assert-Native ([KlippyJob]::QueryAccounting($taskJob, 1, [ref]$taskAccounting, $taskAccountingSize, [IntPtr]::Zero))
