@@ -10,6 +10,7 @@ def parse_args():
     parser.add_argument("--smoke-report", type=Path, help="Write isolated startup diagnostic result")
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--orb-self-test", action="store_true", help="Render and measure isolated orb with synthetic audio; no devices or printers")
+    modes.add_argument("--wake-self-test", action="store_true", help="Synthetic wake recheck qualification; no devices or printers")
     modes.add_argument("--voice-self-test", action="store_true", help="Full voice acceptance probe without opening devices or live printers")
     modes.add_argument("--preview-self-test", action="store_true",
                         help="Qualify engineering query/wake-then-request flow; retain full-voice acceptance diagnostics")

@@ -24,9 +24,10 @@ from PySide6.QtWidgets import (
 
 
 class HistoryPage(QWidget):
-    def __init__(self, history, store):
+    def __init__(self, history, store, diagnostic_provider=None):
         super().__init__()
         self.history, self.store = history, store
+        self.diagnostic_provider = diagnostic_provider or history.latest_diagnostic
         layout = QVBoxLayout(self)
         self.controls = {}
         for key, label in [
@@ -114,6 +115,7 @@ class HistoryPage(QWidget):
                 ("Export selected JSON", lambda: self.export(True)),
                 ("Export filtered JSON", lambda: self.export(False)),
                 ("Export all JSON", self.export_all),
+                ("Copy latest diagnostic", self.copy_latest_diagnostic),
             ]
         ):
             button = QPushButton(title)
@@ -129,6 +131,13 @@ class HistoryPage(QWidget):
         self.timer.timeout.connect(lambda: self.reload() if self.isVisible() else None)
         self.timer.start()
         self.reload()
+
+    def copy_latest_diagnostic(self):
+        from PySide6.QtWidgets import QApplication
+        value = self.diagnostic_provider()
+        value = value or {"diagnostic": "none_available", "reason": "No recent voice diagnostic is available."}
+        QApplication.clipboard().setText(json.dumps(value, indent=2))
+        return value
 
     def configure(self, **changes):
         self.history.configure(**changes)

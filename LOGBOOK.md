@@ -1,5 +1,31 @@
 # Logbook
 
+## 2026-11-15 - Investigated wake-only Attention; conservative verification and diagnostics
+
+Existing enabled owner history contains wake_prefix_rejected with a KWS candidate and ASR
+prefix mismatch; earlier verified wake/read-only replies/playback succeeded. Reproduced
+ASR rejection -> Wake transcript unclear -> orb substring unclear -> red Attention with a
+synthetic ASR fixture. No device/TTS exception accompanies those rejected attempts. The old
+log lacks orb transition events, so the owner's exact visual frame is not independently
+recorded. Do not commit owner transcripts, IDs/timestamps, printer facts or profile data.
+Independently reproduced stale Attention timer persisting into a new wake; fixed without
+authorizing candidates. Added explicit stage-specific events, hover reason, copy actions,
+transition/counter history and consent-filtered transcript correlation, including discards.
+Strict short-wake recheck requires a separate higher-threshold/lower-boost KWS verification
+and two complete strict ASR results; forwards only wake-only Klippy with no command/token.
+No fuzzy wake aliases, guessed commands, TTS change, model payload change or printer writes.
+Preliminary 715 then 720 full cases passed; final local suite/Ruff and exact-source CI follow
+final strict verifier and frozen/native test integration. See PREVIEW71_REPORT.md for scope.
+Native comparison varies naturally: exploratory unqualified silence-only prototype recovered
+two positives; final stricter protocol preserves ambiguous rejections. The final native gate
+also tests a labeled injected first-ASR failure followed by real KWS/two-ASR and VoiceLoop;
+no claim that every generated run naturally needs/reaches recovery. Human acoustic gate open.
+D workspace was full. Work continues in C:/Users/khisa/.codex/workspaces/KlippyAssistant-attention.
+Archived 517 older ignored generated dist/Klippy files to C, comparing every SHA-256 before
+removing that generated D copy; source, owner profile, current installer and models preserved.
+Next: final tests, Windows frozen/installed/offline/upgrade qualification and qualified hotfix.
+
+
 ## 2026-11-15 - Owner installation upgraded to 0.7.0-preview.1
 
 At owner's explicit request, verified published installer SHA-256, made an integrity-checked

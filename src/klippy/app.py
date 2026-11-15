@@ -151,7 +151,8 @@ class Window(QMainWindow):
         self.resize(940, 680)
         self.sprite = VoiceOrb(self.summon, store, companion_icon(), source=self.orb_snapshot,
                                tray_geometry=lambda: self.tray.geometry() if hasattr(self, "tray") else None,
-                               mute=self.toggle_listening)
+                               mute=self.toggle_listening, on_transition=self.orb_transition,
+                               diagnostic_provider=self.latest_voice_diagnostic)
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
         self.make_console()
@@ -162,7 +163,7 @@ class Window(QMainWindow):
                                          self.edit_printer_aliases)
         self.tabs.addTab(self.query_manager, "Queries && Commands")
         self.make_settings()
-        self.history_page = HistoryPage(self.history,store)
+        self.history_page = HistoryPage(self.history,store,self.latest_voice_diagnostic)
         self.tabs.addTab(self.history_page,'Diagnostics / History')
         self.choices_page = RememberedChoicesPage(store)
         self.tabs.addTab(self.choices_page,'Remembered choices')
@@ -863,7 +864,7 @@ class Window(QMainWindow):
             for printer_name, code in value:
                 text = f"{printer_name}: {code}. No corrective action taken."
                 self.write_message(text)
-                self.sprite.announce(text, "error")
+                self.sprite.announce(text, "error", code="printer_alert")
                 self.tray.showMessage("Klippy · Printer alert", text, QSystemTrayIcon.MessageIcon.Warning, 10000)
                 self.say(text)
         elif name == "macros":
@@ -901,10 +902,24 @@ class Window(QMainWindow):
                 self.send_button.setEnabled(True)
                 self.sprite.pipeline_event("Checking wake word")
         elif name == "voice_state":
+            from .voice_diagnostics import definition, snapshot
             owner = getattr(value, "owner", None)
+            status = "accepted"
             if owner is not None and owner is not getattr(self.voice, "state_token", None):
-                return
-            if self.voice and getattr(value, "epoch", None) not in {None, getattr(self.voice, "epoch", None)}:
+                status = "stale_owner"
+            elif self.voice and getattr(value, "epoch", None) not in {None, getattr(self.voice, "epoch", None)}:
+                status = "stale_generation"
+            elif (self.voice and not self.voice.enabled.is_set() and
+                  (getattr(value, "code", None) or (snapshot(value) or {}).get("diagnostic")) in {
+                      "wake_candidate", "wake_verified", "wake_prefix_rejected", "wake_verification_unavailable", "asr_unavailable", "asr_empty"}):
+                status = "muted"
+            details = snapshot(value)
+            if details:
+                item = definition(value)
+                outcome = ("rejected" if item.code == "wake_prefix_rejected" else "failed") if status == "accepted" and item.attention else None
+                self.history.record("voice_diagnostic", trace=getattr(value, "trace", None), outcome=outcome,
+                                    event_status=status, **{k:v for k,v in details.items() if k != "reason"})
+            if status != "accepted":
                 return
             self.model_status.setText(value)
             self.sprite.pipeline_event(value)
@@ -1095,6 +1110,21 @@ class Window(QMainWindow):
 
         self.sprite.refresh()
 
+    def latest_voice_diagnostic(self):
+        # Text is included only from the consent-filtered local store, never raw voice memory.
+        saved = self.history.latest_diagnostic() if self.history.prefs.enabled else None
+        current = getattr(self.sprite, "latest_diagnostic", None)
+        if saved and (not current or saved.get("diagnostic_timestamp", 0) >= current.get("diagnostic_timestamp", 0)):
+            return saved
+        return current
+
+    def orb_transition(self, event):
+        import time
+        entering = event.get("orb_to") == "error"
+        self.history.record("orb_transition", event_status="accepted" if entering else "resolved",
+                            outcome="failed" if entering else None, transition_timestamp=time.time(),
+                            **{k:v for k,v in event.items() if k != "reason"})
+
     def summon(self):
         self.showNormal()
         self.raise_()
@@ -1132,7 +1162,7 @@ class Window(QMainWindow):
 
 def main(args=None):
     args = parse_args() if args is None else args
-    if args.voice_self_test or args.preview_self_test:
+    if args.voice_self_test or args.preview_self_test or args.wake_self_test:
         from .models import bundled_pack
         from .voice_probe import run
         report_path = args.smoke_report or Path("voice-self-test.json")
@@ -1140,7 +1170,11 @@ def main(args=None):
             root = args.voice_pack or bundled_pack()
             if root is None:
                 raise ModelUnavailable("Bundled model pack is missing")
-            report = run(root.resolve(), checkpoint=report_path)
+            if args.wake_self_test:
+                from .wake_probe import run as wake_probe
+                report = wake_probe(root.resolve())
+            else:
+                report = run(root.resolve(), checkpoint=report_path)
             report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
             passed = report["engineering_preview_passed"] if args.preview_self_test else report["passed"]
             return 0 if passed else 1

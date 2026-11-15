@@ -5,6 +5,7 @@ import queue
 import re
 import threading
 import time
+import uuid
 from collections import OrderedDict, deque
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -34,10 +35,13 @@ WAKE_PREFIX = re.compile(r"^(?:(?:hey|hi)[,\s]+)?(?:klippy|clippy|klippi|clippie
 
 
 class VoiceState(str):
-    def __new__(cls, text, epoch, owner=None):
+    def __new__(cls, text, epoch, owner=None, *, code=None, trace=None, session_id=None, attempt_id=None):
         value = super().__new__(cls, text)
         value.epoch = epoch
         value.owner = owner
+        value.code, value.trace = code, trace
+        value.session_id, value.attempt_id = session_id, attempt_id
+        value.timestamp, value.event_id = time.time(), uuid.uuid4().hex
         return value
 
 
@@ -61,6 +65,11 @@ class SherpaBackend:
         self.kws = so.KeywordSpotter(**absolute(config["wake"]), keywords_threshold=sensitivity,
                                     keywords_score=2.0, num_threads=1)
         self.reset_wake()
+        # Separate ASR-worker-owned verifier: higher threshold and less keyword boost.
+        # Never share the DSP worker's streaming KWS state or lower its configured threshold.
+        self.wake_verifier = so.KeywordSpotter(**absolute(config["wake"]),
+                                              keywords_threshold=max(sensitivity, .5),
+                                              keywords_score=1.0, num_threads=1)
         self.asr = so.OfflineRecognizer.from_whisper(**absolute(config["asr"]), num_threads=2)
         self.tts_kind = config.get("tts_kind", "vits")
         if self.tts_kind == "kokoro":
@@ -96,6 +105,32 @@ class SherpaBackend:
         stream.accept_waveform(RATE, samples)
         self.asr.decode_stream(stream)
         return stream.result.text
+
+    def strict_wake(self, samples):
+        stream = self.wake_verifier.create_stream()
+        stream.accept_waveform(RATE, np.pad(samples, (0, int(.4 * RATE))))
+        while self.wake_verifier.is_ready(stream):
+            self.wake_verifier.decode_stream(stream)
+        return bool(self.wake_verifier.get_result(stream))
+
+    def verify_short_wake(self, samples, cancelled):
+        # Re-decode the SAME bounded audio with silence context, never a spoken prompt.
+        # Two strict, complete wake-only results are required; no fuzzy-name acceptance.
+        if not .25 * RATE <= len(samples) <= 3 * RATE:
+            return None
+        if cancelled() or not self.strict_wake(samples):
+            return None
+        results = []
+        for lead in (.15, .35):
+            if cancelled():
+                return None
+            padded = np.pad(samples, (int(lead * RATE), int(.3 * RATE)))
+            text = self.transcribe(padded).strip()
+            match = WAKE_PREFIX.fullmatch(text)
+            if cancelled() or match is None:
+                return None
+            results.append(text)
+        return results[-1] if len(results) == 2 else None
 
     def synthesize(self, text, cancelled=None, on_chunk=None, on_progress=None):
         # Only this process's serialized TTS worker uses the bounded PCM cache.
@@ -190,6 +225,7 @@ class VoiceLoop:
         self.first_render = False
         self.wake_at = None
         self.capture_queue_delay = 0.0
+        self.wake_attempt = None
         self.diagnostic_lock = threading.Lock()
         self.wake_counts = dict.fromkeys(("captured_frames", "queue_drops", "device_ready", "discontinuities",
                                          "output_discontinuities", "session_resets",
@@ -236,8 +272,12 @@ class VoiceLoop:
             self.threads.append(thread)
             thread.start()
 
-    def report_state(self, text, epoch=None):
-        self.on_state(VoiceState(text, self.epoch if epoch is None else epoch, self.state_token))
+    def report_state(self, text, epoch=None, *, code=None, attempt_id=None):
+        value = VoiceState(text, self.epoch if epoch is None else epoch, self.state_token,
+                                code=code, trace=current.get(), session_id=self.session.session_id,
+                                attempt_id=attempt_id if attempt_id is not None else self.wake_attempt)
+        value.wake_counts = self.wake_diagnostics()
+        self.on_state(value)
 
     def interrupt(self):
         epoch = self.playback.interrupt()
@@ -373,6 +413,9 @@ class VoiceLoop:
                                         spoken_response=str(text),followup_active=self.clock()<self.session.until,
                                         diagnostic=None if success else 'playback_delivery_failed')
                     self.history.update_timings(timings.snapshot())
+                if not success and epoch == self.epoch and not self.closed.is_set():
+                    self.report_state("Speech playback failed; text remains accessible", epoch,
+                                      code="playback_delivery_failed")
                 self.report_state("Speech finished" if success else "Speech interrupted or failed", epoch)
                 current.reset(context)
 
@@ -516,6 +559,7 @@ class VoiceLoop:
             epoch = self.epoch if accepted_probe else self.interrupt()
             if not accepted_probe:
                 self.on_wake(epoch)
+            self.wake_attempt = uuid.uuid4().hex
             self.report_state("Checking wake word", epoch)
             self._clear_capture()
             self.capture_hold = self.session.begin_active()
@@ -599,6 +643,7 @@ class VoiceLoop:
         if woke and self.wake_at is not None:
             timings.mark("wake", trace, at=self.wake_at)
         queued = self.clock()
+        attempt_id = self.wake_attempt or uuid.uuid4().hex
         hold = self.session.begin() if not woke or self.clock() < self.session.until else None
         def run():
             accepted = False
@@ -607,26 +652,56 @@ class VoiceLoop:
                 if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set():
                     return
                 timings.duration("asr_queue", self.clock() - queued)
-                self.report_state("Thinking", epoch)
+                self.report_state("Thinking", epoch, attempt_id=attempt_id)
                 self.count("asr_started")
                 with timings.span("asr"):
                     text = self.backend.transcribe(samples).strip()
                 raw_transcript = text
                 timings.mark("asr_complete")
-                if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set() or not text:
+                if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set():
                     if self.history:
                         self.history.record('asr_discarded',trace=trace,muted=not self.enabled.is_set(),
                                             outcome='canceled',diagnostic='input_generation_invalid')
                     return
+                if not text:
+                    if self.history:
+                        self.history.record("asr_empty", trace=trace, outcome="rejected", diagnostic="asr_empty",
+                                            voice_stage="asr", attempt_id=attempt_id)
+                    self.report_state("Speech recognition returned no text; please repeat", epoch,
+                                      code="asr_empty", attempt_id=attempt_id)
+                    return
                 if self.history:
                     self.history.record('asr',trace=trace,user_transcript=text,wake_detected=woke,
-                                        session_id=self.session.session_id,muted=False)
+                                        session_id=self.session.session_id,attempt_id=attempt_id,muted=False)
                 match = WAKE_PREFIX.match(text)
+                if woke and match is None:
+                    verifier = getattr(self.backend, "verify_short_wake", None)
+                    # Recheck short wake-only candidates, never echo/barge-in context or commands.
+                    if verifier and not output_context and 1 <= len(re.findall(r"[a-z]+", text.lower())) <= 3:
+                        def cancelled():
+                            return epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set()
+                        with timings.span("wake_redecode"):
+                            verified = verifier(samples, cancelled)
+                        if cancelled():
+                            return
+                        if verified and WAKE_PREFIX.fullmatch(verified):
+                            text, match = verified, WAKE_PREFIX.fullmatch(verified)
+                            confirmation_token_local = None
+                            if self.history:
+                                self.history.record("wake_redecoded", trace=trace, diagnostic="wake_verified_redecode",
+                                                    voice_stage="wake_verification", attempt_id=attempt_id,
+                                                    verification_transcript=verified)
+                        else:
+                            confirmation_token_local = confirmation_token
+                    else:
+                        confirmation_token_local = confirmation_token
+                else:
+                    confirmation_token_local = confirmation_token
                 if woke and match is None:
                     if self.history:
                         self.history.record('wake_rejected',trace=trace,outcome='rejected',diagnostic='wake_prefix_rejected')
                     self.count("prefix_rejected")
-                    self.report_state("Wake transcript unclear; please repeat Klippy and the request", epoch)
+                    self.report_state("Wake transcript unclear; please repeat Klippy and the request", epoch, attempt_id=attempt_id)
                     return
                 if output_context:
                     if self._is_own_text(text):
@@ -635,7 +710,10 @@ class VoiceLoop:
                         self.count("echo_rejected")
                         return
                 if match:
-                    text = "Klippy " + text[match.end():]
+                    remainder = text[match.end():]
+                    text = "Klippy " + remainder
+                    if not remainder.strip():
+                        confirmation_token_local = None
                 with self.playback.lock:
                     if epoch != self.playback.generation or not self.enabled.is_set() or self.closed.is_set():
                         return
@@ -643,13 +721,13 @@ class VoiceLoop:
                     accepted = True
                 if woke:
                     self.count("verified")
-                    self.report_state("Listening", epoch)
+                    self.report_state("Listening", epoch, attempt_id=attempt_id)
                 self.count("delivered")
-                self.on_text(VoiceInput(text, epoch, woke, confirmation_token, trace,raw_transcript))
+                self.on_text(VoiceInput(text, epoch, woke, confirmation_token_local, trace,raw_transcript))
             except Exception:
                 if self.history:
                     self.history.record('asr_failed',trace=trace,outcome='failed',diagnostic='asr_unavailable')
-                self.report_state("Speech recognition unavailable; no request sent", epoch)
+                self.report_state("Speech recognition unavailable; no request sent", epoch, attempt_id=attempt_id)
             finally:
                 if hold is not None:
                     self.session.finish(hold, refresh=accepted and epoch == self.epoch)

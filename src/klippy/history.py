@@ -85,9 +85,16 @@ class InteractionHistory:
             "query",
             "diagnostic",
             "reason",
+            "voice_stage",
+            "session_state",
+            "attempt_id",
+            "event_id",
+            "event_status",
+            "orb_from",
+            "orb_to",
         ):
             if isinstance(fields.get(key), (str, int)):
-                if key in {"source", "intent", "query", "diagnostic", "reason",'command'}:
+                if key in {"source", "intent", "query", "diagnostic", "reason",'command', 'voice_stage', 'session_state', 'event_status', 'orb_from', 'orb_to'}:
                     result[key] = (
                         fields[key]
                         if isinstance(fields[key], str) and re.fullmatch(r"[A-Za-z0-9_]{1,80}", fields[key])
@@ -110,7 +117,7 @@ class InteractionHistory:
             if type(fields.get(key)) is bool:
                 result[key] = fields[key]
         if prefs.transcripts:
-            for key in ("user_transcript", "normalized_request"):
+            for key in ("user_transcript", "normalized_request", "verification_transcript"):
                 if isinstance(fields.get(key), str):
                     result[key] = redact(fields[key])
         if prefs.responses:
@@ -132,6 +139,43 @@ class InteractionHistory:
                 and math.isfinite(v)
                 and not re.search(r"token|secret|passw|credential|auth|key", k, re.I)
             }
+        for key in ("diagnostic_timestamp", "event_epoch", "transition_timestamp"):
+            value = fields.get(key)
+            if type(value) in (float, int) and math.isfinite(value):
+                result[key] = value
+        if isinstance(fields.get("wake_counts"), dict):
+            allowed = {"captured_frames", "queue_drops", "device_ready", "discontinuities",
+                       "output_discontinuities", "session_resets", "frames", "voiced_frames",
+                       "candidates", "duplicate_candidates", "asr_started", "prefix_rejected",
+                       "echo_rejected", "verified", "delivered"}
+            result["wake_counts"] = {k:v for k,v in fields["wake_counts"].items()
+                                     if k in allowed and type(v) is int and v >= 0}
+        if isinstance(fields.get("voice_events"), list):
+            result["voice_events"] = [self._clean({k: v for k, v in row.items() if k != "voice_events"})
+                                      for row in fields["voice_events"][-32:] if isinstance(row, dict)]
+        return result
+
+    def latest_diagnostic(self):
+        from .voice_diagnostics import DEFINITIONS
+        choices = []
+        for turn in self.entries():
+            for row in turn.get("voice_events", []):
+                if row.get("diagnostic") in DEFINITIONS and DEFINITIONS[row["diagnostic"]].attention and row.get("event_status") == "accepted":
+                    choices.append(self._clean(row))
+            code = turn.get("diagnostic")
+            if not turn.get("voice_events") and code in DEFINITIONS and DEFINITIONS[code].attention:
+                # 0.7 records have no per-event timestamps or transition proof. Label them
+                # as legacy observations, never invent an orb transition or session state.
+                choices.append(self._clean({**{k:turn[k] for k in ("diagnostic", "user_transcript", "session_id", "attempt_id") if k in turn},
+                                            "voice_stage": DEFINITIONS[code].stage,
+                                            "diagnostic_timestamp": turn["timestamp"], "event_id": turn["id"],
+                                            "event_status": "legacy_record", "session_state": "unknown"}))
+        if not choices:
+            return None
+        result = max(choices, key=lambda row: (row.get("diagnostic_timestamp", 0), bool(row.get("user_transcript")))).copy()
+        result["reason"] = DEFINITIONS[result["diagnostic"]].reason
+        if result.get("event_status") == "legacy_record" and result["diagnostic"] == "playback_delivery_failed":
+            result["reason"] = "An older playback did not complete; its cause may include an interruption."
         return result
 
     def record(self, event, *, trace=None, outcome=None, **fields):
@@ -155,6 +199,11 @@ class InteractionHistory:
                     if event == "input" and fields.get("source") == "voice" and "user_transcript" in data:
                         cleaned.pop("user_transcript", None)
                     data.update(cleaned)
+                    if event in {"voice_diagnostic", "orb_transition"}:
+                        snapshot = {k: v for k, v in cleaned.items() if k not in {"voice_events", "parameters", "milliseconds"}}
+                        if self.prefs.transcripts and "user_transcript" in data:
+                            snapshot.setdefault("user_transcript", data["user_transcript"])
+                        data["voice_events"] = [*data.get("voice_events", []), snapshot][-32:]
                     if re.fullmatch(r"[a-z_]{1,60}", event):
                         if not data["events"] or data["events"][-1] != event:
                             data["events"] = [*data["events"], event][-32:]

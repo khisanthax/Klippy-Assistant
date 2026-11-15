@@ -1,4 +1,4 @@
-param([string]$Installer = 'dist\Klippy-Setup-0.7.0-preview.1.exe', [string]$PreviousInstaller = '',
+param([string]$Installer = 'dist\Klippy-Setup-0.7.1-preview.1.exe', [string]$PreviousInstaller = '',
       [string]$Python = '.venv\Scripts\python.exe', [switch]$BlockExternalNetwork,
       [switch]$MeasurePerformance)
 $ErrorActionPreference = 'Stop'
@@ -66,6 +66,11 @@ try {
         '--preview-self-test','--smoke-report',('"' + $taskVoiceReport + '"'))
     Wait-QaProcess $taskVoice 300
     if (-not (Get-Content -LiteralPath $taskVoiceReport -Raw | ConvertFrom-Json).engineering_preview_passed) { throw 'Installed engineering preview gate failed' }
+    $taskWakeReport = Join-Path $taskQaRoot 'installed-wake.json'
+    $taskWake = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
+        '--wake-self-test','--smoke-report',('"' + $taskWakeReport + '"'))
+    Wait-QaProcess $taskWake 180
+    if (-not (Get-Content -LiteralPath $taskWakeReport -Raw | ConvertFrom-Json).passed) { throw 'Installed wake recheck gate failed' }
     if ($MeasurePerformance) {
         & (Join-Path $PSScriptRoot 'performance_probe.ps1') -Application 'local\installer-qa\application\Klippy.exe'
     }

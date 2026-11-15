@@ -1,4 +1,5 @@
 """Passive Qt presentation of existing voice/session/confirmation state."""
+import json
 import math
 import time
 from collections import deque
@@ -9,6 +10,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QWidget
 
 from .orb_geometry import Rect, observe_windows, placement, reduced_motion
 from .orb_settings import OrbPreferences, preferences
+from .voice_diagnostics import definition, snapshot
 
 COLORS = {
     "idle": ("#6c8ca5", "#3d566c"), "muted": ("#7a8795", "#434e5d"),
@@ -23,7 +25,7 @@ LABELS = {"idle":"Ready", "muted":"Mic off", "verifying":"Verifying wake", "list
 class VoiceOrb(QWidget):
     preferences_changed = Signal()
 
-    def __init__(self, summon, store, icon, *, source=None, tray_geometry=None, clock=time.monotonic, mute=None):
+    def __init__(self, summon, store, icon, *, source=None, tray_geometry=None, clock=time.monotonic, mute=None, on_transition=None, diagnostic_provider=None):
         super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint |
                          Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -33,6 +35,11 @@ class VoiceOrb(QWidget):
         self.setAccessibleName("Klippy voice status")
         self.store, self.open_panel, self.clock, self.icon = store, summon, clock, icon
         self.source = source or (lambda: {})
+        self.on_transition = on_transition or (lambda event: None)
+        self.diagnostic_provider = diagnostic_provider
+        self.latest_diagnostic = None
+        self.event_epoch = -1
+        self.event_owner = None
         self.toggle_microphone = mute
         self.tray_geometry = tray_geometry or (lambda: None)
         try:
@@ -144,23 +151,43 @@ class VoiceOrb(QWidget):
             self.move(x, y)
 
     def pipeline_event(self, text):
-        text = str(text)
-        if text == "Checking wake word":
-            self.phase = "verifying"
-        elif text in {"Thinking", "Speaking"}:
-            self.phase = "thinking"  # TTS preparation is not yet rendered playback.
-        elif text in {"Listening", "Microphone ready", "Speech finished", "Speech interrupted or failed",
-                      "Default audio device changed; reconnecting"}:
-            self.phase = "idle"
-        elif any(word in text.lower() for word in ("unavailable", "unclear", "discontinuity", "full", "failed")):
+        epoch, owner = getattr(text, "epoch", None), getattr(text, "owner", None)
+        if epoch is not None:
+            if owner is self.event_owner and epoch < self.event_epoch:
+                return
+            if owner is not self.event_owner or epoch > self.event_epoch:
+                self.error_until = 0
+            self.event_epoch, self.event_owner = epoch, owner
+        event = definition(text)
+        message = str(text)
+        if event and event.attention:
+            self.latest_diagnostic = snapshot(text)
             self.phase = "idle"
             self.error_until = self.clock() + 2.5
+        elif message == "Checking wake word":
+            self.error_until = 0  # A previous attempt's warning cannot color a new verification.
+            self.phase = "verifying"
+        elif message in {"Thinking", "Speaking"}:
+            self.phase = "thinking"
+        elif message in {"Listening", "Microphone ready", "Speech finished", "Speech interrupted or failed",
+                         "Default audio device changed; reconnecting"}:
+            self.phase = "idle"
+            if message == "Listening" or (message == "Microphone ready" and self.latest_diagnostic
+                                          and self.latest_diagnostic["voice_stage"] == "device"):
+                self.error_until = 0
         self.phase_at = self.clock()
         self.refresh()
 
-    def announce(self, text, state="idle", *, force=False):
+    def copy_latest_diagnostic(self):
+        value = self.diagnostic_provider() if self.diagnostic_provider else self.latest_diagnostic
+        value = value or {"diagnostic": "none_available", "reason": "No recent voice diagnostic is available."}
+        QApplication.clipboard().setText(json.dumps(value, indent=2))
+        return value
+
+    def announce(self, text, state="idle", *, force=False, code="application_error"):
         # Compatibility with companion notifications: never interprets or dispatches commands.
         if state == "error":
+            self.latest_diagnostic = snapshot(text, code=code)
             self.error_until = self.clock()+2.5
             self.phase = "idle"
         if force:
@@ -201,6 +228,7 @@ class VoiceOrb(QWidget):
                 self.state = "thinking"
             else:
                 self.phase = "idle"
+                self.latest_diagnostic = snapshot("", code="processing_timeout")
                 self.error_until = now+2.5
                 self.state = "error"
         elif mic and self.phase == "verifying":
@@ -238,7 +266,15 @@ class VoiceOrb(QWidget):
         if not visible:
             self.hide()
             self.animation.stop()
-        self.setAccessibleDescription(f"{LABELS[self.state]} · {self.printer}")
+        reason = self.latest_diagnostic["reason"] if self.state == "error" and self.latest_diagnostic else ""
+        self.setToolTip(reason or "Klippy voice status. Right-click for the latest diagnostic.")
+        self.setAccessibleDescription(f"{LABELS[self.state]} · {self.printer}" + (" · " + reason if reason else ""))
+        if old != self.state and (old == "error" or self.state == "error") and self.latest_diagnostic:
+            try:
+                self.on_transition({**self.latest_diagnostic, "orb_from": old, "orb_to": self.state})
+            except Exception:
+                pass  # Optional diagnostics cannot affect capture or safety.
+
 
     def paintEvent(self, event):
         self.paint_count += 1
@@ -346,6 +382,11 @@ class VoiceOrb(QWidget):
 
     def contextMenuEvent(self, event):
         menu = QMenu(self)
+        if self.latest_diagnostic:
+            reason = menu.addAction(self.latest_diagnostic["reason"])
+            reason.setEnabled(False)
+        menu.addAction("Copy latest diagnostic", self.copy_latest_diagnostic)
+        menu.addSeparator()
         pin = menu.addAction("Pin open")
         pin.setCheckable(True)
         pin.setChecked(self.prefs.pinned)

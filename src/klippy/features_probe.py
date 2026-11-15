@@ -148,6 +148,14 @@ def run(app, images):
             session.finish(hold, response=True)
             window.sprite.refresh()
             checks["response_resets_countdown"] = window.sprite.countdown > 0.9
+            window.sprite.pipeline_event("Wake transcript unclear")
+            checks["attention_reason_tooltip"] = window.sprite.state == "error" and "Wake phrase wasn't recognized" in window.sprite.toolTip()
+            from PySide6.QtWidgets import QPushButton
+            checks["copy_diagnostic_action_present"] = any(button.text() == "Copy latest diagnostic"
+                                                          for button in window.history_page.findChildren(QPushButton))
+            window.sprite.grab().save(str(images / "attention-reason.png"))
+            window.sprite.pipeline_event("Checking wake word")
+            checks["new_wake_clears_old_attention"] = window.sprite.state == "verifying"
             store.set("listening", {"mode": "always"})
             window.toggle_listening()
             checks["mute_clears_countdown"] = window.sprite.countdown == 0

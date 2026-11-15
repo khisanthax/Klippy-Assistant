@@ -53,6 +53,10 @@ if ($voiceProcess.ExitCode -ne 0) {
     if (Test-Path -LiteralPath $voiceReport) { Get-Content -LiteralPath $voiceReport -Raw | Write-Output }
     throw "Frozen engineering preview self-test failed; see $voiceReport"
 }
+$wakeReport = Join-Path $PWD 'build\frozen-wake.json'
+$wakeProcess = Start-Process -FilePath (Join-Path $PWD 'dist\Klippy\Klippy.exe') -ArgumentList @('--wake-self-test', '--smoke-report', ('"' + $wakeReport + '"')) -WindowStyle Hidden -PassThru
+if (-not $wakeProcess.WaitForExit(180000)) { $wakeProcess.Kill(); throw 'Frozen wake recheck qualification timed out' }
+if ($wakeProcess.ExitCode -ne 0) { Get-Content -LiteralPath $wakeReport -Raw; throw 'Frozen wake recheck qualification failed' }
 if (-not $Iscc) {
     $candidates = @(
         (Join-Path $PWD 'local\inno\ISCC.exe'),

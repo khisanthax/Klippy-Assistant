@@ -50,6 +50,7 @@ jobs:
             build/frozen-orb.json
             build/frozen-orb-images/*
             build/frozen-voice.json
+            build/frozen-wake.json
             build/Klippy/warn-Klippy.txt
       - uses: actions/upload-artifact@v4
         with:
@@ -76,13 +77,13 @@ jobs:
       - shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download v0.6.1-preview.1 --pattern 'Klippy-Setup-0.6.1-preview.1.exe' --dir local/previous
+        run: gh release download v0.7.0-preview.1 --pattern 'Klippy-Setup-0.7.0-preview.1.exe' --dir local/previous
       - shell: pwsh
         run: |
           if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
             Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True
           }
-          ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.6.1-preview.1.exe' -BlockExternalNetwork -MeasurePerformance
+          ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.7.0-preview.1.exe' -BlockExternalNetwork -MeasurePerformance
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -93,6 +94,7 @@ jobs:
             local/installer-qa/installed-orb.json
             local/installer-qa/installed-orb-images/*
             local/installer-qa/installed-voice.json
+            local/installer-qa/installed-wake.json
             local/installer-qa/*.log
             local/performance-budget.json
             local/performance-voice.json

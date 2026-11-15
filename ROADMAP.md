@@ -1,5 +1,12 @@
 # Roadmap
 
+## Wake Attention diagnostics - 0.7.1 candidate
+
+Verified stored wake_prefix_rejected path and independently reproduced old Attention timer.
+Strict bounded wake-only recovery, explicit reasons, timestamped diagnostics and copy actions
+implemented; final tests/native Windows qualification pending. PREVIEW71_REPORT.md records
+evidence boundaries. Human acoustic and hardware gates remain open.
+
 ## Conversation controls - 0.7.0 preview published
 
 Published [v0.7.0-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.0-preview.1) at exact qualified app source
