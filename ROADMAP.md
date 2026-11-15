@@ -1,11 +1,20 @@
 # Roadmap
 
-## Conversation controls - 0.7.0 qualified preview candidate
+## Conversation controls - 0.7.0 preview published
 
-Grounded personality/dialogue, default-off local history, shared-session red countdown and reviewed-macro clarification
-popup/remembered-identity review implemented. PREVIEW7_REPORT.md records scope/privacy and
-remaining acceptance. Prior 610 tests and native audio/safety gates remain mandatory.
-Exact-source f6ce887 passed Windows frozen/installed/offline/0.6.1 upgrade and process-tree memory qualification; 698 tests/Ruff, 29 orb and 19 feature checks passed. Publication follows digest verification. Human/hardware acceptance remains open.
+Published [v0.7.0-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.0-preview.1) at exact qualified app source
+f6ce887e703b0201c1548e58a06167d7757d815b, Windows run 43720667146. All ten uploaded asset sizes/digests verified
+before and after publication. 698 tests/Ruff preserve prior 610. Frozen/installed startup,
+29 orb plus 19 feature checks, 0.6.1 upgrade/reinstall/offline/settings/uninstall preservation
+and 16 GiB process-tree budget passed. Native grounded dialogue passed in all three contexts:
+routine 2.49-3.26 ms without LLM, actual model explanation 3.74-6.24 s excluding ASR/TTS/playback.
+Personality/length/context/casual chat, opt-in local history, shared-session red countdown and
+reviewed-macro popup/remembered identity are implemented. Audio algorithms/models unchanged;
+all action authority remains in SafetyEngine. Verified installer and checksum are in dist.
+No owner installation, logging opt-in or physical-printer change performed for this release.
+Full focus/DPI/taskbar/sleep matrix, acoustic/room, long device-load, clean desktop VM,
+actual 16 GB hardware and supervised printer gates remain open. See PREVIEW7_REPORT.md and
+benchmarks/preview7-release-*.json. Original broad acoustic outcomes remain independently recorded.
 
 ## Conversation and playback - 0.6.1 preview published
 

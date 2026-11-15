@@ -1,0 +1,61 @@
+{
+  "release": "v0.7.0-preview.1",
+  "url": "https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.0-preview.1",
+  "published_at": "2026-11-15T14:18:22Z",
+  "source_commit": "f6ce887e703b0201c1548e58a06167d7757d815b",
+  "prerelease": true,
+  "draft": false,
+  "all_asset_sizes_and_digests_verified": true,
+  "assets": [
+    {
+      "name": "clarification-popup.png",
+      "size": 12633,
+      "digest": "sha256:5bf6c1b4f7098b9885c453582ec076b9b6f2a0cc287ffb225751abc3794e1561"
+    },
+    {
+      "name": "diagnostics-history.png",
+      "size": 38656,
+      "digest": "sha256:009a1261e8ddf9e4559b49e51f7ebfccf5e66f8369d3f3adea4d1524d50dda9e"
+    },
+    {
+      "name": "followup-half.png",
+      "size": 33233,
+      "digest": "sha256:60e6026c129278d095292200c82ec2a5fa850edb7d8a437177d39f0342b99049"
+    },
+    {
+      "name": "Klippy-Setup-0.7.0-preview.1.exe",
+      "size": 1489871539,
+      "digest": "sha256:e828db938485b46b659ab78d17fbcaa42024f1b76cf7069de70772e707489f53"
+    },
+    {
+      "name": "Klippy-Setup-0.7.0-preview.1.exe.sha256",
+      "size": 100,
+      "digest": "sha256:30eb9d34d6a9c182cd93c7b0017487d14937892b81b4046adc8c8521e7f0aad5"
+    },
+    {
+      "name": "manifest.json",
+      "size": 26591,
+      "digest": "sha256:c1ee41d40b27cf02de34723992d328111c8c06c5f6dfe1389c12ece654a5782f"
+    },
+    {
+      "name": "MOONRAKER_QUERIES.md",
+      "size": 14398,
+      "digest": "sha256:7949d274a57c5a1322aa906178cd0491ac9cb5e068ea0edeb58cae94ef452247"
+    },
+    {
+      "name": "preview7-release-qualification.json",
+      "size": 81828,
+      "digest": "sha256:6baca50c3a20f1525eb9d9796beebdc4152ccb72ba0ad618438c98ebc5c879de"
+    },
+    {
+      "name": "PREVIEW7_REPORT.md",
+      "size": 12615,
+      "digest": "sha256:704d7776007c5c247521a805ee808297b599d954c0d8366d629636d67d05d8a8"
+    },
+    {
+      "name": "query_catalog.json",
+      "size": 36955,
+      "digest": "sha256:2ee0cfade447859a3163ed23a578cf695e2250e2ecb3b1eafa9fd928e6a7b40e"
+    }
+  ]
+}

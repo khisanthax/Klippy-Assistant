@@ -1,5 +1,28 @@
 # Logbook
 
+## 2026-11-15 - 0.7.0 conversation controls preview published
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.0-preview.1 at qualified app source f6ce887e703b0201c1548e58a06167d7757d815b.
+Windows run 43720667146 passed all three jobs: 698 tests/Ruff, frozen and installed native
+startup/29 orb/19 feature checks, 0.6.1 upgrade/reinstall/offline/settings/uninstall preservation
+and 16 GiB process-tree budget. All ten draft assets were size/SHA-256 verified, then verified
+unchanged after publication. Exact-source tag was independently checked through GitHub.
+Publication metadata: benchmarks/preview7-release-publication.json; full qualifications in
+benchmarks/preview7-release-qualification.json. Native text response timings: routine
+2.49/3.00/3.26 ms; actual model explanations 3736.70/6237.54/6220.89 ms frozen/installed/budgeted,
+excluding ASR/TTS/playback. Original broad acoustic False/True/True results retained separately.
+No unsupported claim of human wake accuracy or stable acceptance.
+Verified Klippy-Setup-0.7.0-preview.1.exe and sidecar copied to
+D:/Users/khisa/Documents/ChatGPT/KlippyAssistant/dist; 1489871539 bytes,
+SHA-256 e828db938485b46b659ab78d17fbcaa42024f1b76cf7069de70772e707489f53.
+Owner app/profile/logging were not changed by this release work; install remains a user action.
+Personality/length are in Settings; optional History remains off by default; remembered macro
+choices remain identities only and never authorize execution. TTS algorithms/models unchanged.
+No physical-printer commands. Next acceptance: owner's conversation review, interactive
+focus/DPI/taskbar/sleep matrix, long device-load, room/acoustic, clean desktop VM, actual 16 GB
+and supervised physical-printer gates. Issues remain open for unverified acceptance.
+
+
 ## 2026-11-15 - 0.7.0 exact-source Windows qualification passed
 
 Source f6ce887e703b0201c1548e58a06167d7757d815b; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43720667146, attempt 1. 698 tests/Ruff passed, prior 610 preserved.
