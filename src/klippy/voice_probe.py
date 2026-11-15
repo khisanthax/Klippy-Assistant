@@ -59,6 +59,12 @@ def qualify_preview_report(report):
     report["preview_gates"]["paced_captured_status"] = (
         bool(report.get("paced_pipeline_transcripts")) and "63%" in (report.get("paced_status_response") or ""))
     query = report.get("query_catalog", {})
+    if 'dialogue' in report:
+        dialogue = report['dialogue']
+        report['preview_gates']['grounded_dialogue'] = dialogue.get('passed') is True and all(
+            dialogue.get('checks',{}).get(key) is True for key in (
+                'routine_no_model','routine_verified_nozzle','followup_bed','actual_model_composed',
+                'explanation_keeps_verified_observation','casual_without_printer','no_pending_or_writes','model_latency_bounded'))
     if "audio_quality" in report:
         quality=report['audio_quality']
         report['preview_gates']['audio_signal_and_delivery']=(
@@ -274,6 +280,8 @@ def run(pack, checkpoint=None):
             report["llm_intent"] = value.model_dump(mode="json")
             from .query_probe import run as query_probe
             report["query_catalog"] = await query_probe(model)
+            from .dialogue_probe import run as dialogue_probe
+            report['dialogue'] = await dialogue_probe(model)
         finally:
             runtime.close()
     asyncio.run(language_probe())

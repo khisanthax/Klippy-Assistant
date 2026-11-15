@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": {
+    "routine_no_model": true,
+    "routine_verified_nozzle": true,
+    "followup_bed": true,
+    "actual_model_composed": true,
+    "explanation_keeps_verified_observation": true,
+    "casual_without_printer": true,
+    "no_pending_or_writes": true,
+    "model_latency_bounded": true
+  },
+  "routine_ms": 7.44,
+  "explanation_ms": 3530.21,
+  "model_calls": 1,
+  "scope": "Actual local model; fresh simulated Moonraker facts and constrained clause composition; no devices/printer writes"
+}

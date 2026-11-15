@@ -164,7 +164,11 @@ def run(app, icon, report_path):
             checks["no_audio_devices_or_printers"] = not voice.threads and not voice.capture_ready.is_set()
             orb.shutdown()
             checks["cleanup"] = not orb.animation.isActive() and not orb.geometry_timer.isActive() and not orb.isVisible()
+            from .features_probe import run as features_probe
+            features = features_probe(app,images)
+            checks['conversation_features'] = features['passed']
             return {"passed": all(checks.values()), "checks": checks, "qt_platform": app.platformName(),
+                    'conversation_features':features,
                     "device_pixel_ratio": orb.devicePixelRatioF(), "desktop": geometry,
                     "observed_desktops": desktops,
                     "windows_reduced_motion": reduced, "performance": {"hidden": hidden, "active": active,

@@ -1,4 +1,4 @@
-Klippy Assistant 0.6.1-preview.1 — Conversation and Playback Engineering Preview
+Klippy Assistant 0.7.0-preview.1 - Conversation Controls Engineering Preview
 
 This package is unsigned and is not a stable v1.0 release.
 
@@ -16,3 +16,6 @@ simulated printer first. Firmware and physical emergency controls remain essenti
 
 Settings and Windows credential-vault entries are preserved on upgrade and uninstall.
 See README.md for backup, reset, data removal and known limitations.
+
+Optional local history is OFF by default, with separate text consent. No audio recordings.
+Grounded dialogue, inner follow-up countdown and clarification choices retain safety checks.

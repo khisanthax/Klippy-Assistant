@@ -48,6 +48,7 @@ class VoiceOrb(QWidget):
         self.playback = deque([0.0]*32, maxlen=32)
         self.last_levels = (0.0, 0.0)
         self.playing = False
+        self.countdown = 0.0
         self.motion_reduced = reduced_motion()
         self.drag_offset = None
         self.dragged = False
@@ -188,6 +189,7 @@ class VoiceOrb(QWidget):
         self.microphone.append(max(0.0, min(1.0, levels[0])))
         self.playback.append(max(0.0, min(1.0, levels[1])))
         old = self.state
+        old_countdown = self.countdown
         if now < self.error_until:
             self.state = "error"
         elif data.get("pending", False):
@@ -207,7 +209,11 @@ class VoiceOrb(QWidget):
             self.state = "listening"
         else:
             self.state = "idle" if mic else "muted"
-        active = self.state not in {"idle", "muted"}
+        self.countdown = (max(0.0,min(1.0,data.get('followup_fraction',0.0)))
+                          if self.prefs.show_countdown and mic and data.get('followup_ready',False)
+                          and not data.get('busy',False) and self.phase != 'thinking'
+                          and self.state in {'listening','confirmation'} else 0.0)
+        active = self.state not in {"idle", "muted"} or data.get('clarification_active',False)
         manual = self.prefs.pinned or now < self.manual_until
         if active or manual:
             self.inactive_since = None
@@ -227,7 +233,7 @@ class VoiceOrb(QWidget):
                 interval = 33 if self.moving else 100
                 if self.animation.interval() != interval or not self.animation.isActive():
                     self.animation.start(interval)
-                if self.moving or old != self.state:
+                if self.moving or old != self.state or old_countdown != self.countdown:
                     self.update()
         if not visible:
             self.hide()
@@ -265,6 +271,9 @@ class VoiceOrb(QWidget):
         painter.setPen(QPen(b, 2.3))
         angle = int(phase*75) % 360 if self.state in {"thinking", "verifying"} else 285
         painter.drawArc(QRectF(11, 11, 170, 170), angle*16, 56*16)
+        if self.countdown>0:
+            painter.setPen(QPen(QColor('#ff444f'),3.5,Qt.PenStyle.SolidLine,Qt.PenCapStyle.RoundCap))
+            painter.drawArc(QRectF(22,22,148,148),90*16,-round(self.countdown*360*16))
         mark = self.icon.pixmap(round(26*scale*self.devicePixelRatioF()))
         painter.drawPixmap(QRectF(83, 29, 26, 26), mark, QRectF(mark.rect()))
         painter.setFont(QFont("Segoe UI", 8, QFont.Weight.DemiBold))

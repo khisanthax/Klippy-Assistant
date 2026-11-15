@@ -100,3 +100,9 @@ Speech playback qualification additionally requires original/chunk equality, pha
 antialias rejection, finite/unclipped PCM, producer schedule without starvation, non-silent
 delivery receipt and actual cached production worker/callback equality. Retain original
 acoustic results independently; human perceived quality and hardware acceptance remain open.
+
+0.7 preview additionally requires native Qt conversation_features checks (history opt-in,
+redacted local export, countdown session/mute, taskbar-safe popup and selection-to-review),
+and actual local-model grounded_dialogue checks (routine bypass, verified observation,
+multi-turn/casual behavior, zero writes and bounded latency). No gate replaces original
+acoustic/safety checks or closes interactive/hardware/actual 16 GB acceptance.

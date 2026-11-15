@@ -8,6 +8,13 @@ class Response(str):
     def __new__(cls, detail, spoken):
         value = super().__new__(cls, detail)
         value.spoken = spoken
+        value.verified = False
+        value.capabilities = []
+        value.stale = False
+        value.fresh_until = None
+        value.explanation_fact = None
+        value.model_composed = False
+        value.dialogue_ms = 0.0
         return value
 
 

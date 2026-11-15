@@ -1,5 +1,12 @@
 # Roadmap
 
+## Conversation controls - 0.7.0 candidate
+
+Grounded personality/dialogue, default-off local history, shared-session red countdown and reviewed-macro clarification
+popup/remembered-identity review implemented. PREVIEW7_REPORT.md records scope/privacy and
+remaining acceptance. Prior 610 tests and native audio/safety gates remain mandatory.
+Exact-source frozen/installed/offline/upgrade/performance qualification pending.
+
 ## Conversation and playback - 0.6.1 preview published
 
 Published [v0.6.1-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.1-preview.1) at exact qualified app source

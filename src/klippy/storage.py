@@ -8,6 +8,8 @@ import uuid
 from functools import wraps
 from pathlib import Path
 
+from .dialogue import DialoguePreferences
+from .dialogue import preferences as dialogue_preferences
 from .domain import Macro, Printer
 from .orb_settings import preferences as orb_preferences
 
@@ -105,10 +107,13 @@ class Store:
         payload = {"version": 2, "preferences": {key: self.get(key, default) for key, default in
                    (("followup_seconds", 30), ("confirmation_seconds", 30), ("spoken", True),
                     ("monitor_enabled", True), ("wake_threshold", .22), ("response_style", "brief"),
-                    ("voice_orb", {}))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
+                    ("voice_orb", {}),('personality',{'style':'friendly','length':'short'}))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
                    "selected": self.get("selected"), "listening": self.get("listening", {}),
                    "macros": {p.id: [m.model_dump(mode="json") for m in self.macros(p.id).values()]
                               for p in self.printers()}}
+        style,length = dialogue_preferences(self)
+        payload['preferences']['personality'] = {'style':style,'length':length}
+        payload['preferences']['response_style'] = {'short':'brief','standard':'conversational','detailed':'detailed'}[length]
         path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     @serialized
@@ -125,13 +130,15 @@ class Store:
             if len({m.name for m in registry}) != len(registry):
                 raise ValueError("Duplicate macro names")
         preferences = payload.get("preferences", {})
-        allowed = {"followup_seconds": (10, 120), "confirmation_seconds": (10, 120),
+        allowed = {"followup_seconds": (0, 120), "confirmation_seconds": (10, 120),
                    "wake_threshold": (.01, 1)}
-        if not isinstance(preferences, dict) or set(preferences) - {*allowed, "spoken", "monitor_enabled", "response_style", "voice_orb"}:
+        if not isinstance(preferences, dict) or set(preferences) - {*allowed, "spoken", "monitor_enabled", "response_style", "voice_orb",'personality'}:
             raise ValueError("Invalid preferences")
         for key, value in preferences.items():
             if key == "voice_orb":
                 preferences[key] = orb_preferences(value).model_dump(mode="json")
+            elif key=='personality':
+                preferences[key] = DialoguePreferences.model_validate(value).model_dump(mode='json')
             elif key == "response_style":
                 if not isinstance(value, str) or value not in {"brief", "conversational", "detailed"}:
                     raise ValueError("Invalid response style")
@@ -141,6 +148,8 @@ class Store:
                     raise ValueError("Invalid preference range")
             elif type(value) is not bool:
                 raise ValueError("Invalid preference type")
+        if 'personality' in preferences:
+            preferences['response_style'] = {'short':'brief','standard':'conversational','detailed':'detailed'}[preferences['personality']['length']]
         # A SQLite online backup includes committed WAL pages before any mutation.
         backup = self.path.with_name(self.path.stem + ".before-restore-" + uuid.uuid4().hex[:12] + ".sqlite")
         destination = sqlite3.connect(backup)

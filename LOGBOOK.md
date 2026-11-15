@@ -1,5 +1,77 @@
 # Logbook
 
+## 2026-11-15 - 0.7.0 candidate regression and native checks passed
+
+All 689 tests passed in 72.91 s; Ruff clean. Preserve all previous 610 tests. Native local
+Qt orb/conversation probe passed, including personality settings, history/privacy/export,
+reviewed choices and countdown. Actual local-model probe passed (7.44 ms routine vs
+3530.21 ms explanation). No TTS model/resampling/buffering algorithm changes. Integration
+review moved mute permission revocation ahead of storage I/O and queued bounded session
+lifecycle events for UI collection outside capture locks. Regressions prove late ASR text
+is discarded after mute, log failures cannot prevent session closure or safety cancellation,
+and session IDs remain stable through long holds but renew after expiry. History view is
+bounded to 200 recent matches while filtered/all JSON export covers all retained matches.
+Final additions were justified by those integration/privacy boundaries, not relaxed gates.
+
+Next: commit exact source, dispatch Windows CI/build/installed upgrade/offline/memory probes,
+verify source-bound evidence and all release asset sizes/digests, then publish engineering
+preview. Keep UI focus/multi-DPI/hardware/clean desktop VM/actual 16 GB gates open. Owner
+reports current audio quality satisfactory for now; deeper audio work is deferred.
+
+
+## 2026-11-15 - Dialogue priority added; audio algorithms preserved
+
+Owner is satisfied with audio quality for now and prioritizes dialogue. Added Friendly/Calm/
+Direct personality, response length, basic casual turns without an enrolled/selected printer,
+fast routine templates and read-only contextual corrections/explanations. The local model
+composes only verified observation and vetted explanatory clauses under a strict index schema:
+no freeform invented states/values, action generation/authorization, omitted observation or
+safety-prompt rewrite is possible. Missing information remains unknown. Stale/superseded
+explanations are labeled/discarded; four-second fallback budget. Existing interpretation and
+SafetyEngine write path remain separate and unchanged in authority. Personality backup and
+legacy detail migration validated. No TTS/resampling/buffering algorithm changes.
+
+Actual model probe passed: 7.44 ms routine text answer with zero model calls, 3530.21 ms
+accepted explanation, one composition call, no pending action/writes. Evidence in
+benchmarks/dialogue7-local.json; these timings exclude ASR/TTS/playback. First full integrated
+suite 680 passed in 65.00 s; final additions cover spoken macro names, mandatory dialogue
+gates and bounded 200-row UI with complete filtered export. Final suite pending. Local Qt
+probe passed 18 conversation controls checks in addition to prior orb checks; final UI
+personality setting check added. Issues #15 (dialogue) and #16 (history/countdown/popup) created.
+Models unchanged. Human acoustic/hardware/clean interactive VM/actual 16 GB gates stay open.
+Next: final suite/native captures, exact-source commit and Windows/installer qualification.
+
+
+## 2026-11-15 - Optional history, shared countdown and clarification popup implementation
+
+Read AGENTS, continuity/roadmap/latest preview report and voice/orb/safety code before edits.
+Owner added interactive clarification to the same next-preview scope. Implemented default-off
+local WAL history with independent text/timing consent, bounded retention, filters/details/
+JSON export, credential-field exclusion and text redaction. Raw ASR is not ground truth and
+unlabeled spoken secrets cannot be guaranteed recognizable; opt-in/privacy limits documented.
+No audio persistence or cloud upload. Late ASR after mute records a discard code without text.
+Session IDs and explicit response-ready snapshots drive the red inner orb ring after rendered
+speech plus tail, hiding during holds, mute/expiry, with no additional clock or device stream.
+Popup resolves actual reviewed macro ambiguity/required numeric parameters through existing
+SafetyEngine, fresh config checks and mandatory macro confirmation. Remembered identity is
+printer/request-signature scoped and conservatively invalidated on registry/context changes.
+
+Existing canceled-parameter regression caught choice state surviving cancellation; corrected
+and retained that regression. Ordinal tests found normalization changes first one to first 1;
+both are recognized now. A UI test initially lacked its injected simulator; corrected the
+fixture before testing selection. Another existing UI fixture omitted enabled telemetry;
+optional history now handles it without changing speech behavior. Focused 45 new-feature
+cases pass; latest three playback-tail/mute/UI-export regressions pass. Ruff clean. Full suite
+and final native UI checks pending. Initial actual Qt gate passed with synthetic-only captures;
+visual review improved consent control sync, table sizing, safety labels and popup provenance.
+
+D: ran out of space while adding tests. SHA-verified generated 0.4.0 and 0.5.0 installers and
+sidecars were archived on C:; source/models/user data preserved. Restored the interrupted test
+file before running it. No printer actions, live config modifications or owner logging enabled.
+Next: finish regression/native visual validation, commit/push 0.7.0 candidate, exact-source
+Windows build/upgrade/offline/memory qualification and publish only if gates pass.
+
+
 ## 2026-11-14 - Published and installed qualified 0.6.1 preview
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.6.1-preview.1, unsigned prerelease/not latest or stable, after all seven asset sizes and

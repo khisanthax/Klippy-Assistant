@@ -343,8 +343,14 @@ class QueryService:
             # Fits the existing spoken response budget; manager provides full spec detail separately.
             response = f"{printer.name}: {label}{answer}"
             detail = response if len(response) <= 550 else response[:520] + "; further results omitted."
-            return present(printer.name, spec.id, status, detail, request.subject,
-                           self.store.get("response_style", "brief"), stale)
+            presented = present(printer.name, spec.id, status, detail, request.subject,
+                                self.store.get("response_style", "brief"), stale)
+            presented.verified = True
+            presented.capabilities = ['read_only:'+spec.id]
+            presented.stale = stale
+            presented.fresh_until = min(times)+self.fresh_seconds if times else None
+            presented.explanation_fact = detail.replace('_',' ')
+            return presented
 
 
 def normalize(text):

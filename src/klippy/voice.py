@@ -48,6 +48,7 @@ class VoiceInput:
     woke: bool
     confirmation_token: str | None = field(default=None, repr=False)
     trace: int | None = None
+    raw_transcript: str | None = field(default=None,repr=False)
 
 
 class SherpaBackend:
@@ -139,9 +140,10 @@ class VoiceLoop:
     """
 
     def __init__(self, backend, on_text, on_state, on_wake=None, *, clock=time.monotonic,
-                 followup_seconds=30, energy_threshold=0.008, session=None, on_delivery=None):
+                 followup_seconds=30, energy_threshold=0.008, session=None, on_delivery=None, history=None):
         self.session = session or Session(clock, followup_seconds)
         self.on_delivery = on_delivery or (lambda token, success: None)
+        self.history = history
         self.backend, self.on_text, self.on_state = backend, on_text, on_state
         self.state_token = object()
         self.on_wake = on_wake or (lambda epoch: None)
@@ -364,8 +366,13 @@ class VoiceLoop:
             finally:
                 if epoch == self.epoch:
                     self.speaking.clear()
-                self.session.finish(hold, refresh=success or (epoch == self.epoch and not self.closed.is_set()))
+                self.session.finish(hold, refresh=success or (epoch == self.epoch and not self.closed.is_set()),response=success)
                 self.on_delivery(token, success)
+                if self.history:
+                    self.history.record('playback_complete' if success else 'playback_failed',trace=trace,
+                                        spoken_response=str(text),followup_active=self.clock()<self.session.until,
+                                        diagnostic=None if success else 'playback_delivery_failed')
+                    self.history.update_timings(timings.snapshot())
                 self.report_state("Speech finished" if success else "Speech interrupted or failed", epoch)
                 current.reset(context)
 
@@ -604,16 +611,27 @@ class VoiceLoop:
                 self.count("asr_started")
                 with timings.span("asr"):
                     text = self.backend.transcribe(samples).strip()
+                raw_transcript = text
                 timings.mark("asr_complete")
                 if epoch != self.epoch or not self.enabled.is_set() or self.closed.is_set() or not text:
+                    if self.history:
+                        self.history.record('asr_discarded',trace=trace,muted=not self.enabled.is_set(),
+                                            outcome='canceled',diagnostic='input_generation_invalid')
                     return
+                if self.history:
+                    self.history.record('asr',trace=trace,user_transcript=text,wake_detected=woke,
+                                        session_id=self.session.session_id,muted=False)
                 match = WAKE_PREFIX.match(text)
                 if woke and match is None:
+                    if self.history:
+                        self.history.record('wake_rejected',trace=trace,outcome='rejected',diagnostic='wake_prefix_rejected')
                     self.count("prefix_rejected")
                     self.report_state("Wake transcript unclear; please repeat Klippy and the request", epoch)
                     return
                 if output_context:
                     if self._is_own_text(text):
+                        if self.history:
+                            self.history.record('echo_rejected',trace=trace,outcome='rejected',diagnostic='own_echo_rejected')
                         self.count("echo_rejected")
                         return
                 if match:
@@ -627,8 +645,10 @@ class VoiceLoop:
                     self.count("verified")
                     self.report_state("Listening", epoch)
                 self.count("delivered")
-                self.on_text(VoiceInput(text, epoch, woke, confirmation_token, trace))
+                self.on_text(VoiceInput(text, epoch, woke, confirmation_token, trace,raw_transcript))
             except Exception:
+                if self.history:
+                    self.history.record('asr_failed',trace=trace,outcome='failed',diagnostic='asr_unavailable')
                 self.report_state("Speech recognition unavailable; no request sent", epoch)
             finally:
                 if hold is not None:

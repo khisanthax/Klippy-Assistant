@@ -2,6 +2,11 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
+Current source 0.7.0.dev1 adds grounded personality/dialogue, optional local history, an orb
+follow-up countdown and reviewed-macro clarification. Exact-source qualification is pending;
+[PREVIEW7_REPORT.md](PREVIEW7_REPORT.md) describes scope/privacy. Published download remains
+0.6.1 until the new package qualifies.
+
 Current engineering preview **0.6.1-preview.1** corrects speech resampling discontinuities,
 playback starvation and follow-up conversation resets. Slow producers complete PCM before
 playback; capture and interruption remain active. 610 tests, Windows frozen/installed,

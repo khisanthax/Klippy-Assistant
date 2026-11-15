@@ -45,9 +45,13 @@ from PySide6.QtWidgets import (
 )
 
 from . import __version__
+from .clarification_ui import ClarificationPopup, RememberedChoicesPage
 from .conversation import Conversation
 from .diagnostics import current, timings
+from .dialogue import preferences as dialogue_preferences
 from .domain import Printer
+from .history import InteractionHistory
+from .history_ui import HistoryPage
 from .listening import listening_enabled, validate_windows
 from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
@@ -130,7 +134,12 @@ class Window(QMainWindow):
         self.client_cache = {}
         self.queries = QueryService(store, self.client)
         self.engine = SafetyEngine(store, self.client)
+        self.history = InteractionHistory(store)
+        self.engine.history = self.history
         self.conversation = Conversation(self.engine, queries=self.queries)
+        self.conversation.session.on_event = lambda session,reason:self.history.record(
+            'session_'+reason,session_id=session,reason=reason,muted=reason=='muted',
+            outcome='expired' if reason=='timeout' else 'canceled' if reason in {'muted','canceled'} else None)
         self.engine.confirmation_seconds = self.store.get("confirmation_seconds", 30)
         self.conversation.timeout = self.conversation.session.timeout = self.store.get("followup_seconds", 30)
         self.monitor = Monitor(store, self.client, queries=self.queries)
@@ -153,6 +162,12 @@ class Window(QMainWindow):
                                          self.edit_printer_aliases)
         self.tabs.addTab(self.query_manager, "Queries && Commands")
         self.make_settings()
+        self.history_page = HistoryPage(self.history,store)
+        self.tabs.addTab(self.history_page,'Diagnostics / History')
+        self.choices_page = RememberedChoicesPage(store)
+        self.tabs.addTab(self.choices_page,'Remembered choices')
+        self.tabs.currentChanged.connect(lambda index:self.choices_page.reload() if self.tabs.widget(index) is self.choices_page else None)
+        self.clarification_popup = ClarificationPopup(self.sprite,self.conversation,store,self.submit_turn,self.cancel)
         self.tray = QSystemTrayIcon(companion_icon(), self)
         menu = QMenu()
         for title, slot in [("Show Klippy", self.summon), ("Show voice orb", self.show_sprite),
@@ -176,10 +191,13 @@ class Window(QMainWindow):
         enabled, ready = getattr(voice, "enabled", None), getattr(voice, "capture_ready", None)
         levels = getattr(voice, "levels", None)
         pending = self.engine.pending
+        session = self.conversation.session.snapshot()
         return {**(levels.snapshot() if levels else {}),
                 "microphone_ready": bool(enabled and ready and enabled.is_set() and ready.is_set()),
                 "session_active": self.conversation.clock() < self.conversation.until,
+                "followup_ready":session['ready'],"followup_fraction":session['fraction'],
                 "busy": self.command_busy,
+                "clarification_active": bool(self.conversation.choice and self.conversation.clock()<self.conversation.until),
                 "pending": pending is not None and self.engine.clock() < pending.expires}
 
     def client(self, printer):
@@ -346,10 +364,17 @@ class Window(QMainWindow):
         self.model_status.setWordWrap(True)
         layout.addWidget(self.model_status)
         self.response_style = QComboBox()
-        self.response_style.addItems(["Brief", "Conversational", "Detailed"])
-        self.response_style.setCurrentText(self.store.get("response_style", "brief").title())
-        self.response_style.currentTextChanged.connect(lambda value: self.store.set("response_style", value.lower()))
-        layout.addWidget(QLabel("Spoken response style (facts and safety checks are always preserved)"))
+        style,length = dialogue_preferences(self.store)
+        self.personality_style = QComboBox()
+        self.personality_style.addItems(['Friendly','Calm','Direct'])
+        self.personality_style.setCurrentText(style.title())
+        self.personality_style.currentTextChanged.connect(lambda value:self.save_personality(style=value.lower()))
+        layout.addWidget(QLabel('Personality style (safety prompts remain exact)'))
+        layout.addWidget(self.personality_style)
+        self.response_style.addItems(["Short", "Standard", "Detailed"])
+        self.response_style.setCurrentText(length.title())
+        self.response_style.currentTextChanged.connect(lambda value:self.save_personality(length=value.lower()))
+        layout.addWidget(QLabel("Response length (verified facts and safety checks are preserved)"))
         layout.addWidget(self.response_style)
         layout.addWidget(self.button("Load local voice pack", self.load_voice))
         layout.addWidget(self.button("Review selected printer heater limits", self.review_heater_limits))
@@ -364,7 +389,7 @@ class Window(QMainWindow):
                            ("confirmation_seconds", "Confirmation response window after speech (seconds)")]:
             spin = QDoubleSpinBox()
             spin.setObjectName(key)
-            spin.setRange(10, 120)
+            spin.setRange(0 if key=='followup_seconds' else 10, 120)
             spin.setDecimals(0)
             spin.setValue(self.store.get(key, 30))
             spin.valueChanged.connect(lambda value, setting=key: self.save_timeout(setting, value))
@@ -407,7 +432,7 @@ class Window(QMainWindow):
         row.addWidget(self.button("Export configuration", self.export_config))
         row.addWidget(self.button("Restore configuration", self.restore_config))
         layout.addLayout(row)
-        layout.addWidget(QLabel("No recordings or transcripts are saved. Configuration exports contain private printer\n"
+        layout.addWidget(QLabel("Audio is never recorded. Diagnostics / History offers opt-in local text logging. Configuration exports contain private printer\n"
                                 "addresses and definitions; keep them private. Credentials stay in the Windows vault.\n"
                                 "Voice interruption uses local echo cancellation. Microphone/room calibration remains necessary.\n"
                                 "Optional speaker enrollment is not enabled."))
@@ -422,6 +447,7 @@ class Window(QMainWindow):
         self.orb_controls = {}
         for key, title in (("enabled", "Enable floating orb"), ("pinned", "Pin open"),
                            ("show_printer", "Show printer name"), ("show_status", "Show status labels"),
+                           ("show_countdown", "Show follow-up countdown ring"),
                            ("animations", "Animate waveform and glow (respects Windows reduced motion)")):
             control = QCheckBox(title)
             control.setObjectName("orb_"+key)
@@ -457,6 +483,12 @@ class Window(QMainWindow):
         form.addRow(QLabel("Uses the existing audio streams. Disabling the orb never changes microphone or printer permissions."))
         self.sprite.preferences_changed.connect(self.sync_orb_controls)
         layout.addWidget(group)
+
+    def save_personality(self, *, style=None, length=None):
+        old_style,old_length = dialogue_preferences(self.store)
+        selected_length = length or old_length
+        self.store.set('personality',{'style':style or old_style,'length':selected_length})
+        self.store.set('response_style',{'short':'brief','standard':'conversational','detailed':'detailed'}[selected_length])
 
     def sync_orb_controls(self):
         for key, control in self.orb_controls.items():
@@ -788,7 +820,8 @@ class Window(QMainWindow):
 
     def cancel(self):
         self.turn += 1
-        self.conversation.clear()
+        self.history.record('canceled',outcome='canceled')
+        self.conversation.clear('canceled')
         if self.voice:
             self.voice.pending_token = None
             self.voice.interrupt()
@@ -810,9 +843,11 @@ class Window(QMainWindow):
         self.command_busy = False
         self.send_button.setEnabled(True)
         self.polling = False
-        self.write_message(text)
+        self.write_message(friendly_error(text))
         self.sprite.announce(self.active_name() + " · Needs attention", "error")
         self.say(friendly_error(text))
+        if not (self.voice and self.spoken.isChecked()):
+            self.conversation.session.response_complete()
 
     def result(self, name, value):
         if name == "capabilities":
@@ -843,6 +878,7 @@ class Window(QMainWindow):
             self.voice = VoiceLoop(backend, self.voice_text, lambda text: self.worker.result.emit("voice_state", text),
                                    lambda epoch: self.worker.result.emit("voice_wake", epoch),
                                    session=self.conversation.session,
+                                   history=self.history,
                                    on_delivery=lambda token, ok: self.worker.result.emit("delivery", (token, ok)))
             # Do not leave a newly loaded loop deaf until the next one-second UI tick.
             if listening_enabled(self.store.get("listening", {}), datetime.now()):
@@ -874,6 +910,8 @@ class Window(QMainWindow):
             self.sprite.pipeline_event(value)
         elif name == "voice_input":
             if self.voice and self.voice.enabled.is_set() and value.epoch == self.voice.epoch:
+                self.history.record('asr',trace=value.trace,user_transcript=getattr(value,'raw_transcript',None) or value.text,
+                                    wake_detected=value.woke,muted=False)
                 self.submit_turn(value.text, source="voice", confirmation_token=value.confirmation_token, trace=value.trace)
         elif name == "turn":
             turn, value, error = value
@@ -881,6 +919,8 @@ class Window(QMainWindow):
                 return
             self.command_busy = False
             self.send_button.setEnabled(True)
+            self.history.record('presented',trace=getattr(self,'reaction_trace',None),response=str(friendly_error(value) if error else value) if value else '',
+                                muted=not bool(getattr(self.voice,'enabled',None) and self.voice.enabled.is_set()))
             if error:
                 self.failure(value)
                 return
@@ -890,6 +930,9 @@ class Window(QMainWindow):
                 self.say(value, confirmation=True)
             elif value == "speech_stopped":
                 self.stop_speaking()
+                self.conversation.session.response_complete()
+            if not (self.voice and self.spoken.isChecked()):
+                self.conversation.session.response_complete()
             self.reload_printers()
             if self.voice:
                 self.voice.pending_token = self.engine.pending.token if self.engine.pending else None
@@ -903,6 +946,7 @@ class Window(QMainWindow):
         if self.voice and self.spoken.isChecked():
             pending = self.engine.pending
             spoken = text if pending else getattr(text, "spoken", text)
+            self.history.record('spoken',trace=getattr(self,'reaction_trace',None) if confirmation else None,spoken_response=str(spoken))
             self.voice.say(spoken, token=pending.token if confirmation and pending and not pending.ready else None,
                            trace=getattr(self, "reaction_trace", None) if confirmation else timings.new())
         elif confirmation and self.engine.pending and not self.engine.pending.ready:
@@ -949,13 +993,17 @@ class Window(QMainWindow):
             self.failure("Schedule must be a JSON list of time windows")
 
     def toggle_listening(self):
+        if self.voice and self.voice.enabled.is_set():
+            # Revoke capture before settings/history I/O can wait on storage.
+            self.voice.enabled.clear()
+            self.voice.interrupt()
         settings = self.store.get("listening", {})
         settings["override"] = not listening_enabled(settings, datetime.now())
         self.store.set("listening", settings)
         self.turn += 1
         self.command_busy = False
         self.send_button.setEnabled(True)
-        self.conversation.clear()
+        self.conversation.clear('muted' if not settings['override'] else 'unmuted')
         if self.voice:
             self.voice.pending_token = None
             (self.voice.enabled.set if settings["override"] else self.voice.enabled.clear)()
@@ -1004,6 +1052,7 @@ class Window(QMainWindow):
 
     def tick(self):
         self.ticks += 1
+        self.history.update_timings(timings.snapshot())
         self.diagnostics.setText(timings.compact())
         if self.voice:
             self.diagnostics.setText(timings.compact() + "\nWake pipeline (counts): " +
@@ -1023,7 +1072,7 @@ class Window(QMainWindow):
                                  f"Monitoring {'enabled' if self.monitor_enabled.isChecked() else 'off'}")
         pending = self.engine.pending
         if pending and self.engine.clock() >= pending.expires:
-            self.engine.cancel()
+            self.engine.cancel('expired')
             pending = None
         self.confirm_button.setEnabled(pending is not None and pending.ready and not self.command_busy)
         if self.voice:
@@ -1035,12 +1084,14 @@ class Window(QMainWindow):
         if self.ticks % 5 == 0 and not self.polling and self.monitor_enabled.isChecked() and not self.smoke:
             self.polling = True
             self.worker.submit("poll", self.monitor.poll())
+        if self.ticks % 60 == 0:
+            self.history.entries()  # Retention applies even while logging is disabled.
         if self.discovery:
             self.discovered.setText("\n".join(self.discovery.found.values()) or "No Moonraker advertisements found")
         if (not self.command_busy and self.conversation.until and
                 self.conversation.clock() >= self.conversation.until):
             self.output.clear()
-            self.conversation.clear()
+            self.conversation.clear('timeout')
 
         self.sprite.refresh()
 
@@ -1071,6 +1122,11 @@ class Window(QMainWindow):
         self.runtime.close()
         self.tray.hide()
         self.sprite.close()
+        self.clarification_popup.timer.stop()
+        self.clarification_popup.close()
+        self.history_page.timer.stop()
+        self.conversation.session.snapshot()  # Drain bounded lifecycle events before closing local history.
+        self.history.close()
         QApplication.instance().quit()
 
 

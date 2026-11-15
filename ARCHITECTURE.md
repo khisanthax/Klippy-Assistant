@@ -88,3 +88,17 @@ clarification-required flag block voice/manual/direct confirmation and old promp
 Only a complete fresh request creates a new validated token. Already dispatched operations
 cannot be retracted, and uncertain transmissions are never retried. Safe diagnostic codes
 are stored with their reaction identifier in bounded memory separately from spoken errors.
+
+Opt-in InteractionHistory uses a separate bounded local WAL database; transcript, response
+and timing consent are independent and off by default for text/recording. No audio or
+structured credentials/tokens are accepted. Session lifecycle events are queued in memory
+and collected by the UI, not written under capture locks. History observers cannot prevent
+session closure or SafetyEngine cancellation. The red countdown uses Session snapshots and
+response-ready state set after actual playback/tail; it has no authorization authority.
+ClarificationPopup resolves printer/session-bound reviewed macro identity/required values;
+registry signatures and live config are rechecked. Remembered choices are identity mappings,
+not permissions or confirmations. Grounded dialogue models select a mandatory verified
+observation and vetted explanatory clauses under a closed schema. Routine/casual templates
+avoid inference. Neither narration nor selected identity can bypass SafetyEngine; action
+review strings never enter personality generation. All model replies carry generation/target
+checks, and observations aging during narration are labeled rather than asserted current.

@@ -19,6 +19,7 @@ class OrbPreferences(StrictModel):
     intensity: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)] = .65
     animations: bool = True
     pinned: bool = False
+    show_countdown: bool = True
 
     @field_validator("custom_position")
     @classmethod
