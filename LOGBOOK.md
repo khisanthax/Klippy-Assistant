@@ -1,5 +1,21 @@
 # Logbook
 
+## 2026-11-15 - Owner installation upgraded to 0.7.0-preview.1
+
+At owner's explicit request, verified published installer SHA-256, made an integrity-checked
+SQLite online backup in the owner's local profile backups, and upgraded existing per-user
+0.6.1 installation in place. Installer closed old Klippy/owned language runtime, completed
+successfully without reboot; registry reports 0.7.0-preview.1. Before relaunch, all settings,
+enrolled printers and reviewed macros matched the backup's logical digest exactly; integrity
+check passed. Installed isolated startup/shutdown smoke passed. Relaunched updated app in
+tray and verified process remains running. Backup/installer log/startup evidence remain local
+in the profile, never committed. No settings reset, logging opt-in, safety-policy change or
+physical-printer command. Initial helper-file write hit full workspace drive; backup was
+completed successfully on C before the old application closed. Archived SHA-verified generated
+0.1.0 installer/sidecar to existing C archive, retaining current 0.7 installer in dist.
+Remaining human/hardware acceptance gates unchanged.
+
+
 ## 2026-11-15 - 0.7.0 conversation controls preview published
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.0-preview.1 at qualified app source f6ce887e703b0201c1548e58a06167d7757d815b.
