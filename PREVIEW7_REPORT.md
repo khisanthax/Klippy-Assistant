@@ -1,6 +1,6 @@
 # 0.7 engineering preview - local troubleshooting and conversation controls
 
-Candidate pending exact-source Windows CI, frozen and installer qualification.
+Exact-source Windows engineering qualification passed; human/hardware acceptance stays open.
 Unsigned engineering preview; hardware, acoustic, clean interactive VM and actual 16 GB
 acceptance remain open. No physical printer actions are permitted by qualification.
 
@@ -113,7 +113,7 @@ Local pre-package validation: 689 passed (prior 610 preserved), Ruff clean; nati
 orb checks plus 19 conversation-feature checks passed. Mute revokes capture before storage
 I/O; lifecycle observers are queued and drained outside capture locks. Log failures cannot
 prevent session closure or cancellation. Executed in history means dispatch accepted by
-Moonraker, never proof of physical completion. Windows package qualification remains pending.
+Moonraker, never proof of physical completion. Historical local candidate result; final package qualification is recorded below.
 
 Event-only records include the reviewed macro command identity after validation. Initial
 f94fcfe candidate was superseded before publication to complete that no-text diagnostic
@@ -145,3 +145,32 @@ seconds, HTTP 3.5 to 7.5 seconds, native overhead allowance 4.5 to 8.5 seconds. 
 factuality, no-write and prior safety/audio requirements remain. Routine queries avoid LLM;
 timeout cancels work and returns verified fallback. This latency tradeoff excludes ASR/TTS/
 playback. benchmarks/preview7-indexed-dialogue-timeout.json retains rejected candidate evidence.
+
+## Exact-source Windows qualification
+
+Qualified app source `f6ce887e703b0201c1548e58a06167d7757d815b` in [Windows run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43720667146), attempt 1.
+All 698 tests and Ruff passed, preserving the prior 610 cases. Frozen and installed startup,
+29 orb checks and 19 conversation-feature checks passed. Actual 0.6.1 upgrade, reinstall,
+external-network-blocked runtime, settings preservation and uninstall preservation passed.
+The 16 GiB process-tree commit budget passed; this is not actual 16 GB desktop qualification.
+
+Actual bundled-model text timings (single probe per context, excluding ASR/TTS/playback):
+
+| Context | Routine ms, no model | Accepted model explanation ms | Original broad synthetic voice result |
+|---|---:|---:|---|
+| frozen | 2.49 | 3736.7 | False |
+| installed offline | 3.0 | 6237.54 | True |
+| 16 GiB process-tree budget | 3.26 | 6220.89 | True |
+
+All three contexts passed grounded-dialogue, prior audio signal/delivery, three unprefixed
+follow-ups, seven native query cases and 21 heating/cancellation cases with zero writes.
+The original broad acoustic results above remain independent of engineering-preview gates.
+Model explanations retain the verified observation and have no action or confirmation path.
+
+Installer `Klippy-Setup-0.7.0-preview.1.exe`: 1489871539 bytes.
+SHA-256: `e828db938485b46b659ab78d17fbcaa42024f1b76cf7069de70772e707489f53`.
+Full evidence: `benchmarks/preview7-release-qualification.json` and its frozen/installed/
+memory/installer reports. Failed and superseded candidates are retained rather than published.
+Human room/wake accuracy, full interactive focus/DPI/taskbar/sleep matrix, long device-load,
+clean desktop VM, actual 16 GB hardware and supervised physical-printer gates remain open.
+No physical printer actions were executed. This remains an unsigned engineering preview.

@@ -1,5 +1,19 @@
 # Logbook
 
+## 2026-11-15 - 0.7.0 exact-source Windows qualification passed
+
+Source f6ce887e703b0201c1548e58a06167d7757d815b; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43720667146, attempt 1. 698 tests/Ruff passed, prior 610 preserved.
+Frozen/installed startup and 29 orb plus 19 conversation-feature checks passed. Actual 0.6.1
+upgrade/reinstall/offline/settings/uninstall preservation and 16 GiB process-tree budget
+passed. All three native model explanation probes passed with verified facts and no writes;
+actual timings are in PREVIEW7_REPORT.md. Prior audio/follow-up/query/heating gates retained.
+Installer 1489871539 bytes; SHA-256 e828db938485b46b659ab78d17fbcaa42024f1b76cf7069de70772e707489f53.
+Evidence: benchmarks/preview7-release-qualification.json. No audio algorithm/model changes,
+owner logging changes or physical printer actions. Next: exact-source tag, digest-verified
+draft assets and preview publication. Hardware/acoustic/interactive desktop/clean VM/actual
+16 GB acceptance remain open; source 04ddb7e failed dialogue gate and was not published.
+
+
 ## 2026-11-15 - Measured CPU timeout and bounded explanation budget
 
 Source 6be74b8 / run 43719542714 passed 697 tests/Ruff, native Qt and prior voice/safety gates,

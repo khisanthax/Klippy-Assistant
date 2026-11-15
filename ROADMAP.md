@@ -1,11 +1,11 @@
 # Roadmap
 
-## Conversation controls - 0.7.0 candidate
+## Conversation controls - 0.7.0 qualified preview candidate
 
 Grounded personality/dialogue, default-off local history, shared-session red countdown and reviewed-macro clarification
 popup/remembered-identity review implemented. PREVIEW7_REPORT.md records scope/privacy and
 remaining acceptance. Prior 610 tests and native audio/safety gates remain mandatory.
-Exact-source frozen/installed/offline/upgrade/performance qualification pending.
+Exact-source f6ce887 passed Windows frozen/installed/offline/0.6.1 upgrade and process-tree memory qualification; 698 tests/Ruff, 29 orb and 19 feature checks passed. Publication follows digest verification. Human/hardware acceptance remains open.
 
 ## Conversation and playback - 0.6.1 preview published
 

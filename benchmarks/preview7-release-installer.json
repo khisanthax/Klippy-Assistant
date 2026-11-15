@@ -1,0 +1,43 @@
+{
+  "host_ram_bytes": 8584425472,
+  "environment": "Fresh Windows CI runner; not a clean Windows desktop VM",
+  "installers": [
+    "local/previous/Klippy-Setup-0.6.1-preview.1.exe",
+    "dist\\Klippy-Setup-0.7.0-preview.1.exe",
+    "dist\\Klippy-Setup-0.7.0-preview.1.exe"
+  ],
+  "performance_budget_test": true,
+  "firewall_profiles": [
+    {
+      "Name": "Domain",
+      "Enabled": 1
+    },
+    {
+      "Name": "Private",
+      "Enabled": 1
+    },
+    {
+      "Name": "Public",
+      "Enabled": 1
+    }
+  ],
+  "external_network_blocked": true,
+  "cross_version_upgrade": true,
+  "status": "passed",
+  "limitations": [
+    "not clean Windows desktop VM qualification",
+    "not physical microphone accuracy"
+  ],
+  "os": "Microsoft Windows NT 10.0.26100.0",
+  "installer_sha256": "e828db938485b46b659ab78d17fbcaa42024f1b76cf7069de70772e707489f53",
+  "tests": [
+    "per-user install",
+    "same-version reinstall preserving isolated data",
+    "installed application smoke test",
+    "installed synthetic audio orb states/rendering/geometry/cleanup and performance",
+    "installed offline engineering query/wake-followup preview; full voice diagnostics retained separately",
+    "uninstall removes executable",
+    "uninstall preserves isolated user data"
+  ],
+  "build_run": null
+}
