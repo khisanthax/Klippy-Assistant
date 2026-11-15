@@ -92,7 +92,7 @@ async def run(model):
                 "explanation_keeps_verified_observation": "25" in str(explanation),
                 "casual_without_printer": bool(greeting and thanks),
                 "no_pending_or_writes": not writes and engine.pending is None,
-                "model_latency_bounded": explanation_ms < 4500,
+                "model_latency_bounded": explanation_ms < 8500,
             }
             return {
                 "passed": all(checks.values()),

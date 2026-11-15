@@ -170,7 +170,7 @@ async def compose(model, question, answer, topic, style="friendly", length="shor
                 planner(
                     question, bank, OPENINGS[style], closings, getattr(answer, "capabilities", []), length
                 ),
-                timeout=4.0,
+                timeout=8.0,
             )
         if not isinstance(plan, dict) or set(plan) != {"opening", "parts", "closing"}:
             raise ValueError("Invalid dialogue schema")

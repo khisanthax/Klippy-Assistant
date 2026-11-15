@@ -273,3 +273,24 @@ async def test_dialogue_timeout_diagnostic_never_exposes_provider_error_text():
         and reply.dialogue_diagnostic == "dialogue_timeout"
         and "dialogue_timeout" not in reply
     )
+
+
+async def test_complex_reply_has_bounded_cpu_budget_and_cancels_timed_out_work(monkeypatch):
+    from klippy import dialogue
+
+    observed = []
+
+    async def bounded(task, *, timeout):
+        observed.append(timeout)
+        task.close()
+        raise TimeoutError
+
+    async def planner(*args):
+        raise AssertionError("Timed-out work must not run")
+
+    monkeypatch.setattr(dialogue.asyncio, "wait_for", bounded)
+    reply = await compose(
+        SimpleNamespace(compose_reply=planner), "explain", Response("25 degrees", "25 degrees"), "temperatures"
+    )
+    assert observed == [8.0] and not reply.model_composed
+    assert reply.dialogue_diagnostic == "dialogue_timeout" and "25" in reply

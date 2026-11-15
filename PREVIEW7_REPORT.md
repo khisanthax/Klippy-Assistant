@@ -98,7 +98,7 @@ observation is mandatory. This is model-composed grounded explanation, not unres
 model prose. Supported explanatory topics are bounded; an unreported cause stays unknown.
 Safety reviews never enter the composer and retain their exact existing text/policies.
 Routine responses bypass it. Model failure/invalid output falls back to factual templates
-within a four-second composition budget. Information aging during composition gets an
+within an eight-second composition budget (7.5-second HTTP deadline). Information aging during composition gets an
 explicit earlier-observation label; generation/target checks discard superseded replies.
 
 Actual bundled-model local probe: routine simulated nozzle answer 7.44 ms without a model
@@ -136,3 +136,12 @@ qualification remain unchanged. Tests cover malformed plan indices and failure d
 
 Indexed-plan candidate: 697 local tests passed, Ruff clean. Qt keyboard Escape and Space
 Continue are covered alongside mouse/voice selections. All previous 690 cases remain.
+
+## CPU budget correction
+
+Indexed source 6be74b8 hit dialogue_timeout at 3520.39 ms in frozen CI. Local 1831.87 ms
+was not slower CPU qualification. Complex response budget explicitly changes four to eight
+seconds, HTTP 3.5 to 7.5 seconds, native overhead allowance 4.5 to 8.5 seconds. All actual-model,
+factuality, no-write and prior safety/audio requirements remain. Routine queries avoid LLM;
+timeout cancels work and returns verified fallback. This latency tradeoff excludes ASR/TTS/
+playback. benchmarks/preview7-indexed-dialogue-timeout.json retains rejected candidate evidence.

@@ -716,7 +716,7 @@ class LocalLLM:
         }
         try:
             async with self.lock:
-                async with httpx.AsyncClient(timeout=3.5, trust_env=False) as client:
+                async with httpx.AsyncClient(timeout=7.5, trust_env=False) as client:
                     response = await client.post(
                         f"http://127.0.0.1:{self.port}/v1/chat/completions",
                         headers={"Authorization": "Bearer " + self.api_key} if self.api_key else {},

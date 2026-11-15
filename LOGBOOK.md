@@ -1,5 +1,22 @@
 # Logbook
 
+## 2026-11-15 - Measured CPU timeout and bounded explanation budget
+
+Source 6be74b8 / run 43719542714 passed 697 tests/Ruff, native Qt and prior voice/safety gates,
+but actual explanation hit dialogue_timeout at 3520.39 ms. Retain evidence in
+benchmarks/preview7-indexed-dialogue-timeout.json; no installer/release published.
+The 1831.87 ms local run did not establish slower CPU performance. Complex explanation HTTP
+deadline changes 3.5 to 7.5 seconds, total composition budget 4 to 8 seconds, native allowance
+4.5 to 8.5 seconds. This explicitly revises a self-imposed performance gate, not safety,
+factuality or actual-model requirements. Routine queries still bypass LLM; interruption cancels
+generation, timeouts use verified fallback, aged observations stay labeled, and actions/reviews
+never enter generation. Added bounded-timeout regression. Fresh full-suite/CI follows.
+Disk-full interrupted source write was restored from Git before changes; its collection errors
+are infrastructure failures. Checksum-verified generated 0.5.1/0.6.1 installers archived to
+C:/Users/khisa/.codex/artifacts/klippy-archive/previous-dist. No user settings/models removed.
+Final local validation: 698 tests passed in 63.67 s, Ruff clean. No audio algorithm, model payload, owner logging or physical-printer changes.
+
+
 ## 2026-11-15 - Frozen dialogue gate blocked release; compact bounded plan output
 
 
