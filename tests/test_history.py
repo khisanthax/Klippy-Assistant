@@ -169,3 +169,27 @@ def test_database_uses_wal_and_reopens_committed_rows(rig):
     h = InteractionHistory(rig[0])
     assert len(h.entries()) == 1
     h.close()
+
+
+async def test_event_only_history_identifies_the_reviewed_macro_without_text(rig):
+    from klippy.macros import discover
+
+    store, sim, engine, _ = rig
+    registry, _ = discover(sim.config, {})
+    store.replace_macros(
+        "sim",
+        {
+            key: macro.model_copy(update={"approved": True, "reviewed": True, "enabled": True})
+            for key, macro in registry.items()
+        },
+    )
+    h = InteractionHistory(store)
+    h.configure(enabled=True)
+    engine.history = h
+    try:
+        await Conversation(engine).hear("load filament")
+        row = next(r for r in h.entries() if r["outcome"] == "proposed")
+        assert row["command"] == "LOAD_FILAMENT" and "user_transcript" not in row and "response" not in row
+        assert not sim.writes
+    finally:
+        h.close()

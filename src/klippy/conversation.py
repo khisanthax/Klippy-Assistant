@@ -528,6 +528,7 @@ class Conversation:
         except NeedsParameter:
             self.draft = intent
             if intent.action == Action.MACRO:
+                self.engine.audit('parameter_needed',command=intent.macro,clarification_requested=True,outcome='clarification_needed')
                 self.choice = Choice(
                     selected,
                     text,

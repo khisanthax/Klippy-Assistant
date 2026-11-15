@@ -81,12 +81,13 @@ class InteractionHistory:
             "printer_id",
             "source",
             "intent",
+            "command",
             "query",
             "diagnostic",
             "reason",
         ):
             if isinstance(fields.get(key), (str, int)):
-                if key in {"source", "intent", "query", "diagnostic", "reason"}:
+                if key in {"source", "intent", "query", "diagnostic", "reason",'command'}:
                     result[key] = (
                         fields[key]
                         if isinstance(fields[key], str) and re.fullmatch(r"[A-Za-z0-9_]{1,80}", fields[key])

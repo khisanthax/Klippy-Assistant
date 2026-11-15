@@ -114,3 +114,11 @@ orb checks plus 19 conversation-feature checks passed. Mute revokes capture befo
 I/O; lifecycle observers are queued and drained outside capture locks. Log failures cannot
 prevent session closure or cancellation. Executed in history means dispatch accepted by
 Moonraker, never proof of physical completion. Windows package qualification remains pending.
+
+Event-only records include the reviewed macro command identity after validation. Initial
+f94fcfe candidate was superseded before publication to complete that no-text diagnostic
+requirement; original persistence regression retained and one macro-metadata case added.
+
+Final metadata candidate: 690 local tests passed, Ruff clean; full native Windows and
+installer qualification follow. A transient Windows socket-buffer setup error was retained
+in LOGBOOK.md; the unchanged full rerun passed without relaxed criteria.

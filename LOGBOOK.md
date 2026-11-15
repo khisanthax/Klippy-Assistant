@@ -1,5 +1,27 @@
 # Logbook
 
+## 2026-11-15 - Event-only macro identity completion before final qualification
+
+
+Final metadata candidate validation: 690 passed in 58.93 s, Ruff clean; focused history/
+persistence module 13 passed after preserving the original independent reopen assertions.
+An earlier run had 689 passes plus one Windows WinError 10055 during pytest-asyncio event-
+loop setup, before the affected test ran. The unchanged full rerun passed; no tests or timeouts
+were relaxed and no user applications were closed. Fresh Windows CI remains required.
+
+
+
+Candidate f94fcfe / Windows run 43715058166 passed 689 tests/Ruff; superseded and canceled
+before publication to close a requirement gap in event-only history. With transcript and
+response text both off, a proposed macro also needs its reviewed technical identity, not
+only action=macro. Added command metadata only after SafetyEngine has validated the macro,
+and for reviewed missing-parameter drafts. The field never includes a definition, secret,
+connection or confirmation token. Added a no-text regression verifying LOAD_FILAMENT is
+identifiable while both text fields remain absent and no write occurs. Preserve the existing
+persistence/reopen regression independently. Full 690-case run and exact-source requalification
+follow; no acceptance criterion relaxed. No physical actions, owner logging or TTS changes.
+
+
 ## 2026-11-15 - 0.7.0 candidate regression and native checks passed
 
 All 689 tests passed in 72.91 s; Ruff clean. Preserve all previous 610 tests. Native local

@@ -318,6 +318,7 @@ class SafetyEngine:
                 self.audit(
                     "proposed",trace=self.pending_trace,
                     intent=intent.action.value,
+                    command=intent.macro,
                     printer_id=intent.printer_id,
                     parameters=intent.params,
                     confirmation_requested=bool(
