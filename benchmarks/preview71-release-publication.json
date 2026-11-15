@@ -1,0 +1,76 @@
+{
+  "release": "v0.7.1-preview.1",
+  "url": "https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.1-preview.1",
+  "published_at": "2026-11-15T22:58:35Z",
+  "source_commit": "63ef222582e096e6651c689fb85fd9bf5a47d04d",
+  "draft": false,
+  "prerelease": true,
+  "all_asset_sizes_and_digests_verified": true,
+  "assets": [
+    {
+      "name": "attention-reason.png",
+      "size": 28464,
+      "digest": "sha256:7b241020f54ca9e3ee6422db34822f631f42948166daf748358575faa7ba73b2"
+    },
+    {
+      "name": "clarification-popup.png",
+      "size": 12633,
+      "digest": "sha256:5bf6c1b4f7098b9885c453582ec076b9b6f2a0cc287ffb225751abc3794e1561"
+    },
+    {
+      "name": "diagnostics-history.png",
+      "size": 39286,
+      "digest": "sha256:7d6914472b3c175216f27e3b47b201c251058cd0c772d4d06d3b196345b9b914"
+    },
+    {
+      "name": "followup-half.png",
+      "size": 33233,
+      "digest": "sha256:60e6026c129278d095292200c82ec2a5fa850edb7d8a437177d39f0342b99049"
+    },
+    {
+      "name": "Klippy-Setup-0.7.1-preview.1.exe",
+      "size": 1489919100,
+      "digest": "sha256:2906d1bf0726b47e9e0b70308345f071b39576e46ba327ee8ef7ecffcdc60c83"
+    },
+    {
+      "name": "Klippy-Setup-0.7.1-preview.1.exe.sha256",
+      "size": 100,
+      "digest": "sha256:eb34b066918b77cf28bbabfbbfa278553cd197b1a264bf8357e30fbe70990d7f"
+    },
+    {
+      "name": "manifest.json",
+      "size": 26591,
+      "digest": "sha256:c1ee41d40b27cf02de34723992d328111c8c06c5f6dfe1389c12ece654a5782f"
+    },
+    {
+      "name": "MOONRAKER_QUERIES.md",
+      "size": 14245,
+      "digest": "sha256:6d4bf2c2f8b3b70503cbbb4265fe0af700c471d6e179cb94ed1a2de911c16afc"
+    },
+    {
+      "name": "preview71-release-qualification.json",
+      "size": 102860,
+      "digest": "sha256:010da0ea3398146b1c2d9c3b6ddb807126fc18bfe62238f25eaea2ebc3e3f9c4"
+    },
+    {
+      "name": "preview71-release-wake-frozen.json",
+      "size": 9536,
+      "digest": "sha256:835c38d03fd5c0f5b3b1069c89651ea0d4ea545cf592d6741cc3612b13336466"
+    },
+    {
+      "name": "preview71-release-wake-installed.json",
+      "size": 8838,
+      "digest": "sha256:eab2cce686e7ac84e3ec1d0ca6bf268114726fe3cc8dd84cf9a8d9c3502e8ca0"
+    },
+    {
+      "name": "PREVIEW71_REPORT.md",
+      "size": 9411,
+      "digest": "sha256:dbb48a1698f7c175a182d99f98b5be30b2f559199e582ea5ef32baa6ddb1ed3d"
+    },
+    {
+      "name": "query_catalog.json",
+      "size": 35763,
+      "digest": "sha256:c6a327aff2643decd573c2f3cdd1a3c32134ddf8b73b7bb422274a698c85f412"
+    }
+  ]
+}

@@ -1,11 +1,22 @@
 # Roadmap
 
-## Wake Attention diagnostics - 0.7.1 qualified preview candidate
+## Wake Attention diagnostics - 0.7.1 preview published
 
-Verified stored wake_prefix_rejected path and independently reproduced old Attention timer.
-Strict bounded wake-only recovery, explicit reasons, timestamped diagnostics and copy actions
-implemented; 725 tests/Ruff and exact-source frozen/installed/offline/0.7.0 upgrade/memory qualification passed. Publication follows digest verification. PREVIEW71_REPORT.md records
-evidence boundaries. Human acoustic and hardware gates remain open.
+Published [v0.7.1-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.1-preview.1) at qualified app source
+63ef222582e096e6651c689fb85fd9bf5a47d04d, Windows run 43769019232. All 13 asset sizes/digests
+verified before and after publication. 725 tests/Ruff preserve prior 698; 29 orb/22 feature,
+frozen/installed native wake recovery, 0.7.0 upgrade/reinstall/offline/logging/settings/
+uninstall preservation and 16 GiB process-tree budget passed. First da74984 candidate failed
+the retained legacy orb error check and was not published; its evidence remains.
+Explicit Attention reasons/copy actions/timeline, conservative wake-only re-verification,
+stale warning filtering and DSP-overrun ASR generation invalidation implemented. No guessed
+wake spelling, action/token forwarding, TTS/model payload change or physical command.
+Owner installation upgraded to 0.7.1 with exact settings/printer/macro preservation, old
+history entries preserved, logging still enabled and startup/visible process verified.
+Current verified installer/sidecar are in dist; older generated builds/installers archived to C.
+Human acoustic/focus/DPI/taskbar/sleep/long device-load, clean desktop VM, actual16GB and
+supervised physical-printer gates stay open; issue #17 remains open for owner acceptance.
+See PREVIEW71_REPORT.md and benchmarks/preview71-release-*.json for exact evidence.
 
 ## Conversation controls - 0.7.0 preview published
 

@@ -2,21 +2,26 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
-Current engineering preview **0.7.0-preview.1** adds Friendly/Calm/Direct personality,
-Short/Standard/Detailed responses, casual chat and contextual follow-ups. Routine printer
-answers bypass the model; complex explanations use verified observations and vetted clauses
-without action authority or changes to safety reviews. Settings controls personality/length.
+Current engineering preview **0.7.1-preview.1** fixes wake Attention diagnostics and stale
+recognition after input-queue overrun. Stored wake-prefix rejections are distinguished from
+microphone, ASR and playback failures. Hover over Attention for its reason, or right-click
+the orb / open Diagnostics / History for **Copy latest diagnostic**. A new wake clears the
+previous warning; discarded old events cannot restore it.
 
-It also adds default-off local Diagnostics / History with independent text/timing consent,
-retention and JSON export; a red shared-session follow-up countdown after playback; and
-orb-anchored reviewed-macro clarification with identity-only remembered choices. Continue
-still requires normal validation and confirmation. Existing audio algorithms/models stay intact.
+Short wake-only recovery requires a separate stricter phonetic check and two strict complete
+ASR results. It forwards only Klippy with no command or confirmation token. Uncertain, echo,
+canceled and stale input stays rejected. No TTS/audio-quality algorithm or model payload change.
 
-698 tests/Ruff and exact-source Windows frozen/installed, 0.6.1 upgrade, offline and process-tree
-memory gates passed. Native routine text responses took 2.49-3.26 ms; accepted model explanations
-3.74-6.24 s, excluding ASR/TTS/playback. See [PREVIEW7_REPORT.md](PREVIEW7_REPORT.md) for actual
-measurements, privacy scope and retained acoustic outcomes. Human/physical-printer, interactive
-desktop, clean VM and actual 16 GB acceptance remain open; unsigned preview, not stable v1.0.
+Personality/length/context/casual chat, optional local History, shared follow-up countdown and
+reviewed-macro clarification remain. Logging stays off for new profiles; existing choices are
+preserved. Diagnostic event fields/transcripts respect current consent. No microphone audio
+is recorded. Read [PREVIEW71_REPORT.md](PREVIEW71_REPORT.md) for the cause and evidence limits.
+
+725 tests/Ruff, 29 orb/22 feature checks and exact-source frozen/installed native wake, 0.7.0
+upgrade/reinstall/offline/settings/history-choice preservation and process-tree memory gates
+passed. All 13 release asset sizes/digests verified. Human microphone/room accuracy, full
+interactive desktop, clean VM, actual 16 GB hardware and supervised printer acceptance remain
+open; unsigned engineering preview, not stable v1.0.
 
 The 0.6 preview adds a floating waveform orb using the existing voice streams. It shows wake
 verification, listening, thinking, real playback and pending confirmation above the taskbar
@@ -25,7 +30,7 @@ drag to customize and right-click to reset. It normally stays hidden with the mi
 off or outside a conversation. See [PREVIEW6_REPORT.md](PREVIEW6_REPORT.md) for actual Qt
 captures, measurements, qualification progress and open desktop acceptance gates.
 
-[Download the 0.7.0 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.0-preview.1)
+[Download the 0.7.1 engineering preview](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.1-preview.1)
 (unsigned, about 1.39 GiB). Run Setup as a normal Windows user, open Klippy from Start,
 then enable the microphone from the tray and wait for the models to become ready.
 The repository is private: sign in to GitHub with an account that has access before

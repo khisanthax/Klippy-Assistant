@@ -1,5 +1,33 @@
 # Logbook
 
+## 2026-11-15 - 0.7.1 hotfix published and owner installation updated
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.1-preview.1 at qualified source 63ef222582e096e6651c689fb85fd9bf5a47d04d; Windows run
+43769019232 passed all three jobs, 725 tests/Ruff, 29 orb/22 feature checks, frozen/installed
+strict wake probes, 0.7.0 upgrade/reinstall/offline/logging/settings/uninstall preservation and
+16 GiB process-tree budget. All 13 uploaded sizes/digests verified and unchanged after release.
+Verified tag independently through GitHub. Publication metadata in
+benchmarks/preview71-release-publication.json; qualifications and original broad acoustic
+False/True/False outcomes retained independently. No stable/human wake-accuracy claim.
+Frozen synthetic natural recovery count 1; installed count 0. Both passed a labeled injected
+first-ASR rejection followed by real higher-threshold KWS and exactly two actual ASR passes,
+canonical wake-only delivery, no command/token and no added negative acceptance. Natural
+variation/rejection remains reported, never forced into acceptance to pass a gate.
+Installer 1489919100 bytes, SHA-256 2906d1bf0726b47e9e0b70308345f071b39576e46ba327ee8ef7ecffcdc60c83.
+Owner settings/history backed up privately before installation. Installer succeeded without
+reboot; registry 0.7.1-preview.1. Settings/printers/reviewed macros matched the pre-install
+logical digest exactly; original history IDs preserved and integrity checks passed. Installed
+isolated startup/shutdown passed; visible updated window responsive. Existing logging opt-ins
+remain enabled; no settings reset or safety-policy change. No owner profile data in Git.
+Verified installer/sidecar copied to D:/Users/khisa/Documents/ChatGPT/KlippyAssistant/dist.
+Prior 0.7.0 installer archived with SHA verification to C; old generated unpacked build already
+archived after comparing all 517 file hashes, preserving source/model inputs and profile.
+No physical-printer command or microphone audio recording. TTS/quality algorithms and model
+payloads unchanged. Hover/copy reason available; left-click still mutes capture immediately.
+Next: owner's microphone/room wake verification, full interactive focus/DPI/taskbar/sleep,
+long device-load, clean desktop VM, actual16GB and supervised-printer acceptance; all stay open.
+
+
 ## 2026-11-15 - 0.7.1 exact-source Windows qualification passed
 
 Qualified 63ef222582e096e6651c689fb85fd9bf5a47d04d; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43769019232. All 725 tests/Ruff, frozen/installed startup,
