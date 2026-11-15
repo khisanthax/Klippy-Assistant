@@ -1,0 +1,173 @@
+{
+  "passed": false,
+  "checks": {
+    "idle_hidden": true,
+    "clear_of_taskbar": true,
+    "idle": true,
+    "non_activating_idle": true,
+    "verifying": true,
+    "non_activating_verifying": true,
+    "listening": true,
+    "non_activating_listening": true,
+    "thinking": true,
+    "non_activating_thinking": true,
+    "speaking": true,
+    "non_activating_speaking": true,
+    "confirmation": true,
+    "non_activating_confirmation": true,
+    "interruption_clears_playback": true,
+    "error": false,
+    "non_activating_error": true,
+    "muted": true,
+    "non_activating_muted": true,
+    "transparent_corners": true,
+    "diameter_128": true,
+    "diameter_256": true,
+    "diameter_384": true,
+    "hidden_has_no_animation_paints": true,
+    "active_animation_rendered": true,
+    "disabled_has_no_animation_paints": true,
+    "no_audio_devices_or_printers": true,
+    "cleanup": true,
+    "conversation_features": true
+  },
+  "qt_platform": "windows",
+  "conversation_features": {
+    "passed": true,
+    "checks": {
+      "personality_settings": true,
+      "history_default_off": true,
+      "actual_two_reviewed_choices": true,
+      "popup_does_not_activate": true,
+      "remember_default_off": true,
+      "popup_inside_taskbar_safe_area": true,
+      "selection_requires_confirmation": true,
+      "remembered_identity_only": true,
+      "remembered_review_delete": true,
+      "local_json_export_redacts": true,
+      "history_view_has_turns": true,
+      "countdown_after_response": true,
+      "countdown_shared_half_window": true,
+      "capture_hides_countdown": true,
+      "response_resets_countdown": true,
+      "attention_reason_tooltip": true,
+      "copy_diagnostic_action_present": true,
+      "new_wake_clears_old_attention": true,
+      "mute_clears_countdown": true,
+      "revoked_text_removed": true,
+      "clear_history": true,
+      "no_devices_or_printer_writes": true
+    },
+    "scope": "Actual Qt controls, temporary local history, simulated Moonraker; zero audio devices or printer writes"
+  },
+  "device_pixel_ratio": 1.0,
+  "desktop": {
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "work": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 1024.0,
+      "height": 720.0
+    },
+    "scale": 1.0,
+    "taskbar": {
+      "x": 0.0,
+      "y": 720.0,
+      "width": 1024.0,
+      "height": 48.0
+    },
+    "edge": "bottom",
+    "auto_hide": false,
+    "native_verified": true
+  },
+  "observed_desktops": [
+    {
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "work": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1024.0,
+        "height": 720.0
+      },
+      "scale": 1.0,
+      "taskbar": {
+        "x": 0.0,
+        "y": 720.0,
+        "width": 1024.0,
+        "height": 48.0
+      },
+      "edge": "bottom",
+      "auto_hide": false,
+      "native_verified": true
+    }
+  ],
+  "windows_reduced_motion": true,
+  "performance": {
+    "hidden": {
+      "seconds": 2.0097912999999608,
+      "cpu_percent_of_one_core": 0.0,
+      "paints": 0,
+      "paints_per_second": 0.0,
+      "before": {
+        "working_set_bytes": 103231488,
+        "private_bytes": 95178752
+      },
+      "after": {
+        "working_set_bytes": 103284736,
+        "private_bytes": 96231424
+      }
+    },
+    "active": {
+      "seconds": 2.9987952999999834,
+      "cpu_percent_of_one_core": 8.857723633220363,
+      "paints": 1,
+      "paints_per_second": 0.3334672426624136,
+      "before": {
+        "working_set_bytes": 103288832,
+        "private_bytes": 96231424
+      },
+      "after": {
+        "working_set_bytes": 102555648,
+        "private_bytes": 95789056
+      }
+    },
+    "disabled_with_same_audio_producer": {
+      "seconds": 1.9974906999999575,
+      "cpu_percent_of_one_core": 7.8223142665947485,
+      "paints": 0,
+      "paints_per_second": 0.0,
+      "before": {
+        "working_set_bytes": 102563840,
+        "private_bytes": 95789056
+      },
+      "after": {
+        "working_set_bytes": 102572032,
+        "private_bytes": 95789056
+      }
+    },
+    "before_widget": {
+      "working_set_bytes": 89444352,
+      "private_bytes": 88379392
+    },
+    "after_widget": {
+      "working_set_bytes": 90062848,
+      "private_bytes": 88395776
+    }
+  },
+  "screenshots": "D:\\a\\Klippy-Assistant\\Klippy-Assistant\\build\\frozen-orb-images",
+  "scope": "Actual Qt widget; synthetic PCM and printer label; zero devices/network/hardware actions",
+  "limitations": [
+    "single current desktop only; multi-DPI/auto-hide permutations are unit simulations",
+    "short process CPU/working-set measurements; not owner room, clean VM or actual 16 GB acceptance"
+  ]
+}

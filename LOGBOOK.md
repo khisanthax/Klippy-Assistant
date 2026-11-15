@@ -1,5 +1,30 @@
 # Logbook
 
+## 2026-11-15 - Discontinuity stale-ASR safety regression blocked first hotfix candidate
+
+Source da74984 passed 723 local tests (62.67 s)/Ruff and Windows unit CI. During the requested
+discontinuity audit, added a blocked-ASR simulation: DSP reset cleared Session but retained
+playback generation, so the delayed pre-reset transcript reopened Session and reached on_text.
+The regression failed before the fix; only a fake callback was used, never printer transport.
+No evidence this defect caused the owner's stored prefix rejections or any physical action.
+The direct reset is used by input-queue overrun; the input-status discontinuity path already
+called reset_session. Resetting DSP now interrupts generation before clearing capture/Session, invalidating
+old ASR/TTS and UI state events. Input-queue overrun gets its own capture-stage diagnostic.
+Preserve the failing regression and every previous case. Supersede first candidate before
+publication; fresh full suite and exact-source Windows qualification required. No automatic
+consequential retry, model/audio-quality change or physical-printer command.
+
+Corrected local validation: all 725 cases passed in 64.58 s; Ruff clean. Actual Windows Qt
+probe passed all 29 orb and 22 feature checks. Offscreen rendering cannot qualify native focus
+and was explicitly excluded for that purpose; no focus assertion was relaxed. Next exact-source
+Windows frozen/installed/offline/upgrade/memory and strict native wake qualification follow.
+
+First run 43767542981 failed the retained frozen orb error check: it uses the exact legacy
+Speech recognition unavailable fragment, absent from the new explicit map. All 22 new feature
+checks passed. Add that exact known alias and regression, never restore substring matching
+or relax a check. Keep failed frozen evidence in benchmarks/preview71-initial-frozen-orb.json.
+
+
 ## 2026-11-15 - Investigated wake-only Attention; conservative verification and diagnostics
 
 Existing enabled owner history contains wake_prefix_rejected with a KWS candidate and ASR

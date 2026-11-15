@@ -85,3 +85,13 @@ real stricter KWS and exactly two real ASR passes, then actual VoiceLoop wake-on
 It must pass without new negative acceptances, command/token delivery or unbounded rechecks.
 Frozen and installed --wake-self-test now qualify this path independently of the existing
 full voice/acoustic diagnostic. This is not human microphone/room accuracy evidence.
+
+## Discontinuity stale-input correction
+
+A separately reproduced simulation found an in-flight ASR result surviving DSP reset:
+Session cleared, but the old playback generation still matched and the result could reopen
+Session/reach the input callback. This was not observed in the owner's stored wake rejections;
+no physical command was involved in reproduction. DSP reset now interrupts the generation
+before clearing capture and Session. Older ASR/TTS/state events become stale and cannot revive
+the conversation. Input queue overrun has a distinct capture-stage code. The new regression
+fails on the prior candidate and remains required alongside the original safety tests.

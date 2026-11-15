@@ -499,6 +499,7 @@ class VoiceLoop:
         self.capture_output_context = False
 
     def _reset_dsp(self):
+        self.interrupt()  # Input continuity loss invalidates every in-flight ASR/TTS generation.
         self._clear_capture()
         self.session.clear()
         self.preroll.clear()
@@ -740,9 +741,12 @@ class VoiceLoop:
     def _process(self):
         while not self.closed.is_set():
             if self.overrun.is_set() or self.reset_requested.is_set():
+                overrun = self.overrun.is_set()
                 self.overrun.clear()
                 self.reset_requested.clear()
                 self._reset_dsp()
+                if overrun:
+                    self.report_state("Audio input queue overflow; please wake Klippy and repeat", code="audio_queue_overrun")
             try:
                 near, far, now, active, delay, discontinuity = self.audio.get(timeout=0.2)
             except queue.Empty:

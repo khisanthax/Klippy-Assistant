@@ -82,6 +82,7 @@ def test_muted_asr_error_does_not_trigger_attention(window):
 
 @pytest.mark.parametrize("text,code,stage", [
     ("Speech recognition unavailable; no request sent", "asr_unavailable", "asr"),
+    ("Speech recognition unavailable", "asr_unavailable", "asr"),
     ("Microphone or speaker unavailable; retrying safely", "audio_device_unavailable", "device"),
     ("Speaker or speech model unavailable; text remains accessible", "tts_unavailable", "tts"),
     ("Audio discontinuity", "audio_discontinuity", "capture"),
@@ -252,3 +253,24 @@ def test_copy_legacy_diagnostic_labels_unknown_session_and_honors_current_consen
     prefs["transcripts"] = False
     value.store.set("conversation_log", prefs)
     assert "user_transcript" not in value.latest_voice_diagnostic()
+
+
+def test_dsp_discontinuity_invalidates_inflight_asr_before_it_can_reopen_session(window):
+    import threading
+    _, voice, _ = window
+    entered, release = threading.Event(), threading.Event()
+    inputs = []
+    voice.on_text = inputs.append
+    def delayed(samples):
+        entered.set()
+        release.wait(2)
+        return "Klippy heat the nozzle to 90"
+    voice.backend.transcribe = delayed
+    voice._transcribe(np.ones(RATE, np.float32), voice.epoch, True, False)
+    assert entered.wait(1)
+    try:
+        voice._reset_dsp()
+    finally:
+        release.set()
+    voice.asr_pool.submit(lambda: None).result(timeout=4)
+    assert not inputs and voice.session.until == 0
