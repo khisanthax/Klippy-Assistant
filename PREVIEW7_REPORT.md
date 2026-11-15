@@ -122,3 +122,17 @@ requirement; original persistence regression retained and one macro-metadata cas
 Final metadata candidate: 690 local tests passed, Ruff clean; full native Windows and
 installer qualification follow. A transient Windows socket-buffer setup error was retained
 in LOGBOOK.md; the unchanged full rerun passed without relaxed criteria.
+
+## Frozen dialogue correction
+
+Source 04ddb7e's frozen gate rejected template fallback at 3524.97 ms, despite all prior
+engineering gates and desktop controls passing. No preview was published. Exact failure
+reason was not captured in that candidate; it is now a controlled timeout/HTTP/schema code.
+The model now returns a single index into vetted reply plans, preserving the complete fact
+and excluding action authority or new prose. This reduced a local packet from 32 output
+tokens/3322.56 ms to 7/1831.87 ms; routine response 6.09 ms. These are single-run text timings,
+not an ASR/TTS/acoustic performance claim. Four-second fallback and mandatory actual-model
+qualification remain unchanged. Tests cover malformed plan indices and failure diagnostics.
+
+Indexed-plan candidate: 697 local tests passed, Ruff clean. Qt keyboard Escape and Space
+Continue are covered alongside mouse/voice selections. All previous 690 cases remain.

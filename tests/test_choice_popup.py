@@ -33,7 +33,7 @@ def macros(rig, parameter=False):
     return Conversation(engine, clock=lambda: rig[3][0])
 
 
-@pytest.mark.parametrize("selection", ["first one", "second one", "BED_MESH_FAST",'bed mesh fast'])
+@pytest.mark.parametrize("selection", ["first one", "second one", "BED_MESH_FAST", "bed mesh fast"])
 async def test_actual_approved_ambiguity_selection_only_proposes(selection, rig):
     c = macros(rig)
     with pytest.raises(Rejected, match="Which macro"):
@@ -139,6 +139,43 @@ async def test_mouse_selection_resolves_through_normal_confirmation(rig):
         jobs = []
         window.worker.submit = lambda name, job: jobs.append(job)
         popup.continue_choice()
+        result = await jobs.pop()
+        window.result("turn", result)
+        assert window.engine.pending is not None and not rig[1].writes
+    finally:
+        window.quit()
+        window.deleteLater()
+        app.processEvents()
+
+
+async def test_keyboard_escape_and_continue_preserve_the_confirmation_boundary(rig):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QPushButton
+
+    from klippy.app import Window
+
+    app = QApplication.instance() or QApplication([])
+    macros(rig)
+    window = Window(rig[0], smoke=True)
+    window.timer.stop()
+    window.engine.clients = rig[2].clients
+    try:
+        with pytest.raises(Rejected):
+            await window.conversation.hear("bed mesh")
+        popup = window.clarification_popup
+        popup.refresh()
+        QTest.keyClick(popup, Qt.Key.Key_Escape)
+        assert window.conversation.choice is None and window.engine.pending is None
+        popup.refresh()
+        with pytest.raises(Rejected):
+            await window.conversation.hear("bed mesh")
+        popup.refresh()
+        QTest.keyClick(popup.radios[1][1], Qt.Key.Key_Space)
+        jobs = []
+        window.worker.submit = lambda name, job: jobs.append(job)
+        buttons = popup.layout.itemAt(popup.layout.count() - 1).widget().findChildren(QPushButton)
+        QTest.keyClick(next(b for b in buttons if b.text() == "Continue"), Qt.Key.Key_Space)
         result = await jobs.pop()
         window.result("turn", result)
         assert window.engine.pending is not None and not rig[1].writes

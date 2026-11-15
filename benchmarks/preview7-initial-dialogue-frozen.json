@@ -1,0 +1,36 @@
+{
+  "source_commit": "04ddb7e3d249c47b348a93b451ac3e818845d26c",
+  "ci_run": 43716024429,
+  "dialogue": {
+    "passed": false,
+    "checks": {
+      "routine_no_model": true,
+      "routine_verified_nozzle": true,
+      "followup_bed": true,
+      "actual_model_composed": false,
+      "explanation_keeps_verified_observation": true,
+      "casual_without_printer": true,
+      "no_pending_or_writes": true,
+      "model_latency_bounded": true
+    },
+    "routine_ms": 2.3,
+    "explanation_ms": 3524.97,
+    "model_calls": 1,
+    "scope": "Actual local model; fresh simulated Moonraker facts and constrained clause composition; no devices/printer writes"
+  },
+  "preview_gates": {
+    "standalone_wake": true,
+    "own_echo": true,
+    "verified_interruption": true,
+    "local_language": true,
+    "no_printer_writes": true,
+    "paced_captured_status": true,
+    "grounded_dialogue": false,
+    "audio_signal_and_delivery": true,
+    "three_unprefixed_followups": true,
+    "read_only_query_catalog": true,
+    "no_negative_query_activation": true,
+    "heating_parser_and_cancel_safety": true
+  },
+  "note": "Actual model composition was false near the 3.5 second HTTP deadline; exact fallback cause was not captured in this candidate. No package published; no gate relaxed."
+}

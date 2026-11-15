@@ -15,6 +15,7 @@ class Response(str):
         value.explanation_fact = None
         value.model_composed = False
         value.dialogue_ms = 0.0
+        value.dialogue_diagnostic = None
         return value
 
 

@@ -100,6 +100,8 @@ async def run(model):
                 "routine_ms": round(routine_ms, 2),
                 "explanation_ms": round(explanation_ms, 2),
                 "model_calls": observed.calls,
+                "dialogue_diagnostic": getattr(explanation, "dialogue_diagnostic", None),
+                "model_tokens": getattr(model, "dialogue_metrics", {}),
                 "scope": "Actual local model; fresh simulated Moonraker facts and constrained clause composition; no devices/printer writes",
             }
         finally:

@@ -212,3 +212,64 @@ def test_dialogue_failure_blocks_preview_even_when_other_gates_pass(defect):
         report["dialogue"]["checks"][defect] = False
     qualify_preview_report(report)
     assert not report["engineering_preview_passed"]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"r": 0, "action": "heat"},
+        {"r": 99},
+        {"r": True},
+        {"r": "secret"},
+    ],
+)
+def test_compact_model_decoder_rejects_injected_fields_and_invalid_indexes(value):
+    from klippy.dialogue import decode_plan
+
+    with pytest.raises(ValueError):
+        decode_plan(value, [{"opening": "", "parts": [0, 1], "closing": ""}])
+
+
+async def test_compact_api_reply_ignores_missing_optional_usage_and_preserves_fact_guard(monkeypatch):
+    import httpx
+
+    from klippy.conversation import LocalLLM
+
+    actual = httpx.AsyncClient
+
+    def handle(request):
+        payload = json.loads(request.content)
+        assert payload["max_tokens"] == 24 and set(
+            payload["response_format"]["json_schema"]["schema"]["properties"]
+        ) == {"r"}
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": json.dumps({"r": 0})}}],
+                "usage": None,
+            },
+        )
+
+    monkeypatch.setattr(
+        httpx, "AsyncClient", lambda **kwargs: actual(transport=httpx.MockTransport(handle), **kwargs)
+    )
+    answer = Response("Verified bed temperature is 25 degrees.", "Verified bed temperature is 25 degrees.")
+    reply = await compose(LocalLLM(), "explain", answer, "temperatures")
+    assert reply.model_composed and "25" in reply
+
+
+async def test_dialogue_timeout_diagnostic_never_exposes_provider_error_text():
+    async def timeout(*args):
+        raise RuntimeError("dialogue_timeout")
+
+    reply = await compose(
+        SimpleNamespace(compose_reply=timeout),
+        "explain",
+        Response("27 degrees", "27 degrees"),
+        "temperatures",
+    )
+    assert (
+        not reply.model_composed
+        and reply.dialogue_diagnostic == "dialogue_timeout"
+        and "dialogue_timeout" not in reply
+    )

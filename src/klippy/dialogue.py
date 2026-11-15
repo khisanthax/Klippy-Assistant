@@ -114,6 +114,30 @@ def wants_explanation(text):
     return bool(re.search(r"\b(?:why|explain|meaning|more detail|tell me more|what does|how does)\b", text))
 
 
+def response_plans(bank, openings, closings, length):
+    if not 1 <= len(bank) <= 3 or not 1 <= len(openings) <= 3 or not 1 <= len(closings) <= 2:
+        raise ValueError("Invalid reply bank")
+    orders = [[0]] if len(bank) == 1 else [[0, 1]]
+    if len(bank) == 3:
+        orders += [[0, 2]]
+        if length == "detailed":
+            orders += [[0, 1, 2]]
+    return [
+        {"opening": opening, "parts": order, "closing": closing}
+        for opening in openings
+        for order in orders
+        for closing in closings
+    ]
+
+
+def decode_plan(value, plans):
+    if not isinstance(value, dict) or set(value) != {"r"}:
+        raise ValueError("Invalid compact reply")
+    if type(value["r"]) is not int or not 0 <= value["r"] < len(plans):
+        raise ValueError("Invalid response index")
+    return plans[value["r"]]
+
+
 async def compose(model, question, answer, topic, style="friendly", length="short"):
     """The model chooses wording/structure only from an application-verified clause bank.
 
@@ -128,6 +152,8 @@ async def compose(model, question, answer, topic, style="friendly", length="shor
         )
         if item != fact
     ]
+    if length != "detailed":
+        explanations = explanations[:1]
     bank = [fact, *explanations]
     closings = [""] if length == "short" else CLOSINGS
     max_parts = 3 if length == "detailed" else 2
@@ -170,7 +196,18 @@ async def compose(model, question, answer, topic, style="friendly", length="shor
         value.model_composed = True
         value.dialogue_ms = round((timings.clock() - started) * 1000, 2)
         return value
-    except (TimeoutError, ValueError, TypeError, KeyError, RuntimeError):
-        timings.error("dialogue_fallback")
+    except (TimeoutError, ValueError, TypeError, KeyError, RuntimeError) as exc:
+        code = (
+            "dialogue_timeout"
+            if isinstance(exc, TimeoutError)
+            else str(exc)
+            if isinstance(exc, RuntimeError)
+            and str(exc) in {"dialogue_timeout", "dialogue_http_failure", "dialogue_invalid_response"}
+            else "dialogue_invalid_plan"
+        )
+        timings.error(code)
         timings.duration("dialogue_fallback", timings.clock() - started)
-        return Response(fallback, fallback)
+        value = Response(fallback, fallback)
+        value.dialogue_ms = round((timings.clock() - started) * 1000, 2)
+        value.dialogue_diagnostic = code
+        return value

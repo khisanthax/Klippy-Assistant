@@ -1,5 +1,37 @@
 # Logbook
 
+## 2026-11-15 - Frozen dialogue gate blocked release; compact bounded plan output
+
+
+Final indexed-plan validation: 697 passed in 57.21 s; Ruff clean. All previous 690 cases
+preserved, plus compact transport/decoder/diagnostic cases and actual Qt keyboard Escape/
+Space-Continue selection regression. Keyboard selection creates a pending review, never a
+write. Local actual model accepted indexed plan in 1831.87 ms with 7 completion tokens;
+routine 6.09 ms with no model call. No latency threshold, model-required gate, facts or safety
+prompt was relaxed. Next exact-source frozen/installed/offline/memory qualification follows.
+
+
+
+Source 04ddb7e / Windows run 43716024429 passed 690 tests/Ruff, frozen startup, 29 orb/
+19 conversation-feature checks and all prior engineering voice/audio/safety gates. Added
+grounded_dialogue gate correctly failed: routine 2.30 ms, explanation fallback 3524.97 ms,
+actual_model_composed false. The old report did not capture the fallback cause; timing is
+consistent with the 3.5 s HTTP deadline, not proof of a parsing cause. No installer/release.
+Retain evidence in benchmarks/preview7-initial-dialogue-frozen.json.
+
+Reduced request/decoder overhead without relaxing the four-second budget or any safety/
+publication gate. The local model now chooses one index into prevalidated reply plans;
+every plan contains the full verified observation and vetted explanation. Output cannot add
+prose, facts, actions, tools or omit observations. Short banks exclude unused extra clauses.
+Compact decoder rejects extra fields, invalid/boolean indices; optional numeric token metrics
+and specific timeout/HTTP/invalid-response diagnostics are now retained without provider text.
+An intermediate o/p/c packet used 32 output tokens/3322.56 ms locally; indexed output used
+7 tokens/1831.87 ms, routine 6.09 ms. Single observations on a loaded host, not guaranteed
+acoustic/end-to-end latency. Final local evidence: benchmarks/dialogue7-indexed-local.json.
+34 focused dialogue cases passed; full 696 cases/Ruff and fresh exact-source CI follow.
+No TTS/audio algorithm, model payload, user logging preference or physical printer change.
+
+
 ## 2026-11-15 - Event-only macro identity completion before final qualification
 
 
