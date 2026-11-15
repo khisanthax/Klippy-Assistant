@@ -1,10 +1,10 @@
 # Roadmap
 
-## Wake Attention diagnostics - 0.7.1 candidate
+## Wake Attention diagnostics - 0.7.1 qualified preview candidate
 
 Verified stored wake_prefix_rejected path and independently reproduced old Attention timer.
 Strict bounded wake-only recovery, explicit reasons, timestamped diagnostics and copy actions
-implemented; final tests/native Windows qualification pending. PREVIEW71_REPORT.md records
+implemented; 725 tests/Ruff and exact-source frozen/installed/offline/0.7.0 upgrade/memory qualification passed. Publication follows digest verification. PREVIEW71_REPORT.md records
 evidence boundaries. Human acoustic and hardware gates remain open.
 
 ## Conversation controls - 0.7.0 preview published

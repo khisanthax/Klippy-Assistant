@@ -1,6 +1,6 @@
 # 0.7.1 engineering preview - wake verification and Attention diagnostics
 
-Candidate: exact-source full tests, Windows CI, frozen and installer qualification pending.
+Exact-source Windows engineering qualification passed; human/hardware gates remain open.
 Unsigned preview; human/acoustic, interactive desktop/clean VM, actual 16 GB and supervised
 printer gates remain open. No physical printer command is part of this work.
 
@@ -95,3 +95,41 @@ no physical command was involved in reproduction. DSP reset now interrupts the g
 before clearing capture and Session. Older ASR/TTS/state events become stale and cannot revive
 the conversation. Input queue overrun has a distinct capture-stage code. The new regression
 fails on the prior candidate and remains required alongside the original safety tests.
+
+## Exact-source Windows engineering qualification
+
+Qualified source `63ef222582e096e6651c689fb85fd9bf5a47d04d` in [Windows validation](https://github.com/khisanthax/Klippy-Assistant/actions/runs/43769019232), attempt 1.
+725 tests/Ruff passed, preserving all prior 698. Frozen and installed startup, 29 orb checks
+and 22 feature checks passed, including explicit Attention reason, copy-action presence and
+clearing an old warning on new verification. Actual 0.7.0 upgrade/reinstall, logging/settings
+preservation, external-network-blocked runtime, uninstall preservation and process-tree
+16 GiB budget passed. This is not clean interactive VM or actual 16 GB host qualification.
+
+Frozen and installed native wake probes passed all five checks: ordinary actual VoiceLoop
+wake-only delivery, no unsafe delivery, no added negative acceptances across seven synthetic
+negatives, bounded rechecks, and a labeled injected first-ASR rejection followed by real
+strict KWS, exactly two real ASR passes and canonical wake-only/no-token delivery. Naturally
+ambiguous generated speech stays rejected; recovery counts are reported, not forced nonzero.
+
+Retained routine/dialogue measurements, excluding ASR/TTS/playback:
+
+| Context | Routine text ms | Actual model explanation ms | Original broad synthetic voice result |
+|---|---:|---:|---|
+| frozen | 2.81 | 3801.89 | False |
+| installed/offline | 4.08 | 6208.1 | True |
+| memory-budgeted | 3.74 | 6265.01 | False |
+
+All prior engineering voice, audio signal/delivery, three follow-ups, 7 catalog query and
+21 heating/cancellation checks passed without printer writes. The broad raw acoustic outcome
+is independent and retained above; this release does not claim human wake accuracy.
+
+Installer `Klippy-Setup-0.7.1-preview.1.exe`, 1489919100 bytes.
+SHA-256: `2906d1bf0726b47e9e0b70308345f071b39576e46ba327ee8ef7ecffcdc60c83`.
+Evidence: benchmarks/preview71-release-qualification.json and frozen/installed/wake/memory
+reports. First candidate da74984 failed the retained legacy orb error check and was not
+published; failed evidence remains. The additional stale-ASR safety regression fails before
+the fix and is retained. No safety, actual-model, focus, audio or negative-input gate relaxed.
+
+Human microphone/room recognition, full interactive focus/DPI/taskbar/sleep matrix, clean
+Windows desktop VM, actual 16 GB hardware, long device load and supervised physical-printer
+acceptance remain open. No physical-printer commands or microphone audio recordings.

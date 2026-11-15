@@ -1,0 +1,17 @@
+{
+  "os": "Microsoft Windows NT 10.0.26100.0",
+  "wall_seconds": 187.381,
+  "limitations": [
+    "Total VM RAM/cache is not controlled by the process-tree commit budget",
+    "No human microphone accuracy",
+    "No real printer connections"
+  ],
+  "scope": "Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM",
+  "passed": true,
+  "peak_active_processes": 3,
+  "cpu_seconds": 307.359,
+  "host_ram_bytes": 8584425472,
+  "cpu": "AMD EPYC 7763 64-Core Processor                ",
+  "peak_job_commit_bytes": 2052866048,
+  "memory_budget_gib": 16
+}

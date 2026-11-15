@@ -1,5 +1,19 @@
 # Logbook
 
+## 2026-11-15 - 0.7.1 exact-source Windows qualification passed
+
+Qualified 63ef222582e096e6651c689fb85fd9bf5a47d04d; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43769019232. All 725 tests/Ruff, frozen/installed startup,
+29 orb/22 feature checks, strict native wake probes, actual 0.7.0 upgrade/reinstall,
+logging/settings/offline/uninstall preservation and 16 GiB process-tree budget passed.
+Every prior engineering voice/audio/query/heating gate retained. Original broad acoustic
+results remain independent, not a human accuracy claim. Model/TTS assets unchanged.
+Installer 1489919100 bytes; SHA-256 2906d1bf0726b47e9e0b70308345f071b39576e46ba327ee8ef7ecffcdc60c83.
+Evidence: benchmarks/preview71-release-qualification.json. First da74984 candidate failed
+legacy orb message mapping; no candidate published or unsafe test criterion removed.
+Next: exact-source tag, verified draft assets, engineering publication and settings-preserving
+owner hotfix installation. Physical/acoustic/interactive desktop/clean VM/actual16GB gates open.
+
+
 ## 2026-11-15 - Discontinuity stale-ASR safety regression blocked first hotfix candidate
 
 Source da74984 passed 723 local tests (62.67 s)/Ruff and Windows unit CI. During the requested
