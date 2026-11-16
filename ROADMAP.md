@@ -1,10 +1,12 @@
 # Roadmap
 
-## Query/capture reliability - 0.7.2 candidate
+## Query/capture reliability - 0.7.2 qualified candidate
 
 Deterministic spatial queries, conservative measurement clarification, reduced background
 compute, numeric capture diagnostics and generated correlation IDs implemented. BEACN
-selection unchanged. Full qualification pending; human/hardware acceptance stays open.
+selection unchanged. All 762 tests/Ruff and exact-source frozen/installed/offline/0.7.1 upgrade/
+settings/history/native wake/query/memory qualification passed. Publication follows asset
+verification. Human/hardware acceptance stays open. See PREVIEW72_REPORT.md.
 
 ## Wake Attention diagnostics - 0.7.1 preview published
 

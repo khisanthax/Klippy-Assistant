@@ -1,5 +1,21 @@
 # Logbook
 
+## 2026-11-15 - 0.7.2 exact-source Windows qualification passed
+
+Qualified 64ba81af5e89681b805db57a0c80e75da769b965; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43782381184. All 762 tests/Ruff, frozen/installed startup,
+29 orb/22 feature checks, native wake, eleven query cases, 21 heating/cancellation checks,
+three unprefixed follow-ups, actual 0.7.1 upgrade/reinstall/offline/logging/settings/history/
+uninstall preservation and 16 GiB process-tree budget passed. All prior 725 cases preserved.
+First 3218469 candidate correctly blocked invalid model query/subject pair; failed evidence
+retained. Native actual-model probes passed three repetitions after constrained pairs and
+independent validation. No silent conversion, gate relaxation or physical printer commands.
+Installer 1489908266 bytes; SHA-256 0c308b113082c2bca18ba328d005e4d659ace77b909c497012775b79b0095238.
+See PREVIEW72_REPORT.md and benchmarks/preview72-release-qualification.json. Compute benchmark
+method reproduced with scripts/query_capture_benchmark.py; original measurements unchanged.
+Next: exact-source tag, verified draft assets, accurately labeled engineering publication and
+profile-backed settings-preserving owner update. Human acoustic/device-load/desktop/clean VM/
+actual16GB/supervised hardware gates remain open; BEACN default selection unchanged.
+
 ## 2026-11-15 - First 0.7.2 package candidate blocked by invalid model subject
 
 3218469 / Windows run 43781318946 passed 758 tests/Ruff but failed the frozen query gate:

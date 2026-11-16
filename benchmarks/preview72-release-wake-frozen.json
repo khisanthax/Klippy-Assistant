@@ -1,0 +1,355 @@
+{
+  "passed": true,
+  "checks": {
+    "native_strict_recovery_after_injected_asr_fault": true,
+    "actual_pipeline_wake_only": true,
+    "no_unsafe_pipeline_delivery": true,
+    "no_new_negative_acceptances": true,
+    "recheck_bounded": true
+  },
+  "recovered_positive_cases": 0,
+  "pipeline": [
+    {
+      "inputs": [
+        {
+          "text": "Klippy ",
+          "raw": "Hey Clippy!",
+          "token_cleared": true
+        }
+      ],
+      "states": [
+        "Thinking",
+        "Listening"
+      ],
+      "counters": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "output_discontinuities": 0,
+        "session_resets": 0,
+        "frames": 0,
+        "voiced_frames": 0,
+        "candidates": 0,
+        "duplicate_candidates": 0,
+        "asr_started": 1,
+        "prefix_rejected": 0,
+        "echo_rejected": 0,
+        "verified": 1,
+        "delivered": 1
+      }
+    }
+  ],
+  "injected_asr_fault": {
+    "injected_initial_rejection": true,
+    "native_verification_passes": 2,
+    "delivered_wake_only": true,
+    "states": [
+      "Thinking",
+      "Listening"
+    ]
+  },
+  "scope": "Synthetic speech only; forced candidate comparison, no physical microphone or printer; no audio saved",
+  "cases": [
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 0,
+      "speed": 0.85,
+      "baseline": "Hey Clippy!",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 1.366
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Hey Clippy!",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 1.161
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 0,
+      "speed": 1.15,
+      "baseline": "Hey Clippy!",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 1.01
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 1,
+      "speed": 0.85,
+      "baseline": "Hey Clippy!",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.919
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 1,
+      "speed": 1,
+      "baseline": "Hey Clippy",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.781
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 1,
+      "speed": 1.15,
+      "baseline": "Hey, Clippy",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.679
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 3,
+      "speed": 0.85,
+      "baseline": "Hey Clippy!",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 1.006
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 3,
+      "speed": 1,
+      "baseline": "Hey Clippy.",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.855
+    },
+    {
+      "synthetic_phrase": "Hey Clippy",
+      "positive": true,
+      "voice": 3,
+      "speed": 1.15,
+      "baseline": "Hey, Clippy",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.744
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 0,
+      "speed": 0.85,
+      "baseline": "Clipping.",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 216.44,
+      "seconds": 0.968
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Clipping.",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 30.13,
+      "seconds": 0.822
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 0,
+      "speed": 1.15,
+      "baseline": "Clipping.",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 29.44,
+      "seconds": 0.715
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 1,
+      "speed": 0.85,
+      "baseline": "Clippy",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.736
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 1,
+      "speed": 1,
+      "baseline": "Clippy",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.625
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 1,
+      "speed": 1.15,
+      "baseline": "club",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 20.09,
+      "seconds": 0.544
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 3,
+      "speed": 0.85,
+      "baseline": "Clippy.",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.821
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 3,
+      "speed": 1,
+      "baseline": "Clibbier",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 37.97,
+      "seconds": 0.698
+    },
+    {
+      "synthetic_phrase": "Clippy",
+      "positive": true,
+      "voice": 3,
+      "speed": 1.15,
+      "baseline": "Clippy.",
+      "recheck": null,
+      "baseline_wake_only": true,
+      "recovered_wake_only": false,
+      "recheck_ms": 0.02,
+      "seconds": 0.607
+    },
+    {
+      "synthetic_phrase": "Hey puppy",
+      "positive": false,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Harry Poppy",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 50.84,
+      "seconds": 1.11
+    },
+    {
+      "synthetic_phrase": "Hey creepy",
+      "positive": false,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Hey Creepy!",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 37.98,
+      "seconds": 1.218
+    },
+    {
+      "synthetic_phrase": "Hey copy",
+      "positive": false,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Hey, copy.",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 37.83,
+      "seconds": 1.152
+    },
+    {
+      "synthetic_phrase": "Klipper",
+      "positive": false,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "K-L-I-P-P-R",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 64.83,
+      "seconds": 1.851
+    },
+    {
+      "synthetic_phrase": "Hey Clipper",
+      "positive": false,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Hey Clipper!",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 39.07,
+      "seconds": 1.239
+    },
+    {
+      "synthetic_phrase": "Hey Cuppy",
+      "positive": false,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Hey, copy",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 40.03,
+      "seconds": 1.102
+    },
+    {
+      "synthetic_phrase": "Hey Crippy",
+      "positive": false,
+      "voice": 0,
+      "speed": 1,
+      "baseline": "Haseer IPPY",
+      "recheck": null,
+      "baseline_wake_only": false,
+      "recovered_wake_only": false,
+      "recheck_ms": 60.5,
+      "seconds": 2.069
+    }
+  ]
+}
