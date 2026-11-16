@@ -1,5 +1,11 @@
 # Roadmap
 
+## Query/capture reliability - 0.7.2 candidate
+
+Deterministic spatial queries, conservative measurement clarification, reduced background
+compute, numeric capture diagnostics and generated correlation IDs implemented. BEACN
+selection unchanged. Full qualification pending; human/hardware acceptance stays open.
+
 ## Wake Attention diagnostics - 0.7.1 preview published
 
 Published [v0.7.1-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.1-preview.1) at qualified app source

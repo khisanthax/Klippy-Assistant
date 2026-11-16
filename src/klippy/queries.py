@@ -12,6 +12,7 @@ from .domain import StrictModel
 from .moonraker import ConnectionFailure
 from .query_catalog import CATALOG, object_fields
 from .query_format import mapping, numeric, render
+from .query_semantics import position_hint
 
 # Reviewed individually against the upstream API. In particular GET is not an
 # authorization rule: device power actions and remote commands are NOT admitted.
@@ -258,8 +259,10 @@ class QueryService:
 
     async def answer(self, printer_id, request):
         from .presentation import Response, present
-        if not isinstance(request, QueryRequest) or request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle", "sensors"}:
+        if not isinstance(request, QueryRequest) or request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle", "sensors", "x", "y", "z"}:
             raise QueryUnavailable("Unknown or invalid information query")
+        if request.subject in {"x", "y", "z"} and request.query_id not in {"position", "gcode_position"}:
+            raise QueryUnavailable("Axis projection requires a position query")
         printer = self.printer(printer_id)
         spec = CATALOG[request.query_id]
         with timings.span("query_response"):
@@ -370,6 +373,8 @@ def information_request(text):
                             "position", "progress", "history", "fans", "layers", "speed", "acceleration", "mmu status",
                             "and", "and the", "and it", "and that printer"}
                 or bool(re.fullmatch(r"(?:and|what about|how about)(?: the)? (?:bed|nozzle|extruder|hotend)", text))
+                or bool(re.fullmatch(r"(?:[xyz]|zed|zee)(?: axis)? (?:height|position|coordinate)", text))
+                or bool(re.fullmatch(r"(?:and|what about|how about)(?: the)? (?:[xyz]|zed|zee)(?: axis)?", text))
                 or text.startswith("can it extrude"))
 
 
@@ -382,6 +387,12 @@ def match_query(text, previous=None):
         raise QueryUnavailable("Ask information and printer actions separately; no action sent")
     if re.fullmatch(r"(?:(?:what|how) about|and)(?: the| it| that printer)?", text):
         return previous
+    try:
+        hint = position_hint(text, previous)
+    except ValueError as exc:
+        raise QueryUnavailable(str(exc)) from None
+    if hint:
+        return QueryRequest(query_id=hint[0], subject=hint[1])
     subject = "bed" if re.search(r"\bbed\b", text) else "nozzle" if re.search(r"\b(?:nozzle|extruder|hotend|hot end)\b", text) else None
     if subject is None and re.search(r"\b(?:sensors?|chamber|enclosure)\b", text):
         subject = "sensors"
@@ -426,7 +437,7 @@ def match_query(text, previous=None):
         ("power_devices", r"\bpower devices?\b"),
         ("webcams", r"\b(?:webcams?|cameras?)\b"),
         ("host", r"\b(?:host|system info|cpu|memory|ram|operating system)\b"),
-        ("configuration", r"\b(?:configuration|config|build volume|axis limits|axis bounds)\b"),
+        ("configuration", r"\b(?:configuration|config|build volume|build height|axis limits|axis bounds|axis travel|(?:maximum|minimum|max|min) (?:[xyz] (?:axis )?)?(?:height|travel|position))\b"),
         ("errors", r"\b(?:error|errors|fault|shutdown|wrong|problem)\b"),
         ("progress", r"\b(?:progress|percent|percentage|far along|done|complete)\b"),
         ("job", r"\b(?:printing|paused|current job|current print|current file|filename)\b"),

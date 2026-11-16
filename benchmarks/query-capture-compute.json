@@ -1,0 +1,19 @@
+{
+  "scope": "Synthetic arrays and generated macro definitions only; no microphones or physical printers",
+  "baseline": "f604ef7",
+  "frames": 2000,
+  "before": {
+    "cold_aec_median_ms": 0.41690003126859665,
+    "cold_aec_p99_ms": 0.7269000634551048,
+    "pcm_exact": true,
+    "background_discovery_median_ms": 26.683400152251124,
+    "macro_count": 10
+  },
+  "after": {
+    "cold_aec_median_ms": 0.09190011769533157,
+    "cold_aec_p99_ms": 0.16440008766949177,
+    "pcm_exact": true,
+    "background_discovery_median_ms": 0.08730008266866207,
+    "macro_count": 10
+  }
+}

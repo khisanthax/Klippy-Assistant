@@ -4,7 +4,7 @@ from difflib import SequenceMatcher
 from .domain import Macro, digest, safe_macro_name
 
 
-def discover(config: dict, previous: dict[str, Macro]) -> tuple[dict[str, Macro], list[str]]:
+def discover(config: dict, previous: dict[str, Macro], *, analyze_conflicts=True) -> tuple[dict[str, Macro], list[str]]:
     found, notices = {}, []
     # Conservative: any configuration change can alter macro behavior through a callee,
     # variable, heater limit or accessory. Revoke all macro approvals on any change.
@@ -36,7 +36,7 @@ def discover(config: dict, previous: dict[str, Macro]) -> tuple[dict[str, Macro]
                 notices.append(f"Possible rename: {old} → {name}; replacement needs approval")
     for name in removed:
         notices.append(f"{name}: removed")
-    return found, notices + conflicts(found)
+    return found, notices + (conflicts(found) if analyze_conflicts else [])
 
 
 def words(text):
@@ -58,17 +58,19 @@ def semantic_words(text):
 def conflicts(registry):
     result = []
     names = sorted(registry)
+    prepared = {name: (semantic_words(name), {x.casefold() for x in registry[name].aliases},
+                       body_signature(registry[name].definition)) for name in names}
     for i, a in enumerate(names):
+        wa, aliases_a, sa = prepared[a]
         for b in names[i + 1:]:
-            wa, wb = semantic_words(a), semantic_words(b)
-            aliases_a = {x.casefold() for x in registry[a].aliases}
-            aliases_b = {x.casefold() for x in registry[b].aliases}
-            if (SequenceMatcher(None, a, b).ratio() > 0.7 or len(wa & wb) >= 2
-                    or aliases_a & aliases_b):
+            wb, aliases_b, sb = prepared[b]
+            if (SequenceMatcher(None, a, b).ratio() > 0.7 or len(wa & wb) >= 2 or aliases_a & aliases_b):
                 result.append(f"Potential overlap: {a} / {b}; do not assume equivalence")
-            sa, sb = body_signature(registry[a].definition), body_signature(registry[b].definition)
-            if sa and sb and (sa == sb or SequenceMatcher(None, sa, sb).ratio() >= .85):
-                result.append(f"Similar function: {a} / {b}; definitions need independent review")
+            if sa and sb:
+                matcher = SequenceMatcher(None, sa, sb)
+                similar = sa == sb or (matcher.real_quick_ratio() >= .85 and matcher.quick_ratio() >= .85 and matcher.ratio() >= .85)
+                if similar:
+                    result.append(f"Similar function: {a} / {b}; definitions need independent review")
     return result
 
 

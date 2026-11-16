@@ -1,5 +1,33 @@
 # Logbook
 
+## 2026-11-15 - Query/capture reliability candidate
+
+Verified routing defect: correctly transcribed Z-axis height question fell through common
+matching and the query model selected temperatures. Added deterministic spatial phrasing,
+axis follow-ups, validated XYZ projection, commanded-position/homing qualifiers and model
+measurement mismatch clarification before reads. GET allowlist and SafetyEngine unchanged.
+Frozen query qualification now includes eleven cases.
+
+An active BEACN endpoint and capture overruns were observed. One live stack sample found
+periodic monitoring in pairwise macro similarity work: a hotspot, not proof of every overrun.
+Background discovery skips unused advisory comparisons; manual review retains warnings.
+Fresh dependency fingerprints, rename detection and approval revocation remain. Per-macro
+comparison inputs and safe upper bounds avoid repeated work without changing thresholds.
+Cold-reference AEC checks now use a running count; AEC processing and TTS assets unchanged.
+Synthetic 2,000-frame median 0.4169 -> 0.0919 ms, p99 0.7269 -> 0.1644 ms, exact cold PCM
+preserved. Ten generated macros, three repetitions: background median 26.6834 -> 0.0873 ms.
+Evidence benchmarks/query-capture-compute.json; these measure compute, not live wake accuracy.
+
+Numeric peak/RMS/zero frames and DSP-work/queue-delay diagnostics retain no microphone audio.
+Owner confirmed BEACN; selection unchanged. Missing optional device-name metadata cannot stop
+capture. Generated 32-hex event/attempt IDs survive redaction for correlation; arbitrary
+secret-like identifiers stay redacted. Previously redacted IDs cannot be recovered.
+New simulated regressions cover phrases/context, malformed data, bad model selection before
+reads, macro warnings/approval changes, AEC equality, metrics/consent and ID privacy.
+Local validation: all 758 tests passed in 58.69 s; Ruff clean. Exact-source Windows package qualification pending. Human acoustic, BEACN signal,
+long-load, clean VM, actual16GB and supervised hardware gates stay open. No physical writes,
+owner conversations/configurations/credentials or audio committed. Next: validate and qualify.
+
 ## 2026-11-15 - 0.7.1 hotfix published and owner installation updated
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.1-preview.1 at qualified source 63ef222582e096e6651c689fb85fd9bf5a47d04d; Windows run

@@ -594,7 +594,76 @@ async def test_native_query_probe_retains_all_cases_when_model_rejects():
             rejection.code = "ReadTimeout"
             raise rejection
     report = await run(Model())
-    assert not report["passed"] and len(report["cases"]) == 7
+    assert not report["passed"] and len(report["cases"]) == 11
     assert all(row["passed"] for row in report["cases"][:-1])
     assert report["cases"][-1]["error_code"] == "ReadTimeout"
     assert "private details" not in json.dumps(report)
+
+
+@pytest.mark.parametrize("phrase,axis", [
+    ("What's the height of the z-axis right now?", "z"),
+    ("What is my Z height?", "z"), ("How high is the nozzle?", "z"),
+    ("What's the nozzle elevation?", "z"), ("Tell me the Z axis location", "z"),
+    ("Where is the X axis right now?", "x"), ("What is the y coordinate?", "y"),
+    ("Z position", "z"), ("What is the zed axis height?", "z"),
+])
+def test_spatial_measurement_variations_are_deterministic(phrase, axis):
+    q = match_query(phrase, QueryRequest(query_id="temperatures", subject="nozzle"))
+    assert q.query_id == "position" and q.subject == axis
+
+
+@pytest.mark.parametrize("phrase,identifier", [
+    ("What's the layer height?", "metadata"), ("What's the maximum Z height?", "configuration"),
+    ("Is the Z axis homed?", "homing"), ("What's the Z axis acceleration?", "limits"),
+    ("What's the nozzle temperature at Z height 10?", "temperatures"),
+    ("What's my Z offset?", "gcode_position"),
+])
+def test_position_height_does_not_steal_other_measurements(phrase, identifier):
+    assert match_query(phrase).query_id == identifier
+
+
+async def test_temperature_homing_z_height_sequence_cannot_inherit_wrong_query(queries):
+    sim, service, engine, _ = queries
+    c = Conversation(engine, NoActionLLM(), queries=service)
+    await c.hear("how hot is the nozzle?")
+    await c.hear("is the printer homed?")
+    start = len(sim.calls)
+    answer = await c.hear("What's the height of the Z-axis right now?")
+    assert "Z position: 3 mm" in answer and "Z not homed" in answer
+    assert "Not measured physical position" in answer and "degrees" not in answer
+    assert c.last_query.query_id == "position" and c.last_query.subject == "z"
+    assert all(method == "GET" for method, _, _ in sim.calls[start:])
+    assert engine.pending is None
+    followup = await c.hear("what about the X axis?")
+    assert "X position: 1 mm" in followup
+
+
+@pytest.mark.parametrize("wrong", ["temperatures", "homing", "job", "fans", "targets"])
+async def test_model_cannot_answer_an_unknown_spatial_measurement_with_unrelated_information(queries, wrong):
+    sim, service, engine, _ = queries
+    class Wrong:
+        async def interpret_query(self, text):
+            return QueryRequest(query_id=wrong)
+    c = Conversation(engine, Wrong(), queries=service)
+    with pytest.raises(Rejected, match="couldn't match that measurement") as exc:
+        await c.hear("What length is reported?")
+    assert exc.value.code == "query_measurement_mismatch" and not sim.calls and engine.pending is None
+
+
+async def test_mixed_position_temperature_question_clarifies_before_any_read(queries):
+    sim, service, engine, _ = queries
+    c = Conversation(engine, NoActionLLM(), queries=service)
+    with pytest.raises(Rejected, match="separately"):
+        await c.hear("What's the Z height and bed temperature?")
+    assert not sim.calls and engine.pending is None
+
+
+@pytest.mark.parametrize("value", [None, [1,2], [1,2,float("nan")], [1,2,True]])
+def test_axis_projection_keeps_malformed_or_missing_data_unknown(value):
+    text = render("position", {"toolhead":{"position":value,"homed_axes":""}}, {}, "z")
+    assert "unavailable" in text and "Z not homed" in text
+
+
+def test_bare_axis_after_temperature_requires_clarification():
+    with pytest.raises(QueryUnavailable, match="position or whether"):
+        match_query("what about Z", QueryRequest(query_id="temperatures", subject="bed"))

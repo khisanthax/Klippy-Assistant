@@ -76,8 +76,17 @@ def render(identifier, status, result, subject=None):
         axes = tool.get("homed_axes")
         valid = isinstance(axes, str) and all(a in "xyz" for a in axes) and len(set(axes)) == len(axes)
         qualifier = ("Cartesian axes homed" if set(axes) == set("xyz") else "axes not all homed") if valid else "homing status unavailable"
+        if subject in {"x", "y", "z"}:
+            values = tool.get("position")
+            value = values["xyz".index(subject)] if vector(values) != UNKNOWN else None
+            axis_homing = f"{subject.upper()} {'homed' if subject in axes else 'not homed'}" if valid else "homing status unavailable"
+            return f"Last commanded {subject.upper()} position: {num(value, ' mm')}; {axis_homing}. Not measured physical position."
         return f"Last commanded machine position: {vector(tool.get('position'))}; {qualifier}. Not measured physical position."
     if identifier == "gcode_position":
+        if subject in {"x", "y", "z"}:
+            values = move.get("gcode_position")
+            value = values["xyz".index(subject)] if vector(values) != UNKNOWN else None
+            return f"G-code {subject.upper()} position: {num(value, ' mm')}; origin offset: {vector(move.get('homing_origin'))}. Not measured physical position."
         return f"G-code position: {vector(move.get('gcode_position'))}; origin offset: {vector(move.get('homing_origin'))}."
     if identifier == "motion":
         motion = obj("motion_report")

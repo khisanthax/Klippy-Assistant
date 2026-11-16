@@ -186,11 +186,12 @@ class Playback:
 
 
 class AudioDiagnostics:
-    """Numeric playback-only observations; producer never waits for the UI reader."""
+    """Numeric capture/playback observations; producer never waits for the UI reader."""
     def __init__(self):
         self.lock = threading.Lock()
         self.last_callback = None
         self.values = {'callbacks':0,'max_callback_gap_ms':0.0,'max_callback_work_ms':0.0,
+                       'input_peak':0.0,'input_rms':0.0,'input_zero_frames':0,'dsp_max_work_ms':0.0,'dsp_queue_delay_ms':0.0,
                        'source_peak':0.0,'preclip_peak':0.0,'render_peak':0.0,'input_latency_ms':0.0,'output_latency_ms':0.0}
 
     def callback(self, began, elapsed):
@@ -205,6 +206,26 @@ class AudioDiagnostics:
             self.values['max_callback_work_ms'] = max(self.values['max_callback_work_ms'],elapsed*1000)
         finally:
             self.lock.release()
+
+    def capture(self, samples):
+        # Numeric levels only; never retain samples or wait on a UI/diagnostic reader.
+        peak = float(np.max(np.abs(samples), initial=0))
+        rms = float(np.sqrt(np.mean(samples * samples))) if len(samples) else 0.0
+        if np.isfinite(peak) and np.isfinite(rms) and self.lock.acquire(False):
+            try:
+                self.values['input_peak'] = max(self.values['input_peak'], peak)
+                self.values['input_rms'] = rms
+                self.values['input_zero_frames'] += int(peak <= 1e-7)
+            finally:
+                self.lock.release()
+
+    def processing(self, elapsed, queue_delay):
+        if self.lock.acquire(False):
+            try:
+                self.values['dsp_max_work_ms'] = max(self.values['dsp_max_work_ms'], elapsed*1000)
+                self.values['dsp_queue_delay_ms'] = max(0.0, queue_delay*1000)
+            finally:
+                self.lock.release()
 
     def peak(self, kind, value):
         if self.lock.acquire(False):
@@ -233,6 +254,8 @@ class EchoFilter:
         from pywebrtc_audio import AudioProcessor
         self.processor = AudioProcessor(sample_rate=RATE, echo_cancellation=True,
                                         noise_suppression=True, stream_delay_ms=delay_ms)
+        self.far_active = deque(maxlen=150)
+        self.active_reference_frames = 0
         self.far = deque(maxlen=150)  # 1.5 s including playback tail.
         self.near = deque(maxlen=20)
         self.capture_history = deque(maxlen=150)
@@ -247,12 +270,17 @@ class EchoFilter:
         far = np.asarray(far, dtype=np.float32).reshape(-1)
         if len(near) != FRAME or len(far) != FRAME:
             raise ValueError("AEC packets must contain exactly 10 ms of near/reference audio")
+        if len(self.far_active) == self.far_active.maxlen:
+            self.active_reference_frames -= self.far_active[0]
+        active = bool(np.any(far))
+        self.far_active.append(active)
+        self.active_reference_frames += active
         self.far.append(far.copy())
         self.near.append(near.copy())
         self.capture_history.append(near.copy())
         self.frames += 1
         cleaned = self.processor.process(near, far)
-        if not any(np.any(frame) for frame in self.far):
+        if not self.active_reference_frames:
             return near.copy()  # Never suppress a cold-start wake when no echo reference exists.
         if self.frames % 10 == 0:
             self.correlation = self.reference_correlation()

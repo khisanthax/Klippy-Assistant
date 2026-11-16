@@ -56,6 +56,10 @@ async def run(model):
                 ("What's the target temperature?", "60"),
                 ("What layer am I on?", "layer 3 of 100"),
                 ("Is Mercury One homed?", "Not homed: Z"),
+                ("What's the height of the z-axis right now?", "Z position: 10 mm"),
+                ("What about the X axis?", "X position: 0 mm"),
+                ("How hot is the nozzle?", "23"),
+                ("How high is the nozzle?", "Z position: 10 mm"),
                 ("Has the machine established its coordinate reference?", "Not homed: Z"),
             ):
                 trace = timings.new()

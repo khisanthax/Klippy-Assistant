@@ -86,6 +86,8 @@ class InteractionHistory:
             "diagnostic",
             "reason",
             "voice_stage",
+            "query_subject",
+            "query_method",
             "session_state",
             "attempt_id",
             "event_id",
@@ -94,12 +96,16 @@ class InteractionHistory:
             "orb_to",
         ):
             if isinstance(fields.get(key), (str, int)):
-                if key in {"source", "intent", "query", "diagnostic", "reason",'command', 'voice_stage', 'session_state', 'event_status', 'orb_from', 'orb_to'}:
+                if key in {"source", "intent", "query", "diagnostic", "reason",'command', 'voice_stage', 'query_subject', 'query_method', 'session_state', 'event_status', 'orb_from', 'orb_to'}:
                     result[key] = (
                         fields[key]
                         if isinstance(fields[key], str) and re.fullmatch(r"[A-Za-z0-9_]{1,80}", fields[key])
                         else "redacted_code"
                     )
+                    continue
+                if key in {"event_id", "attempt_id"}:
+                    value = str(fields[key])
+                    result[key] = value if re.fullmatch(r"[a-f0-9]{32}", value) else redact(value)
                     continue
                 result[key] = (
                     str(fields[key])[:128]
@@ -143,6 +149,12 @@ class InteractionHistory:
             value = fields.get(key)
             if type(value) in (float, int) and math.isfinite(value):
                 result[key] = value
+        if isinstance(fields.get("capture_metrics"), dict):
+            allowed = {"input_peak", "input_rms", "input_zero_frames"}
+            if prefs.timing:
+                allowed |= {"dsp_max_work_ms", "dsp_queue_delay_ms"}
+            result["capture_metrics"] = {k:v for k,v in fields["capture_metrics"].items()
+                                         if k in allowed and type(v) in (float, int) and math.isfinite(v) and v >= 0}
         if isinstance(fields.get("wake_counts"), dict):
             allowed = {"captured_frames", "queue_drops", "device_ready", "discontinuities",
                        "output_discontinuities", "session_resets", "frames", "voiced_frames",

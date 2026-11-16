@@ -87,7 +87,7 @@ class Conversation:
         from .macros import discover
 
         registry, _ = discover(
-            await self.engine.clients(printer).macro_config(), self.engine.store.macros(printer.id)
+            await self.engine.clients(printer).macro_config(), self.engine.store.macros(printer.id), analyze_conflicts=False
         )
         self.engine.store.replace_macros(printer.id, registry)
         if (
@@ -460,7 +460,7 @@ class Conversation:
                     printer = next(p for p in printers if p.id == selected)
                     from .macros import discover
 
-                    registry, _ = discover(await self.engine.clients(printer).macro_config(), registry)
+                    registry, _ = discover(await self.engine.clients(printer).macro_config(), registry, analyze_conflicts=False)
                     self.engine.store.replace_macros(selected, registry)
                     matches = candidates(text, registry)
                     if memory["signature"] == registry_signature(registry) and memory["macro"] in matches:
@@ -546,6 +546,7 @@ class Conversation:
             raise
 
     async def _answer_query(self, text, selected, query, generation):
+        model_selected = query is None
         if query is None:
             interpret = getattr(self.llm, "interpret_query", None)
             if interpret is None:
@@ -567,6 +568,12 @@ class Conversation:
             return None
         if not isinstance(query, QueryRequest):
             raise Rejected("Please clarify the information query; no action sent")
+        from .query_semantics import model_query_compatible
+        if model_selected and not model_query_compatible(text, query.query_id):
+            self.engine.audit("query_mismatch", diagnostic="query_measurement_mismatch", query=query.query_id,
+                              clarification_requested=True, outcome="clarification_needed")
+            raise Rejected("I couldn't match that measurement reliably. Do you mean the current axis position or a configured dimension?",
+                           code="query_measurement_mismatch")
         try:
             answer = await (self.queries or self.query_fallback).answer(selected, query)
         except (QueryUnavailable, ConnectionFailure) as exc:
@@ -574,7 +581,8 @@ class Conversation:
         if generation != self.generation or self.engine.store.get("selected") != selected:
             return None
         self.last_query = query
-        self.engine.audit("query", query=query.query_id, printer_id=selected)
+        self.engine.audit("query", query=query.query_id, query_subject=query.subject,
+                          query_method="model" if model_selected else "deterministic", printer_id=selected)
         style, length = dialogue_preferences(self.engine.store)
         self.dialogue_topic = query.query_id
         if (
@@ -766,13 +774,14 @@ class LocalLLM:
 
         schema = QueryRequest.model_json_schema()
         schema["properties"]["query_id"] = {"enum": [None, *CATALOG]}
-        schema["properties"]["subject"] = {"enum": [None, "bed", "nozzle"]}
+        schema["properties"]["subject"] = {"enum": [None, "bed", "nozzle", "sensors", "x", "y", "z"]}
         system = (
             "Select ONE read-only printer information query from the inventory. Return schema JSON only. "
             "No actions, commands, URLs, G-code or invented facts. If ambiguous/unsupported, query_id=null. "
             "Whether axes have an established/zeroed reference is homing. Numeric location is position. "
             "A question about homing readiness is not asking for numeric position. "
-            "subject is bed/nozzle only when asked, otherwise null. /no_think\n"
+            "Axis height/elevation is machine position, not temperature or homing. "
+            "subject is x/y/z for an explicit position axis, bed/nozzle/sensors for heaters, otherwise null. /no_think\n"
             + json.dumps({q.id: q.description for q in CATALOG.values()})
         )
         try:
@@ -800,7 +809,7 @@ class LocalLLM:
                         request = QueryRequest.model_validate_json(
                             response.json()["choices"][0]["message"]["content"]
                         )
-                        if request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle"}:
+                        if request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle", "sensors", "x", "y", "z"}:
                             raise ValueError("Invalid catalog selection")
                         return request
         except (httpx.HTTPError, ValueError, KeyError, IndexError) as exc:

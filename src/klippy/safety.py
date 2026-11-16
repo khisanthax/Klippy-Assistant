@@ -199,7 +199,7 @@ class SafetyEngine:
         if intent.action == Action.MACRO:
             if not intent.macro or not safe_macro_name(intent.macro):
                 raise Rejected("Invalid macro")
-            current, _ = discover(await client.macro_config(), self.store.macros(printer.id))
+            current, _ = discover(await client.macro_config(), self.store.macros(printer.id), analyze_conflicts=False)
             self.store.replace_macros(printer.id, current)
             macro = current.get(intent.macro)
             if macro is None or not (macro.approved and macro.enabled and macro.reviewed):

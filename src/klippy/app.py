@@ -1075,6 +1075,9 @@ class Window(QMainWindow):
             if hasattr(self.voice,'playback_diagnostics'):
                 self.diagnostics.setText(self.diagnostics.text()+"\nPlayback: "+
                                          "; ".join(f"{key}: {value:.3f}" for key,value in self.voice.playback_diagnostics().items()))
+        if self.voice:
+            self.diagnostics.setText(self.diagnostics.text() + "\nInput: " + getattr(self.voice, "input_device_name", "Default input")
+                                     + "; raw levels are numeric only. Silence is normal when you are not speaking.")
         enabled = listening_enabled(self.store.get("listening", {}), datetime.now())
         if self.voice:
             (self.voice.enabled.set if enabled else self.voice.enabled.clear)()

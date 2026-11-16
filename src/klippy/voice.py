@@ -221,6 +221,7 @@ class VoiceLoop:
         self.last_probe = float("-inf")
         self.last_energy = 0.0
         self.last_device_error = None
+        self.input_device_name = "Default input"
         self.output_trace = None
         self.first_render = False
         self.wake_at = None
@@ -277,6 +278,8 @@ class VoiceLoop:
                                 code=code, trace=current.get(), session_id=self.session.session_id,
                                 attempt_id=attempt_id if attempt_id is not None else self.wake_attempt)
         value.wake_counts = self.wake_diagnostics()
+        value.capture_metrics = {k:v for k,v in self.audio_metrics.snapshot().items()
+                                 if k in {"input_peak", "input_rms", "input_zero_frames", "dsp_max_work_ms", "dsp_queue_delay_ms"}}
         self.on_state(value)
 
     def interrupt(self):
@@ -449,6 +452,7 @@ class VoiceLoop:
         if not self.enabled.is_set():
             return
         self.count("captured_frames")
+        self.audio_metrics.capture(indata[:, 0])
         try:
             fault = self.callback_fault(status)
             if fault == 2:
@@ -771,7 +775,11 @@ class VoiceLoop:
                     self.delay_ms = delay
                     self.echo.processor.stream_delay_ms = delay
                 self.capture_queue_delay = max(0, self.clock() - now)
-                self.process_frame(near, far, now, output_active=active)
+                began = time.perf_counter()
+                try:
+                    self.process_frame(near, far, now, output_active=active)
+                finally:
+                    self.audio_metrics.processing(time.perf_counter()-began, self.capture_queue_delay)
             except Exception:
                 self.reset_session()
                 self.report_state("Audio processing unavailable; no request sent")
@@ -796,6 +804,8 @@ class VoiceLoop:
                     sd._initialize()
                     last_ids = ids
                 pair = default_device_pair(sd)
+                if capturing:
+                    self.input_device_name = str(sd.query_devices(pair[0]).get("name", "Default input"))
                 output_info = sd.query_devices(pair[1])
                 extra = sd.WasapiSettings(auto_convert=True) if sd.query_hostapis(output_info["hostapi"])["name"] == "Windows WASAPI" else None
                 default_latency = getattr(getattr(sd,'default',None),'latency',('low','low'))

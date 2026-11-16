@@ -66,6 +66,7 @@ def snapshot(event, *, code=None):
             "event_id": getattr(event, "event_id", None) or uuid.uuid4().hex,
             "event_epoch": getattr(event, "epoch", None),
             "wake_counts": dict(getattr(event, "wake_counts", {})),
+            "capture_metrics": dict(getattr(event, "capture_metrics", {})),
             "session_id": getattr(event, "session_id", None),
             "session_state": "active" if getattr(event, "session_id", None) else "not_opened",
             "attempt_id": getattr(event, "attempt_id", None)}

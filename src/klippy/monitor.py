@@ -41,7 +41,7 @@ class Monitor:
             ):
                 try:
                     config = await self.clients(printer).macro_config()
-                    registry, _ = discover(config, self.store.macros(printer.id))
+                    registry, _ = discover(config, self.store.macros(printer.id), analyze_conflicts=False)
                     self.store.replace_macros(printer.id, registry)
                 except (ConnectionFailure, KeyError, ValueError):
                     pass  # Writes independently revalidate discovery; a failed refresh grants no rights.
