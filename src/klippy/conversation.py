@@ -772,9 +772,22 @@ class LocalLLM:
 
         from .query_catalog import CATALOG
 
-        schema = QueryRequest.model_json_schema()
-        schema["properties"]["query_id"] = {"enum": [None, *CATALOG]}
-        schema["properties"]["subject"] = {"enum": [None, "bed", "nozzle", "sensors", "x", "y", "z"]}
+        # Constrain pairs, not independent enums: a homing query cannot carry an
+        # axis projection or heater subject. Invalid output still fails validation.
+        groups = [({"position", "gcode_position"}, [None, "x", "y", "z"]),
+                  ({"temperatures", "targets"}, [None, "bed", "nozzle", "sensors"])]
+        groups.append((set(CATALOG) - set.union(*(ids for ids, _ in groups)), [None]))
+        branches = []
+        for identifiers, subjects in groups:
+            branch = QueryRequest.model_json_schema()
+            branch["properties"]["query_id"] = {"enum": sorted(identifiers)}
+            branch["properties"]["subject"] = {"enum": subjects}
+            branch["required"] = ["query_id", "subject"]
+            branches.append(branch)
+        unsupported = QueryRequest.model_json_schema()
+        unsupported["properties"] = {"query_id": {"const": None}, "subject": {"const": None}}
+        unsupported["required"] = ["query_id", "subject"]
+        schema = {"oneOf": [*branches, unsupported]}
         system = (
             "Select ONE read-only printer information query from the inventory. Return schema JSON only. "
             "No actions, commands, URLs, G-code or invented facts. If ambiguous/unsupported, query_id=null. "
@@ -809,7 +822,8 @@ class LocalLLM:
                         request = QueryRequest.model_validate_json(
                             response.json()["choices"][0]["message"]["content"]
                         )
-                        if request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle", "sensors", "x", "y", "z"}:
+                        from .query_semantics import query_subject_compatible
+                        if request.query_id not in CATALOG or not query_subject_compatible(request.query_id, request.subject):
                             raise ValueError("Invalid catalog selection")
                         return request
         except (httpx.HTTPError, ValueError, KeyError, IndexError) as exc:

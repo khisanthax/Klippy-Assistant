@@ -1,0 +1,118 @@
+{
+  "source_commit": "3218469c9da7b213b14597dbaa86cc8937b5b3aa",
+  "ci_run": 43781318946,
+  "query_catalog": {
+    "scope": "Real local query LLM, deterministic parser and injected simulated printers; no hardware/network APIs",
+    "catalog_queries": 41,
+    "cases": [
+      {
+        "synthetic_question": "Klippy, is my M1 printer homed?",
+        "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+        "milliseconds": 9.65,
+        "http_reads": 3,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "What about the SV08?",
+        "answer": "SV08: Homed axes: X, Y, Z. Not homed: none.",
+        "milliseconds": 5.929,
+        "http_reads": 3,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "How hot is the bed?",
+        "answer": "SV08: bed: 55 degrees Celsius, target 60 degrees Celsius",
+        "milliseconds": 1.698,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "What's the target temperature?",
+        "answer": "SV08: bed: target 60 degrees Celsius",
+        "milliseconds": 0.602,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "What layer am I on?",
+        "answer": "SV08: Slicer-reported layer 3 of 100; state printing.",
+        "milliseconds": 1.18,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "Is Mercury One homed?",
+        "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+        "milliseconds": 4.282,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "What's the height of the z-axis right now?",
+        "answer": "M1: Last commanded Z position: 10 mm; Z not homed. Not measured physical position.",
+        "milliseconds": 0.771,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "What about the X axis?",
+        "answer": "M1: Last commanded X position: 0 mm; X homed. Not measured physical position.",
+        "milliseconds": 0.558,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "How hot is the nozzle?",
+        "answer": "M1: nozzle: 23 degrees Celsius, target 210 degrees Celsius",
+        "milliseconds": 0.553,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "How high is the nozzle?",
+        "answer": "M1: Last commanded Z position: 10 mm; Z not homed. Not measured physical position.",
+        "milliseconds": 0.675,
+        "http_reads": 0,
+        "error_code": null,
+        "passed": true
+      },
+      {
+        "synthetic_question": "Has the machine established its coordinate reference?",
+        "answer": null,
+        "milliseconds": 6820.704,
+        "http_reads": 0,
+        "error_code": "request_rejected",
+        "passed": false
+      }
+    ],
+    "printer_writes": 0,
+    "pending_write": false,
+    "passed": false
+  },
+  "preview_gates": {
+    "standalone_wake": true,
+    "own_echo": true,
+    "verified_interruption": true,
+    "local_language": true,
+    "no_printer_writes": true,
+    "paced_captured_status": true,
+    "grounded_dialogue": true,
+    "audio_signal_and_delivery": true,
+    "three_unprefixed_followups": true,
+    "read_only_query_catalog": false,
+    "no_negative_query_activation": true,
+    "heating_parser_and_cancel_safety": true
+  },
+  "engineering_preview_passed": false,
+  "local_reproduction": "Primed real model: first run homing/null passes; next two return homing/x and are rejected before reads. No action or real printer transport.",
+  "correction": "Constrained schema pairs position with axis, temperatures/targets with heater, other queries with null; independent validation rejects invalid pairs."
+}

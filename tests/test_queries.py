@@ -337,7 +337,10 @@ async def test_query_model_schema_cannot_return_extra_action(monkeypatch):
             pass
         async def post(self, url, **kwargs):
             schema = kwargs["json"]["response_format"]["json_schema"]["schema"]
-            assert "action" not in schema["properties"] and schema["additionalProperties"] is False
+            for branch in schema["oneOf"]:
+                assert "action" not in branch["properties"] and branch["additionalProperties"] is False
+                if "homing" in branch["properties"]["query_id"].get("enum", []):
+                    assert branch["properties"]["subject"] == {"enum": [None]}
             return Response()
     monkeypatch.setattr(conversation.httpx if hasattr(conversation, "httpx") else httpx, "AsyncClient", Client)
     with pytest.raises(Rejected):
@@ -667,3 +670,30 @@ def test_axis_projection_keeps_malformed_or_missing_data_unknown(value):
 def test_bare_axis_after_temperature_requires_clarification():
     with pytest.raises(QueryUnavailable, match="position or whether"):
         match_query("what about Z", QueryRequest(query_id="temperatures", subject="bed"))
+
+
+@pytest.mark.parametrize("identifier,subject", [("homing", "x"), ("homing", "nozzle"),
+                                               ("position", "bed"), ("temperatures", "z")])
+async def test_model_query_subject_must_belong_to_selected_query_even_if_server_ignores_schema(monkeypatch, identifier, subject, queries):
+    sim, service, engine, _ = queries
+    with pytest.raises(QueryUnavailable, match="doesn't match"):
+        await service.answer("sim", QueryRequest(query_id=identifier, subject=subject))
+    assert not sim.calls and engine.pending is None
+    class Response:
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return {"choices": [{"message": {"content": json.dumps({"query_id": identifier, "subject": subject})}}]}
+    class Client:
+        def __init__(self, **kwargs):
+            pass
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *args):
+            pass
+        async def post(self, *args, **kwargs):
+            return Response()
+    monkeypatch.setattr(httpx, "AsyncClient", Client)
+    with pytest.raises(Rejected) as error:
+        await LocalLLM().interpret_query("Has the machine established its coordinate reference?")
+    assert error.value.code == "ValueError"

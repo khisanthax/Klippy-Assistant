@@ -12,7 +12,7 @@ from .domain import StrictModel
 from .moonraker import ConnectionFailure
 from .query_catalog import CATALOG, object_fields
 from .query_format import mapping, numeric, render
-from .query_semantics import position_hint
+from .query_semantics import position_hint, query_subject_compatible
 
 # Reviewed individually against the upstream API. In particular GET is not an
 # authorization rule: device power actions and remote commands are NOT admitted.
@@ -261,8 +261,8 @@ class QueryService:
         from .presentation import Response, present
         if not isinstance(request, QueryRequest) or request.query_id not in CATALOG or request.subject not in {None, "bed", "nozzle", "sensors", "x", "y", "z"}:
             raise QueryUnavailable("Unknown or invalid information query")
-        if request.subject in {"x", "y", "z"} and request.query_id not in {"position", "gcode_position"}:
-            raise QueryUnavailable("Axis projection requires a position query")
+        if not query_subject_compatible(request.query_id, request.subject):
+            raise QueryUnavailable("That axis or heater doesn't match the information requested. Please clarify the question.")
         printer = self.printer(printer_id)
         spec = CATALOG[request.query_id]
         with timings.span("query_response"):

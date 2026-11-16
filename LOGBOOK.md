@@ -1,5 +1,18 @@
 # Logbook
 
+## 2026-11-15 - First 0.7.2 package candidate blocked by invalid model subject
+
+3218469 / Windows run 43781318946 passed 758 tests/Ruff but failed the frozen query gate:
+all ten deterministic cases passed; retained coordinate-reference homing model case rejected.
+Reproduced with the actual bundled model after its temperature-action probe: first homing/null
+passed; next two homing/x selections rejected before reads. Independent query and subject
+enums allowed an invalid pair. Evidence benchmarks/preview72-initial-query-failure.json.
+No installer published. Tightened schema to explicit allowed query/subject combinations and
+independently validate both LocalLLM output and QueryService input; never convert invalid model
+output. Added four invalid-pair regressions. Three repeated native full query probes now pass
+(benchmarks/query-capture-native-query.json). Original eleven cases and all package gates stay
+required. Next: complete full suite and qualify a fresh exact-source candidate.
+
 ## 2026-11-15 - Query/capture reliability candidate
 
 Verified routing defect: correctly transcribed Z-axis height question fell through common

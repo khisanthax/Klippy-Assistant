@@ -2,6 +2,16 @@
 import re
 
 
+def query_subject_compatible(query_id, subject):
+    if subject is None:
+        return True
+    if query_id in {"position", "gcode_position"}:
+        return subject in {"x", "y", "z"}
+    if query_id in {"temperatures", "targets"}:
+        return subject in {"bed", "nozzle", "sensors"}
+    return False
+
+
 def axis(text):
     found = re.search(r"\b([xyz]|zed|zee)(?: axis)?\b", text)
     return ("z" if found[1] in {"zed", "zee"} else found[1]) if found else None

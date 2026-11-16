@@ -1,5 +1,17 @@
 # Test plan
 
+## Query and capture reliability (0.7.2)
+
+Preserve all prior 725 cases. The extended 762-case suite covers spatial paraphrases,
+temperature/homing/axis follow-ups, malformed XYZ data and model measurement mismatches
+before any read. The native frozen/installed query probe retains eleven simulated cases.
+Background macro discovery must preserve approvals/revoke changed dependencies without
+executing unused pairwise warnings; explicit review must still emit similarity warnings.
+Check exact cold-reference PCM and activity-window expiry, nonblocking numeric capture
+telemetry, timing opt-out and generated-ID/credential redaction separately. No devices or
+physical printers in automated regressions. Keep live BEACN signal/wake and sustained-device
+load as human acceptance gates; synthetic compute improvement does not prove live accuracy.
+
 ## Floating voice orb (0.6)
 
 Preserve 510 previous cases; 568 total cover the passive orb and associated stale-event
