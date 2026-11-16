@@ -1,12 +1,13 @@
 # Roadmap
 
-## Query/capture reliability - 0.7.2 qualified candidate
+## Query/capture reliability - 0.7.2 preview published
 
 Deterministic spatial queries, conservative measurement clarification, reduced background
 compute, numeric capture diagnostics and generated correlation IDs implemented. BEACN
 selection unchanged. All 762 tests/Ruff and exact-source frozen/installed/offline/0.7.1 upgrade/
-settings/history/native wake/query/memory qualification passed. Publication follows asset
-verification. Human/hardware acceptance stays open. See PREVIEW72_REPORT.md.
+settings/history/native wake/query/memory qualification passed. Published [v0.7.2-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.2-preview.1); all 14 assets verified.
+Owner installation upgraded with exact settings/printer/macro and old-history preservation;
+BEACN device open confirmed. Human/hardware acceptance stays open. See PREVIEW72_REPORT.md.
 
 ## Wake Attention diagnostics - 0.7.1 preview published
 

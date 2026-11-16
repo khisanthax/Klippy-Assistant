@@ -2,26 +2,26 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
-Current engineering preview **0.7.1-preview.1** fixes wake Attention diagnostics and stale
-recognition after input-queue overrun. Stored wake-prefix rejections are distinguished from
-microphone, ASR and playback failures. Hover over Attention for its reason, or right-click
-the orb / open Diagnostics / History for **Copy latest diagnostic**. A new wake clears the
-previous warning; discarded old events cannot restore it.
+Current engineering preview **[0.7.2-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.2-preview.1)** fixes spatial query routing:
+Z-height/elevation/coordinate questions and axis follow-ups use deterministic matching and
+validated commanded positions. Unrelated model-selected measurements ask for clarification.
+Structured output constrains query/subject pairs; independent validation rejects invalid pairs.
 
-Short wake-only recovery requires a separate stricter phonetic check and two strict complete
-ASR results. It forwards only Klippy with no command or confirmation token. Uncertain, echo,
-canceled and stale input stays rejected. No TTS/audio-quality algorithm or model payload change.
+Background macro discovery skips unused similarity warnings while preserving review warnings
+and approval revocation. Cold-reference capture checks do less repeated work. Numeric-only
+signal/work diagnostics and generated event IDs improve troubleshooting without microphone
+recordings. No TTS/model, input-selection, confirmation or hardware-safety policy changes.
 
-Personality/length/context/casual chat, optional local History, shared follow-up countdown and
-reviewed-macro clarification remain. Logging stays off for new profiles; existing choices are
-preserved. Diagnostic event fields/transcripts respect current consent. No microphone audio
-is recorded. Read [PREVIEW71_REPORT.md](PREVIEW71_REPORT.md) for the cause and evidence limits.
+Prior wake Attention reasons/copy actions, conservative wake-only recovery, personality/length/
+context/casual chat, reviewed-macro clarification and shared follow-up conversations remain.
+Existing local-history opt-ins are preserved; fresh profiles keep logging off.
 
-725 tests/Ruff, 29 orb/22 feature checks and exact-source frozen/installed native wake, 0.7.0
-upgrade/reinstall/offline/settings/history-choice preservation and process-tree memory gates
-passed. All 13 release asset sizes/digests verified. Human microphone/room accuracy, full
-interactive desktop, clean VM, actual 16 GB hardware and supervised printer acceptance remain
-open; unsigned engineering preview, not stable v1.0.
+762 tests/Ruff, 29 orb/22 feature checks, eleven query cases, frozen/installed native wake,
+0.7.1 upgrade/reinstall/offline/settings/history preservation and process-tree memory gates
+passed. All 14 release asset sizes/digests verified. See [PREVIEW72_REPORT.md](PREVIEW72_REPORT.md)
+for exact source, retained initial failure and measured evidence. Human microphone/room
+accuracy, sustained device load, interactive desktop, clean VM, actual 16 GB hardware and
+supervised-printer acceptance remain open. Unsigned engineering preview, not stable v1.0.
 
 The 0.6 preview adds a floating waveform orb using the existing voice streams. It shows wake
 verification, listening, thinking, real playback and pending confirmation above the taskbar

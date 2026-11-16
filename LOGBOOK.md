@@ -1,5 +1,31 @@
 # Logbook
 
+## 2026-11-15 - 0.7.2 preview published and owner installation updated
+
+Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.2-preview.1 at qualified source
+64ba81af5e89681b805db57a0c80e75da769b965. Windows run 43782381184 passed all three jobs:
+762 tests/Ruff, frozen/installed/native wake/query/orb/voice, 0.7.1 upgrade/reinstall/offline/
+settings/history/logging/uninstall preservation and 16 GiB process-tree budget. All fourteen
+asset sizes/digests verified before and after publication; remote tag independently verified.
+Raw broad voice outcomes remain separately False/False/True, not a human accuracy claim.
+See PREVIEW72_REPORT.md, benchmarks/preview72-release-qualification.json and publication JSON.
+
+Owner profile/settings/history backed up privately with SQLite integrity checks immediately
+before update. Installer succeeded without reboot; registry 0.7.2-preview.1. Settings, printers
+and reviewed macros match the pre-install logical digest exactly; original history IDs all
+preserved. Isolated installed startup/shutdown passed. Visible 0.7.2 application responding;
+WASAPI input remains Voice Chat Mic (BEACN Mix Create), output System (BEACN Mix Create), and
+startup diagnostic reports microphone ready. This proves device open, not live speech pickup.
+Logging choices preserved. No microphone audio recorded or physical printer command issued.
+
+Installer 1,489,908,266 bytes, SHA-256
+0c308b113082c2bca18ba328d005e4d659ace77b909c497012775b79b0095238.
+Current installer/sidecar remain in the qualified C: artifacts directory because D: was full;
+previous generated 0.7.1 installer/sidecar archived to C: with hashes verified before removal.
+D: source checkout fast-forwarded from clean main; source/model inputs and owner profile kept.
+Next: owner live wake/query check using BEACN, sustained device/load, full interactive desktop,
+clean VM, actual16GB and supervised-printer acceptance. All these hardware gates remain open.
+
 ## 2026-11-15 - 0.7.2 exact-source Windows qualification passed
 
 Qualified 64ba81af5e89681b805db57a0c80e75da769b965; https://github.com/khisanthax/Klippy-Assistant/actions/runs/43782381184. All 762 tests/Ruff, frozen/installed startup,
