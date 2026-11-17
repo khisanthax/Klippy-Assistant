@@ -1,0 +1,17 @@
+{
+  "peak_job_commit_bytes": 2529251328,
+  "passed": true,
+  "os": "Microsoft Windows NT 10.0.26200.0",
+  "host_ram_bytes": 68630749184,
+  "limitations": [
+    "Total VM RAM/cache is not controlled by the process-tree commit budget",
+    "No human microphone accuracy",
+    "No real printer connections"
+  ],
+  "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+  "scope": "Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM",
+  "memory_budget_gib": 16,
+  "wall_seconds": 103.232,
+  "peak_active_processes": 3,
+  "cpu_seconds": 181.547
+}

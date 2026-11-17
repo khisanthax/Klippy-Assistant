@@ -1,0 +1,2388 @@
+{
+  "release_candidate": "v0.8.0-preview.1",
+  "source_commit": "5862ec29cbaa37dc2e7b8501dac3033b135e47d1",
+  "published": false,
+  "qualified_for_publication": false,
+  "tests": {
+    "passed": 886,
+    "failed": 0,
+    "skipped": 0,
+    "ruff": "passed"
+  },
+  "model_runtime_assets": 57,
+  "models_unchanged": true,
+  "local_frozen_engineering_preview_passed": true,
+  "ci_run": "https://github.com/khisanthax/Klippy-Assistant/actions/runs/44202364931",
+  "ci_status": "blocked before any steps: Actions budget",
+  "ci_annotations": [
+    {
+      "annotation_level": "failure",
+      "message": "The job was not started because an Actions budget is preventing further use."
+    }
+  ],
+  "installed_upgrade_offline_qualification": "not run: owner installation preserved; fresh Windows CI blocked",
+  "installer": "dist\\Klippy-Setup-0.8.0-preview.1.exe",
+  "installer_bytes": 1489543358,
+  "installer_sha256": "c4f78386009211369424f013e8165de925275a26734c5f9214751a39b6110256",
+  "frozen_voice": {
+    "scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
+    "speech_load_seconds": 4.86,
+    "python_external_network_denied": true,
+    "wake_threshold": 0.22,
+    "keywords_score": 2.0,
+    "wake_cases": [
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 3,
+        "detected": true
+      }
+    ],
+    "probe_stage": "complete",
+    "probe_elapsed_seconds": 96.03,
+    "pipeline_transcripts": [],
+    "pipeline_wakes": [
+      [
+        1.430000000000001,
+        1,
+        0
+      ]
+    ],
+    "pipeline_states": [
+      "Checking wake word",
+      "Thinking",
+      "Wake transcript unclear; please repeat Klippy and the request",
+      "Speech finished"
+    ],
+    "asr_errors": [],
+    "paced_wake_phrase": "Hey Klippy",
+    "first_attempt_wake_only": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy "
+      ],
+      "session_open": true,
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "output_discontinuities": 0,
+        "session_resets": 0,
+        "frames": 915,
+        "voiced_frames": 321,
+        "candidates": 2,
+        "duplicate_candidates": 0,
+        "asr_started": 2,
+        "prefix_rejected": 1,
+        "echo_rejected": 0,
+        "verified": 1,
+        "delivered": 1
+      }
+    },
+    "followup_capture_count": 3,
+    "paced_pipeline_transcripts": [
+      "Klippy ",
+      "What is the status of the test printer?",
+      "What is the status of the test printer?",
+      "What is the status of the test printer?"
+    ],
+    "paced_pipeline_wakes": [
+      [
+        7.22999999999989,
+        3,
+        0
+      ]
+    ],
+    "first_attempt_wake_command": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy what's the temperature?"
+      ],
+      "session_open": true,
+      "states": [
+        "Checking wake word",
+        "Thinking",
+        "Listening"
+      ],
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "output_discontinuities": 0,
+        "session_resets": 0,
+        "frames": 2863,
+        "voiced_frames": 1070,
+        "candidates": 3,
+        "duplicate_candidates": 0,
+        "asr_started": 6,
+        "prefix_rejected": 1,
+        "echo_rejected": 0,
+        "verified": 2,
+        "delivered": 5
+      }
+    },
+    "negative_composite": [
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      }
+    ],
+    "own_echo_wakes": 0,
+    "own_echo_requests": 0,
+    "barge_wakes": 1,
+    "barge_candidates": [],
+    "barge_linear_fit_error": 1.539715687610623e-13,
+    "barge_states": [
+      "Checking wake word",
+      "Thinking",
+      "Listening",
+      "Checking wake word",
+      "Thinking",
+      "Listening"
+    ],
+    "asr_observations": [
+      {
+        "at": 5.48,
+        "text": "Clibby, what is the status of the test printer?",
+        "audio_seconds": 3.5
+      },
+      {
+        "at": 9.15,
+        "text": "Hey Clippy!",
+        "audio_seconds": 1.71
+      },
+      {
+        "at": 14.12,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.08
+      },
+      {
+        "at": 19.09,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.07
+      },
+      {
+        "at": 24.06,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.07
+      },
+      {
+        "at": 28.63,
+        "text": "Hey Clippy, what's the temperature?",
+        "audio_seconds": 2.55
+      },
+      {
+        "at": 59.35,
+        "text": "Clear.",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 59.82,
+        "text": "Clippy stuff",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 61.33,
+        "text": "Clippy stop talking",
+        "audio_seconds": 2.15
+      }
+    ],
+    "barge_frame_metrics": [
+      {
+        "at": 3.0,
+        "energy": 0.0,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.986
+      },
+      {
+        "at": 3.1,
+        "energy": 0.0095,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.966
+      },
+      {
+        "at": 3.2,
+        "energy": 0.0125,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.48
+      },
+      {
+        "at": 3.3,
+        "energy": 0.1244,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.434
+      },
+      {
+        "at": 3.4,
+        "energy": 0.019,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.58
+      },
+      {
+        "at": 3.5,
+        "energy": 0.0116,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.661
+      },
+      {
+        "at": 3.6,
+        "energy": 0.0933,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.647
+      },
+      {
+        "at": 3.7,
+        "energy": 0.0039,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.533
+      },
+      {
+        "at": 3.8,
+        "energy": 0.0034,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.464
+      },
+      {
+        "at": 3.9,
+        "energy": 0.0211,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.842
+      },
+      {
+        "at": 4.0,
+        "energy": 0.1051,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.278
+      },
+      {
+        "at": 4.1,
+        "energy": 0.019,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.243
+      },
+      {
+        "at": 4.2,
+        "energy": 0.0541,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.269
+      },
+      {
+        "at": 4.3,
+        "energy": 0.0389,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.461
+      },
+      {
+        "at": 4.4,
+        "energy": 0.0347,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.425
+      },
+      {
+        "at": 4.5,
+        "energy": 0.0044,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.398
+      },
+      {
+        "at": 4.6,
+        "energy": 0.0016,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.576
+      }
+    ],
+    "barge_requests": [
+      "Klippy stop talking"
+    ],
+    "barge_detection_seconds_from_user_start": 0.71,
+    "playback_flushed": true,
+    "wake_pipeline_counts": {
+      "captured_frames": 0,
+      "queue_drops": 0,
+      "device_ready": 0,
+      "discontinuities": 0,
+      "output_discontinuities": 0,
+      "session_resets": 0,
+      "frames": 6442,
+      "voiced_frames": 1789,
+      "candidates": 4,
+      "duplicate_candidates": 0,
+      "asr_started": 7,
+      "prefix_rejected": 1,
+      "echo_rejected": 0,
+      "verified": 3,
+      "delivered": 6
+    },
+    "audio_quality": {
+      "passed": true,
+      "checks": {
+        "original_is_finite_unclipped": true,
+        "callback_chunks_match_original": true,
+        "converted_length": true,
+        "chunk_invariance": true,
+        "antialias_rejection": true,
+        "render_preserves_converted_pcm": true,
+        "legacy_render_preserves_legacy_pcm": true,
+        "buffered_generation_has_no_starvation": true,
+        "non_silent_render_receipt": true
+      },
+      "source_rate": 24000,
+      "target_rate": 16000,
+      "source_samples": 204946,
+      "chunk_samples": [
+        73070,
+        68476,
+        63400
+      ],
+      "arrivals_seconds": [
+        3.1721159999724478,
+        6.140827899798751,
+        8.903839099919423
+      ],
+      "chunk_progress": [
+        0.3333333432674408,
+        0.6666666865348816,
+        1.0
+      ],
+      "generation_seconds": 8.912802099948749,
+      "generation_realtime_factor": 1.0437249343669552,
+      "source_peak": 0.33099302649497986,
+      "legacy_chunk_vs_batch_peak_error": 0.17642313241958618,
+      "new_chunk_vs_batch_peak_error": 0.0,
+      "legacy_10khz_alias_db": -2.728707575288005,
+      "new_10khz_alias_db": -107.41921395092012,
+      "before": {
+        "first_pcm_render_seconds": 3.18,
+        "queue_gap_seconds": 0.0,
+        "receipt": true,
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 0,
+        "complete_pcm_fallbacks": 0
+      },
+      "after": {
+        "first_pcm_render_seconds": 3.56,
+        "queue_gap_seconds": 0.0,
+        "receipt": true,
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 56960,
+        "complete_pcm_fallbacks": 0
+      },
+      "conversion_cpu": {
+        "legacy": {
+          "iterations": 32,
+          "wall_seconds": 0.05239039985463023,
+          "cpu_seconds": 0.046875,
+          "audio_seconds_processed": 273.2613333333333
+        },
+        "sinc": {
+          "iterations": 32,
+          "wall_seconds": 0.3326767000835389,
+          "cpu_seconds": 0.328125,
+          "audio_seconds_processed": 273.2613333333333
+        }
+      },
+      "scope": "Synthetic Kokoro PCM and a 10 ms device-free sink; no microphone or printers",
+      "limitations": [
+        "Numeric signal/queue evidence is not human perceived-quality acceptance",
+        "Short CPU timings depend on host load; Windows CPU time is quantized",
+        "16 kHz AEC/output retained; shared WASAPI mix conversion remains in Windows"
+      ],
+      "production_cached_pipeline": {
+        "passed": true,
+        "rendered_samples": 136631,
+        "expected_samples": 136631,
+        "wall_seconds": 2.0025869999080896,
+        "diagnostics": {
+          "queue_underruns": 0,
+          "missing_samples": 0,
+          "device_underflows": 0,
+          "device_overflows": 0,
+          "device_status_events": 0,
+          "clipped_samples": 0,
+          "invalid_pcm": 0,
+          "prefill_frames": 1120,
+          "complete_pcm_fallbacks": 0,
+          "callbacks": 1292,
+          "max_callback_gap_ms": 2.3574999067932367,
+          "max_callback_work_ms": 0.1134001649916172,
+          "input_peak": 0.0,
+          "input_rms": 0.0,
+          "input_zero_frames": 0,
+          "dsp_max_work_ms": 0.0,
+          "dsp_queue_delay_ms": 0.0,
+          "source_peak": 0.33099302649497986,
+          "preclip_peak": 0.33133891224861145,
+          "render_peak": 0.33133891224861145,
+          "input_latency_ms": 0.0,
+          "output_latency_ms": 0.0
+        },
+        "scope": "Production cached TTS worker and output callback; accelerated synthetic sink, no devices"
+      }
+    },
+    "llm_intent": {
+      "action": "temperatures",
+      "printer_id": "synthetic-printer",
+      "query_subject": null,
+      "macro": null,
+      "params": {}
+    },
+    "query_catalog": {
+      "scope": "Real local query LLM, deterministic parser and injected simulated printers; no hardware/network APIs",
+      "catalog_queries": 41,
+      "cases": [
+        {
+          "synthetic_question": "Klippy, is my M1 printer homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 11.053,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What about the SV08?",
+          "answer": "SV08: Homed axes: X, Y, Z. Not homed: none.",
+          "milliseconds": 6.111,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How hot is the bed?",
+          "answer": "SV08: bed: 55 degrees Celsius, target 60 degrees Celsius",
+          "milliseconds": 1.898,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What's the target temperature?",
+          "answer": "SV08: bed: target 60 degrees Celsius",
+          "milliseconds": 0.795,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What layer am I on?",
+          "answer": "SV08: Slicer-reported layer 3 of 100; state printing.",
+          "milliseconds": 1.602,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Is Mercury One homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 4.758,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What's the height of the z-axis right now?",
+          "answer": "M1: Last commanded Z position: 10 mm; Z not homed. Not measured physical position.",
+          "milliseconds": 0.909,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What about the X axis?",
+          "answer": "M1: Last commanded X position: 0 mm; X homed. Not measured physical position.",
+          "milliseconds": 0.726,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How hot is the nozzle?",
+          "answer": "M1: nozzle: 23 degrees Celsius, target 210 degrees Celsius",
+          "milliseconds": 0.681,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How high is the nozzle?",
+          "answer": "M1: Last commanded Z position: 10 mm; Z not homed. Not measured physical position.",
+          "milliseconds": 3.881,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Has the machine established its coordinate reference?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 5761.825,
+          "http_reads": 1,
+          "error_code": null,
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "dialogue": {
+      "passed": true,
+      "checks": {
+        "routine_no_model": true,
+        "routine_verified_nozzle": true,
+        "followup_bed": true,
+        "actual_model_composed": true,
+        "explanation_keeps_verified_observation": true,
+        "casual_without_printer": true,
+        "no_pending_or_writes": true,
+        "model_latency_bounded": true
+      },
+      "routine_ms": 2.07,
+      "explanation_ms": 1952.85,
+      "model_calls": 1,
+      "dialogue_diagnostic": null,
+      "model_tokens": {
+        "completion_tokens": 7,
+        "prompt_tokens": 229
+      },
+      "scope": "Actual local model; fresh simulated Moonraker facts and constrained clause composition; no devices/printer writes"
+    },
+    "heat_fix_probe": {
+      "scope": "Deterministic heating/cancellation with injected simulated Moonraker; every HTTP write forbidden",
+      "cases": [
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Hey Klippy, can you set the Mercury 1 nozzle to 90 degrees Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set M1's nozzle to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Can you set the Mercury 1 nozzle to 90 Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One's hotend to 90.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set the nozzle temperature to 90 on M1.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Bring the nozzle up to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One nozzle to ninety",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 194 F",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 90",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "temperature_operands_not_printer_mentions",
+          "passed": true
+        },
+        {
+          "case": "invalid_model_action_parameters",
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "supported_request_llm_calls": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "limits_probe": {
+      "scope": "Synthetic configuration and motion; every HTTP write forbidden",
+      "cases": [
+        {
+          "case": "Move X minus 20 millimeters.",
+          "proposal_ms": 2.352,
+          "passed": true
+        },
+        {
+          "case": "Go to X 150.",
+          "proposal_ms": 1.429,
+          "passed": true
+        },
+        {
+          "case": "Raise Z by 10.",
+          "proposal_ms": 1.382,
+          "passed": true
+        },
+        {
+          "case": "Move X minus 200 millimeters.",
+          "passed": true
+        },
+        {
+          "case": "Go to X 301.",
+          "passed": true
+        },
+        {
+          "case": "Move X 20 at 400 mm/s",
+          "passed": true
+        },
+        {
+          "case": "Move the bed forward 20 millimeters.",
+          "passed": true
+        },
+        {
+          "case": "changed configuration invalidates confirmation",
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "passed": true
+    },
+    "simulated_status_response": null,
+    "paced_responses": [
+      "I'm listening.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%."
+    ],
+    "paced_status_response": "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+    "printer_writes": 0,
+    "raw_embedded_keyword": {
+      "detected": 4,
+      "total": 4,
+      "misses": []
+    },
+    "gates": {
+      "standalone_wake": true,
+      "negative_words": true,
+      "captured_status": false,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true
+    },
+    "passed": false,
+    "preview_gates": {
+      "standalone_wake": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true,
+      "paced_captured_status": true,
+      "grounded_dialogue": true,
+      "audio_signal_and_delivery": true,
+      "three_unprefixed_followups": true,
+      "read_only_query_catalog": true,
+      "no_negative_query_activation": true,
+      "capability_limits_and_motion_safety": true,
+      "heating_parser_and_cancel_safety": true
+    },
+    "engineering_preview_passed": true,
+    "preview_scope": "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified",
+    "continuous_wake_status_passed": false,
+    "homophone_note": "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
+  },
+  "frozen_orb": {
+    "passed": true,
+    "checks": {
+      "idle_hidden": true,
+      "clear_of_taskbar": true,
+      "idle": true,
+      "non_activating_idle": true,
+      "verifying": true,
+      "non_activating_verifying": true,
+      "listening": true,
+      "non_activating_listening": true,
+      "thinking": true,
+      "non_activating_thinking": true,
+      "speaking": true,
+      "non_activating_speaking": true,
+      "confirmation": true,
+      "non_activating_confirmation": true,
+      "interruption_clears_playback": true,
+      "error": true,
+      "non_activating_error": true,
+      "muted": true,
+      "non_activating_muted": true,
+      "transparent_corners": true,
+      "diameter_128": true,
+      "diameter_256": true,
+      "diameter_384": true,
+      "hidden_has_no_animation_paints": true,
+      "active_animation_rendered": true,
+      "disabled_has_no_animation_paints": true,
+      "no_audio_devices_or_printers": true,
+      "cleanup": true,
+      "conversation_features": true
+    },
+    "qt_platform": "windows",
+    "conversation_features": {
+      "passed": true,
+      "checks": {
+        "personality_settings": true,
+        "history_default_off": true,
+        "actual_two_reviewed_choices": true,
+        "popup_does_not_activate": true,
+        "remember_default_off": true,
+        "popup_inside_taskbar_safe_area": true,
+        "selection_requires_confirmation": true,
+        "remembered_identity_only": true,
+        "remembered_review_delete": true,
+        "local_json_export_redacts": true,
+        "history_view_has_turns": true,
+        "countdown_after_response": true,
+        "countdown_shared_half_window": true,
+        "capture_hides_countdown": true,
+        "response_resets_countdown": true,
+        "attention_reason_tooltip": true,
+        "copy_diagnostic_action_present": true,
+        "new_wake_clears_old_attention": true,
+        "mute_clears_countdown": true,
+        "revoked_text_removed": true,
+        "clear_history": true,
+        "motion_inventory_separate_and_explicit": true,
+        "limits_dialog_exposes_verified_configuration": true,
+        "limits_dialog_rejects_expansion": true,
+        "limits_dialog_saves_only_stricter_local_policy": true,
+        "no_devices_or_printer_writes": true
+      },
+      "scope": "Actual Qt controls, temporary local history, simulated Moonraker; zero audio devices or printer writes"
+    },
+    "device_pixel_ratio": 1.25,
+    "desktop": {
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 4096,
+        "height": 1152
+      },
+      "work": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 4096.0,
+        "height": 1104.0
+      },
+      "scale": 1.25,
+      "taskbar": {
+        "x": 0.0,
+        "y": 1104.0,
+        "width": 4096.0,
+        "height": 48.0
+      },
+      "edge": "bottom",
+      "auto_hide": false,
+      "native_verified": true
+    },
+    "observed_desktops": [
+      {
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 4096,
+          "height": 1152
+        },
+        "work": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 4096.0,
+          "height": 1104.0
+        },
+        "scale": 1.25,
+        "taskbar": {
+          "x": 0.0,
+          "y": 1104.0,
+          "width": 4096.0,
+          "height": 48.0
+        },
+        "edge": "bottom",
+        "auto_hide": false,
+        "native_verified": true
+      },
+      {
+        "bounds": {
+          "x": 0,
+          "y": -1440,
+          "width": 4096,
+          "height": 1152
+        },
+        "work": {
+          "x": 0.0,
+          "y": -1440.0,
+          "width": 4096.0,
+          "height": 1104.0
+        },
+        "scale": 1.25,
+        "taskbar": {
+          "x": 0.0,
+          "y": -336.0,
+          "width": 4096.0,
+          "height": 48.0
+        },
+        "edge": "bottom",
+        "auto_hide": false,
+        "native_verified": true
+      },
+      {
+        "bounds": {
+          "x": -1080,
+          "y": -1289,
+          "width": 1080,
+          "height": 2560
+        },
+        "work": {
+          "x": -1080.0,
+          "y": -1289.0,
+          "width": 1080.0,
+          "height": 2512.0
+        },
+        "scale": 1.0,
+        "taskbar": {
+          "x": -1080.0,
+          "y": 1223.0,
+          "width": 1080.0,
+          "height": 48.0
+        },
+        "edge": "bottom",
+        "auto_hide": false,
+        "native_verified": true
+      },
+      {
+        "bounds": {
+          "x": 5120,
+          "y": -95,
+          "width": 1536,
+          "height": 864
+        },
+        "work": {
+          "x": 5120.0,
+          "y": -95.0,
+          "width": 1536.0,
+          "height": 816.0
+        },
+        "scale": 1.25,
+        "taskbar": {
+          "x": 5120.0,
+          "y": 721.0,
+          "width": 1536.0,
+          "height": 48.0
+        },
+        "edge": "bottom",
+        "auto_hide": false,
+        "native_verified": true
+      }
+    ],
+    "windows_reduced_motion": false,
+    "performance": {
+      "hidden": {
+        "seconds": 2.002683699829504,
+        "cpu_percent_of_one_core": 0.0,
+        "paints": 0,
+        "paints_per_second": 0.0,
+        "before": {
+          "working_set_bytes": 110755840,
+          "private_bytes": 569470976
+        },
+        "after": {
+          "working_set_bytes": 110878720,
+          "private_bytes": 569470976
+        }
+      },
+      "active": {
+        "seconds": 2.9998451001010835,
+        "cpu_percent_of_one_core": 11.458924995441162,
+        "paints": 91,
+        "paints_per_second": 30.334899624295147,
+        "before": {
+          "working_set_bytes": 110882816,
+          "private_bytes": 569470976
+        },
+        "after": {
+          "working_set_bytes": 109928448,
+          "private_bytes": 569511936
+        }
+      },
+      "disabled_with_same_audio_producer": {
+        "seconds": 1.9926769000012428,
+        "cpu_percent_of_one_core": 3.136484394432485,
+        "paints": 0,
+        "paints_per_second": 0.0,
+        "before": {
+          "working_set_bytes": 109936640,
+          "private_bytes": 569511936
+        },
+        "after": {
+          "working_set_bytes": 110084096,
+          "private_bytes": 569647104
+        }
+      },
+      "before_widget": {
+        "working_set_bytes": 91512832,
+        "private_bytes": 560332800
+      },
+      "after_widget": {
+        "working_set_bytes": 92647424,
+        "private_bytes": 560345088
+      }
+    },
+    "screenshots": "D:\\Users\\khisa\\Documents\\ChatGPT\\KlippyAssistant\\build\\frozen-orb-images",
+    "scope": "Actual Qt widget; synthetic PCM and printer label; zero devices/network/hardware actions",
+    "limitations": [
+      "single current desktop only; multi-DPI/auto-hide permutations are unit simulations",
+      "short process CPU/working-set measurements; not owner room, clean VM or actual 16 GB acceptance"
+    ]
+  },
+  "frozen_wake": {
+    "passed": true,
+    "checks": {
+      "native_strict_recovery_after_injected_asr_fault": true,
+      "actual_pipeline_wake_only": true,
+      "no_unsafe_pipeline_delivery": true,
+      "no_new_negative_acceptances": true,
+      "recheck_bounded": true
+    },
+    "recovered_positive_cases": 1,
+    "pipeline": [
+      {
+        "inputs": [
+          {
+            "text": "Klippy ",
+            "raw": "Hey Clippy!",
+            "token_cleared": true
+          }
+        ],
+        "states": [
+          "Thinking",
+          "Listening"
+        ],
+        "counters": {
+          "captured_frames": 0,
+          "queue_drops": 0,
+          "device_ready": 0,
+          "discontinuities": 0,
+          "output_discontinuities": 0,
+          "session_resets": 0,
+          "frames": 0,
+          "voiced_frames": 0,
+          "candidates": 0,
+          "duplicate_candidates": 0,
+          "asr_started": 1,
+          "prefix_rejected": 0,
+          "echo_rejected": 0,
+          "verified": 1,
+          "delivered": 1
+        }
+      },
+      {
+        "inputs": [
+          {
+            "text": "Klippy ",
+            "raw": "Clibb-",
+            "token_cleared": true
+          }
+        ],
+        "states": [
+          "Thinking",
+          "Listening"
+        ],
+        "counters": {
+          "captured_frames": 0,
+          "queue_drops": 0,
+          "device_ready": 0,
+          "discontinuities": 0,
+          "output_discontinuities": 0,
+          "session_resets": 0,
+          "frames": 0,
+          "voiced_frames": 0,
+          "candidates": 0,
+          "duplicate_candidates": 0,
+          "asr_started": 1,
+          "prefix_rejected": 0,
+          "echo_rejected": 0,
+          "verified": 1,
+          "delivered": 1
+        }
+      }
+    ],
+    "injected_asr_fault": {
+      "injected_initial_rejection": true,
+      "native_verification_passes": 2,
+      "delivered_wake_only": true,
+      "states": [
+        "Thinking",
+        "Listening"
+      ]
+    },
+    "scope": "Synthetic speech only; forced candidate comparison, no physical microphone or printer; no audio saved",
+    "cases": [
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 0,
+        "speed": 0.85,
+        "baseline": "Hey Clippy!",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 1.372
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Hey Clippy!",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.02,
+        "seconds": 1.167
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 0,
+        "speed": 1.15,
+        "baseline": "Hey Clippy!",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 1.014
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 1,
+        "speed": 0.85,
+        "baseline": "Hey Clippy",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.919
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 1,
+        "speed": 1,
+        "baseline": "Hey Clippy",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.02,
+        "seconds": 0.781
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 1,
+        "speed": 1.15,
+        "baseline": "Hey, Clippy",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.679
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 3,
+        "speed": 0.85,
+        "baseline": "Hey Clippy!",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 1.006
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 3,
+        "speed": 1,
+        "baseline": "Hey Clippy!",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.855
+      },
+      {
+        "synthetic_phrase": "Hey Clippy",
+        "positive": true,
+        "voice": 3,
+        "speed": 1.15,
+        "baseline": "Hey, Clippy",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.744
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 0,
+        "speed": 0.85,
+        "baseline": "Clippy.",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.937
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Clippy.",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.797
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 0,
+        "speed": 1.15,
+        "baseline": "Clippy.",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.693
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 1,
+        "speed": 0.85,
+        "baseline": "Clippy",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.732
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 1,
+        "speed": 1,
+        "baseline": "Clippy",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.623
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 1,
+        "speed": 1.15,
+        "baseline": "Happy",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 16.72,
+        "seconds": 0.541
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 3,
+        "speed": 0.85,
+        "baseline": "Clippy.",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.821
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 3,
+        "speed": 1,
+        "baseline": "Clibb-",
+        "recheck": "Clippy",
+        "baseline_wake_only": false,
+        "recovered_wake_only": true,
+        "recheck_ms": 201.08,
+        "seconds": 0.698
+      },
+      {
+        "synthetic_phrase": "Clippy",
+        "positive": true,
+        "voice": 3,
+        "speed": 1.15,
+        "baseline": "Clippy.",
+        "recheck": null,
+        "baseline_wake_only": true,
+        "recovered_wake_only": false,
+        "recheck_ms": 0.01,
+        "seconds": 0.607
+      },
+      {
+        "synthetic_phrase": "Hey puppy",
+        "positive": false,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Harry Poppy",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 27.16,
+        "seconds": 1.11
+      },
+      {
+        "synthetic_phrase": "Hey creepy",
+        "positive": false,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Hey Creepy!",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 26.21,
+        "seconds": 1.238
+      },
+      {
+        "synthetic_phrase": "Hey copy",
+        "positive": false,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Hey, copy.",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 30.53,
+        "seconds": 1.138
+      },
+      {
+        "synthetic_phrase": "Klipper",
+        "positive": false,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "K-L-I-P-P-R",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 36.53,
+        "seconds": 1.863
+      },
+      {
+        "synthetic_phrase": "Hey Clipper",
+        "positive": false,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Hey, Clipper.",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 24.26,
+        "seconds": 1.239
+      },
+      {
+        "synthetic_phrase": "Hey Cuppy",
+        "positive": false,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Hey, copy",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 27.87,
+        "seconds": 1.058
+      },
+      {
+        "synthetic_phrase": "Hey Crippy",
+        "positive": false,
+        "voice": 0,
+        "speed": 1,
+        "baseline": "Haseer IPTY",
+        "recheck": null,
+        "baseline_wake_only": false,
+        "recovered_wake_only": false,
+        "recheck_ms": 41.99,
+        "seconds": 2.07
+      }
+    ]
+  },
+  "frozen_memory_budget": {
+    "peak_job_commit_bytes": 2529251328,
+    "passed": true,
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "host_ram_bytes": 68630749184,
+    "limitations": [
+      "Total VM RAM/cache is not controlled by the process-tree commit budget",
+      "No human microphone accuracy",
+      "No real printer connections"
+    ],
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "scope": "Engineering query/wake-followup preview under process-tree commit budget; full acoustic gates separate; not a 16 GB Windows VM",
+    "memory_budget_gib": 16,
+    "wall_seconds": 103.232,
+    "peak_active_processes": 3,
+    "cpu_seconds": 181.547
+  },
+  "budgeted_frozen_voice": {
+    "scope": "CPU-only real models; synthetic audio/acoustics and simulated printer; no devices or real printer APIs",
+    "speech_load_seconds": 5.704,
+    "python_external_network_denied": true,
+    "wake_threshold": 0.22,
+    "keywords_score": 2.0,
+    "wake_cases": [
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "Hey Klippy stop talking",
+        "synthetic_voice": 3,
+        "detected": true
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "detected": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "detected": false
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 0,
+        "detected": true
+      },
+      {
+        "phrase": "clippy",
+        "synthetic_voice": 3,
+        "detected": true
+      }
+    ],
+    "probe_stage": "complete",
+    "probe_elapsed_seconds": 101.965,
+    "pipeline_transcripts": [],
+    "pipeline_wakes": [
+      [
+        1.430000000000001,
+        1,
+        0
+      ]
+    ],
+    "pipeline_states": [
+      "Checking wake word",
+      "Thinking",
+      "Wake transcript unclear; please repeat Klippy and the request",
+      "Speech finished"
+    ],
+    "asr_errors": [],
+    "paced_wake_phrase": "Hey Klippy",
+    "first_attempt_wake_only": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy "
+      ],
+      "session_open": true,
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "output_discontinuities": 0,
+        "session_resets": 0,
+        "frames": 915,
+        "voiced_frames": 320,
+        "candidates": 2,
+        "duplicate_candidates": 0,
+        "asr_started": 2,
+        "prefix_rejected": 1,
+        "echo_rejected": 0,
+        "verified": 1,
+        "delivered": 1
+      }
+    },
+    "followup_capture_count": 3,
+    "paced_pipeline_transcripts": [
+      "Klippy ",
+      "What is the status of the test printer?",
+      "What is the status of the test printer?",
+      "What is the status of the test printer?"
+    ],
+    "paced_pipeline_wakes": [
+      [
+        7.22999999999989,
+        3,
+        0
+      ]
+    ],
+    "first_attempt_wake_command": {
+      "attempts": 1,
+      "accepted_requests": [
+        "Klippy what's the temperature?"
+      ],
+      "session_open": true,
+      "states": [
+        "Checking wake word",
+        "Thinking",
+        "Listening"
+      ],
+      "counts": {
+        "captured_frames": 0,
+        "queue_drops": 0,
+        "device_ready": 0,
+        "discontinuities": 0,
+        "output_discontinuities": 0,
+        "session_resets": 0,
+        "frames": 2862,
+        "voiced_frames": 1071,
+        "candidates": 3,
+        "duplicate_candidates": 0,
+        "asr_started": 6,
+        "prefix_rejected": 1,
+        "echo_rejected": 0,
+        "verified": 2,
+        "delivered": 5
+      }
+    },
+    "negative_composite": [
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "clipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "Klipper",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 0,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      },
+      {
+        "phrase": "The printer is ready",
+        "synthetic_voice": 3,
+        "candidate_interrupts": 0,
+        "accepted_requests": [],
+        "session_open": false
+      }
+    ],
+    "own_echo_wakes": 0,
+    "own_echo_requests": 0,
+    "barge_wakes": 1,
+    "barge_candidates": [],
+    "barge_linear_fit_error": 1.5680016727925368e-13,
+    "barge_states": [
+      "Checking wake word",
+      "Thinking",
+      "Listening",
+      "Checking wake word",
+      "Thinking",
+      "Listening"
+    ],
+    "asr_observations": [
+      {
+        "at": 5.48,
+        "text": "Clibby what is the status of the test printer?",
+        "audio_seconds": 3.5
+      },
+      {
+        "at": 9.15,
+        "text": "Hey Clippy!",
+        "audio_seconds": 1.71
+      },
+      {
+        "at": 14.12,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.08
+      },
+      {
+        "at": 19.09,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.07
+      },
+      {
+        "at": 24.06,
+        "text": "What is the status of the test printer?",
+        "audio_seconds": 3.07
+      },
+      {
+        "at": 28.62,
+        "text": "Hey Clippy, what's the temperature?",
+        "audio_seconds": 2.55
+      },
+      {
+        "at": 59.37,
+        "text": "Clear.",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 59.86,
+        "text": "Clippy stuff",
+        "audio_seconds": 1.6
+      },
+      {
+        "at": 61.35,
+        "text": "Clippy stop talking",
+        "audio_seconds": 2.15
+      }
+    ],
+    "barge_frame_metrics": [
+      {
+        "at": 3.0,
+        "energy": 0.0,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.987
+      },
+      {
+        "at": 3.1,
+        "energy": 0.0089,
+        "near_end": false,
+        "probe_busy": false,
+        "correlation": 0.965
+      },
+      {
+        "at": 3.2,
+        "energy": 0.0138,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.498
+      },
+      {
+        "at": 3.3,
+        "energy": 0.1247,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.452
+      },
+      {
+        "at": 3.4,
+        "energy": 0.0164,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.585
+      },
+      {
+        "at": 3.5,
+        "energy": 0.0107,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.658
+      },
+      {
+        "at": 3.6,
+        "energy": 0.0896,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.625
+      },
+      {
+        "at": 3.7,
+        "energy": 0.0043,
+        "near_end": true,
+        "probe_busy": true,
+        "correlation": 0.511
+      },
+      {
+        "at": 3.8,
+        "energy": 0.0033,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.48
+      },
+      {
+        "at": 3.9,
+        "energy": 0.0225,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.855
+      },
+      {
+        "at": 4.0,
+        "energy": 0.111,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.277
+      },
+      {
+        "at": 4.1,
+        "energy": 0.0201,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.25
+      },
+      {
+        "at": 4.2,
+        "energy": 0.0564,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.348
+      },
+      {
+        "at": 4.3,
+        "energy": 0.0366,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.472
+      },
+      {
+        "at": 4.4,
+        "energy": 0.034,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.427
+      },
+      {
+        "at": 4.5,
+        "energy": 0.0043,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.448
+      },
+      {
+        "at": 4.6,
+        "energy": 0.0019,
+        "near_end": true,
+        "probe_busy": false,
+        "correlation": 0.573
+      }
+    ],
+    "barge_requests": [
+      "Klippy stop talking"
+    ],
+    "barge_detection_seconds_from_user_start": 0.74,
+    "playback_flushed": true,
+    "wake_pipeline_counts": {
+      "captured_frames": 0,
+      "queue_drops": 0,
+      "device_ready": 0,
+      "discontinuities": 0,
+      "output_discontinuities": 0,
+      "session_resets": 0,
+      "frames": 6443,
+      "voiced_frames": 1786,
+      "candidates": 4,
+      "duplicate_candidates": 0,
+      "asr_started": 7,
+      "prefix_rejected": 1,
+      "echo_rejected": 0,
+      "verified": 3,
+      "delivered": 6
+    },
+    "audio_quality": {
+      "passed": true,
+      "checks": {
+        "original_is_finite_unclipped": true,
+        "callback_chunks_match_original": true,
+        "converted_length": true,
+        "chunk_invariance": true,
+        "antialias_rejection": true,
+        "render_preserves_converted_pcm": true,
+        "legacy_render_preserves_legacy_pcm": true,
+        "buffered_generation_has_no_starvation": true,
+        "non_silent_render_receipt": true
+      },
+      "source_rate": 24000,
+      "target_rate": 16000,
+      "source_samples": 204976,
+      "chunk_samples": [
+        73034,
+        68496,
+        63446
+      ],
+      "arrivals_seconds": [
+        3.390181800117716,
+        6.513714200118557,
+        9.476848600199446
+      ],
+      "chunk_progress": [
+        0.3333333432674408,
+        0.6666666865348816,
+        1.0
+      ],
+      "generation_seconds": 9.489173600217327,
+      "generation_realtime_factor": 1.1110577160507369,
+      "source_peak": 0.3336727023124695,
+      "legacy_chunk_vs_batch_peak_error": 0.1554708033800125,
+      "new_chunk_vs_batch_peak_error": 0.0,
+      "legacy_10khz_alias_db": -2.728707575288005,
+      "new_10khz_alias_db": -107.41921395092012,
+      "before": {
+        "first_pcm_render_seconds": 3.4,
+        "queue_gap_seconds": 0.17,
+        "receipt": false,
+        "queue_underruns": 2,
+        "missing_samples": 2927,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 0,
+        "complete_pcm_fallbacks": 0
+      },
+      "after": {
+        "first_pcm_render_seconds": 4.22,
+        "queue_gap_seconds": 0.0,
+        "receipt": true,
+        "queue_underruns": 0,
+        "missing_samples": 0,
+        "device_underflows": 0,
+        "device_overflows": 0,
+        "device_status_events": 0,
+        "clipped_samples": 0,
+        "invalid_pcm": 0,
+        "prefill_frames": 67520,
+        "complete_pcm_fallbacks": 0
+      },
+      "conversion_cpu": {
+        "legacy": {
+          "iterations": 32,
+          "wall_seconds": 0.05072470009326935,
+          "cpu_seconds": 0.046875,
+          "audio_seconds_processed": 273.30133333333333
+        },
+        "sinc": {
+          "iterations": 32,
+          "wall_seconds": 0.3183858999982476,
+          "cpu_seconds": 0.3125,
+          "audio_seconds_processed": 273.30133333333333
+        }
+      },
+      "scope": "Synthetic Kokoro PCM and a 10 ms device-free sink; no microphone or printers",
+      "limitations": [
+        "Numeric signal/queue evidence is not human perceived-quality acceptance",
+        "Short CPU timings depend on host load; Windows CPU time is quantized",
+        "16 kHz AEC/output retained; shared WASAPI mix conversion remains in Windows"
+      ],
+      "production_cached_pipeline": {
+        "passed": true,
+        "rendered_samples": 136651,
+        "expected_samples": 136651,
+        "wall_seconds": 2.0042763999663293,
+        "diagnostics": {
+          "queue_underruns": 0,
+          "missing_samples": 0,
+          "device_underflows": 0,
+          "device_overflows": 0,
+          "device_status_events": 0,
+          "clipped_samples": 0,
+          "invalid_pcm": 0,
+          "prefill_frames": 1280,
+          "complete_pcm_fallbacks": 0,
+          "callbacks": 1302,
+          "max_callback_gap_ms": 2.6494001504033804,
+          "max_callback_work_ms": 0.24809991009533405,
+          "input_peak": 0.0,
+          "input_rms": 0.0,
+          "input_zero_frames": 0,
+          "dsp_max_work_ms": 0.0,
+          "dsp_queue_delay_ms": 0.0,
+          "source_peak": 0.3336727023124695,
+          "preclip_peak": 0.33377397060394287,
+          "render_peak": 0.33377397060394287,
+          "input_latency_ms": 0.0,
+          "output_latency_ms": 0.0
+        },
+        "scope": "Production cached TTS worker and output callback; accelerated synthetic sink, no devices"
+      }
+    },
+    "llm_intent": {
+      "action": "temperatures",
+      "printer_id": "synthetic-printer",
+      "query_subject": null,
+      "macro": null,
+      "params": {}
+    },
+    "query_catalog": {
+      "scope": "Real local query LLM, deterministic parser and injected simulated printers; no hardware/network APIs",
+      "catalog_queries": 41,
+      "cases": [
+        {
+          "synthetic_question": "Klippy, is my M1 printer homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 12.305,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What about the SV08?",
+          "answer": "SV08: Homed axes: X, Y, Z. Not homed: none.",
+          "milliseconds": 6.031,
+          "http_reads": 3,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How hot is the bed?",
+          "answer": "SV08: bed: 55 degrees Celsius, target 60 degrees Celsius",
+          "milliseconds": 1.913,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What's the target temperature?",
+          "answer": "SV08: bed: target 60 degrees Celsius",
+          "milliseconds": 0.931,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What layer am I on?",
+          "answer": "SV08: Slicer-reported layer 3 of 100; state printing.",
+          "milliseconds": 1.49,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Is Mercury One homed?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 4.408,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What's the height of the z-axis right now?",
+          "answer": "M1: Last commanded Z position: 10 mm; Z not homed. Not measured physical position.",
+          "milliseconds": 1.262,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "What about the X axis?",
+          "answer": "M1: Last commanded X position: 0 mm; X homed. Not measured physical position.",
+          "milliseconds": 0.924,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How hot is the nozzle?",
+          "answer": "M1: nozzle: 23 degrees Celsius, target 210 degrees Celsius",
+          "milliseconds": 0.78,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "How high is the nozzle?",
+          "answer": "M1: Last commanded Z position: 10 mm; Z not homed. Not measured physical position.",
+          "milliseconds": 3.12,
+          "http_reads": 0,
+          "error_code": null,
+          "passed": true
+        },
+        {
+          "synthetic_question": "Has the machine established its coordinate reference?",
+          "answer": "M1: Homed axes: X, Y. Not homed: Z.",
+          "milliseconds": 6086.128,
+          "http_reads": 1,
+          "error_code": null,
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "dialogue": {
+      "passed": true,
+      "checks": {
+        "routine_no_model": true,
+        "routine_verified_nozzle": true,
+        "followup_bed": true,
+        "actual_model_composed": true,
+        "explanation_keeps_verified_observation": true,
+        "casual_without_printer": true,
+        "no_pending_or_writes": true,
+        "model_latency_bounded": true
+      },
+      "routine_ms": 2.52,
+      "explanation_ms": 2035.62,
+      "model_calls": 1,
+      "dialogue_diagnostic": null,
+      "model_tokens": {
+        "completion_tokens": 7,
+        "prompt_tokens": 229
+      },
+      "scope": "Actual local model; fresh simulated Moonraker facts and constrained clause composition; no devices/printer writes"
+    },
+    "heat_fix_probe": {
+      "scope": "Deterministic heating/cancellation with injected simulated Moonraker; every HTTP write forbidden",
+      "cases": [
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Hey Klippy, can you set the Mercury 1 nozzle to 90 degrees Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set M1's nozzle to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Can you set the Mercury 1 nozzle to 90 Celsius?",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One's hotend to 90.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Set the nozzle temperature to 90 on M1.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Bring the nozzle up to 90 degrees.",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat Mercury One nozzle to ninety",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 194 F",
+          "passed": true
+        },
+        {
+          "case": "heat_celsius_review",
+          "synthetic_phrase": "Heat nozzle to 90",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "explicit_cancel",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "clarification_not_cancellation",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "ambiguous_or_outside_limits",
+          "passed": true
+        },
+        {
+          "case": "temperature_operands_not_printer_mentions",
+          "passed": true
+        },
+        {
+          "case": "invalid_model_action_parameters",
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "supported_request_llm_calls": 0,
+      "pending_write": false,
+      "passed": true
+    },
+    "limits_probe": {
+      "scope": "Synthetic configuration and motion; every HTTP write forbidden",
+      "cases": [
+        {
+          "case": "Move X minus 20 millimeters.",
+          "proposal_ms": 2.862,
+          "passed": true
+        },
+        {
+          "case": "Go to X 150.",
+          "proposal_ms": 1.742,
+          "passed": true
+        },
+        {
+          "case": "Raise Z by 10.",
+          "proposal_ms": 1.529,
+          "passed": true
+        },
+        {
+          "case": "Move X minus 200 millimeters.",
+          "passed": true
+        },
+        {
+          "case": "Go to X 301.",
+          "passed": true
+        },
+        {
+          "case": "Move X 20 at 400 mm/s",
+          "passed": true
+        },
+        {
+          "case": "Move the bed forward 20 millimeters.",
+          "passed": true
+        },
+        {
+          "case": "changed configuration invalidates confirmation",
+          "passed": true
+        }
+      ],
+      "printer_writes": 0,
+      "passed": true
+    },
+    "simulated_status_response": null,
+    "paced_responses": [
+      "I'm listening.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+      "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%."
+    ],
+    "paced_status_response": "test printer: Klipper: ready; unavailable. Job: printing; message: unavailable. Reported progress: 63%.",
+    "printer_writes": 0,
+    "raw_embedded_keyword": {
+      "detected": 4,
+      "total": 4,
+      "misses": []
+    },
+    "gates": {
+      "standalone_wake": true,
+      "negative_words": true,
+      "captured_status": false,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true
+    },
+    "passed": false,
+    "preview_gates": {
+      "standalone_wake": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true,
+      "paced_captured_status": true,
+      "grounded_dialogue": true,
+      "audio_signal_and_delivery": true,
+      "three_unprefixed_followups": true,
+      "read_only_query_catalog": true,
+      "no_negative_query_activation": true,
+      "capability_limits_and_motion_safety": true,
+      "heating_parser_and_cancel_safety": true
+    },
+    "engineering_preview_passed": true,
+    "preview_scope": "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified",
+    "continuous_wake_status_passed": false,
+    "homophone_note": "Clippy is acoustically equivalent to Klippy; it cannot be reliably excluded by spelling."
+  },
+  "limitations": [
+    "Unpublished candidate; Windows CI and installed upgrade/offline gates outstanding",
+    "No physical printer actions; supervised hardware acceptance remains open",
+    "No human microphone accuracy claim; original broad acoustic results retained separately",
+    "Local Windows development host is not clean VM or actual 16 GB host"
+  ]
+}

@@ -2,6 +2,15 @@
 
 Stable release is blocked until every applicable item has evidence.
 
+For the 0.8 limits candidate, require the new eight-case read-only limits probe in every
+frozen/installed/memory report, all 886 tests/Ruff, 29 orb/26 Qt feature checks and every
+retained voice/query/audio/dialogue/safety gate. Actual 0.7.2 upgrade/reinstall must preserve
+both existing heater caps and stricter-limit preferences. Tag only the exact qualified app
+source after installer digest and all Windows jobs/evidence match. Current source 5862ec2
+passes local frozen/native/memory checks, but Windows CI is blocked by Actions budget before
+any steps; installed/offline/upgrade qualification and publication remain pending. The older
+checked CI item below describes previous releases and does not qualify this candidate.
+
 For the 0.6 orb preview, preserve all prior 510 regressions and require the complete extended
 suite/Ruff, frozen and offline-installed `--orb-self-test` reports/captures and upgrade/reinstall
 orb-preference preservation. Record measured CPU/memory and current native geometry without

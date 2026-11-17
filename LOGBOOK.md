@@ -1,5 +1,27 @@
 # Logbook
 
+## 2026-11-17 - 0.8 local frozen package passed; publication blocked by Actions budget
+
+Exact app source 5862ec29cbaa37dc2e7b8501dac3033b135e47d1. Local build reran 886 tests/Ruff and verified
+57 unchanged assets; frozen startup, 29 orb/26 feature checks, 25 wake cases/recovery,
+eleven query, 21 heating/cancellation, eight new limits cases, dialogue/audio/echo/barge-in
+and three follow-ups passed. Budgeted frozen native preview passed at 2.356 GiB peak
+process-tree commit (16 GiB limit), 103.232 seconds wall/181.547 CPU seconds.
+Raw broad continuous-capture result remains separately False in both contexts. No human
+acoustic/clean VM/actual16GB/supervised printer gate closed. No owner installation changed.
+
+Installer compiled: 1489543358 bytes, SHA-256 c4f78386009211369424f013e8165de925275a26734c5f9214751a39b6110256.
+Current candidate and sidecar are in dist. Local frozen/memory evidence and full status are
+in benchmarks/preview8-local-package-qualification.json and PREVIEW8_REPORT.md.
+
+Windows workflow_dispatch 44202364931 and push 44202365689 ran zero steps. Confirmed GitHub
+annotation: "The job was not started because an Actions budget is preventing further use."
+This blocks required installed/offline/0.7.2 upgrade/reinstall/history/settings/owner-limit
+preservation and fresh-runner qualification. Do not call this CI-passing or publish it as
+qualified. Owner asked to enable Actions budget; continue from exact source once available.
+Issue #19 updated. Prepare an unpublished draft with candidate and evidence, preserve the
+current published 0.7.2 release and installed owner profile. No physical printer actions.
+
 ## 2026-11-17 - Capability registry and deterministic direct-motion candidate
 
 Reviewed current official Moonraker object API and Klipper status/config/G-code references,

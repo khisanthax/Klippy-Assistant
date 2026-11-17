@@ -7,7 +7,9 @@ stricter owner limits, and mandatory reviewed single-axis relative/absolute move
 verified Cartesian/CoreXY setups. Unsupported kinematics/transforms and ambiguous bed
 directions block safely. Firmware heater limits intersect existing local caps. See
 [Printer capabilities and limits](docs/PRINTER_LIMITS.md) and [candidate qualification](PREVIEW8_REPORT.md).
-Publication is pending complete Windows qualification; firmware limits never prove physical clearance.
+All 886 local tests/Ruff and frozen native/memory checks pass. GitHub Actions budget blocks
+Windows CI and installed-upgrade qualification; this candidate is unpublished. Firmware limits
+never prove physical clearance.
 
 Current engineering preview **[0.7.2-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.2-preview.1)** fixes spatial query routing:
 Z-height/elevation/coordinate questions and axis follow-ups use deterministic matching and
