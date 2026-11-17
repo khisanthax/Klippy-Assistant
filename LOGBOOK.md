@@ -28,7 +28,12 @@ classification label and test fixtures with colliding aliases; corrected with re
 Packaged limits probe forbids all HTTP writes and is a mandatory preview gate. Existing
 acoustic/interrupt/query/dialogue/audio/model protections retained. Models unchanged.
 
-Next: finish complete suite and native probes, exact-source Windows build/0.7.2 upgrade/offline/
+Completed all 886 tests and Ruff; additional targeted recovery/limits run 135 passed. Native
+real-model engineering-preview gates pass, all eight motion probe cases with zero writes.
+Independent broad continuous-capture result remains False and is retained separately in
+benchmarks/preview8-local-native.json; no acoustic gate relaxed.
+
+Next: exact-source Windows build/0.7.2 upgrade/offline/
 settings/recovery/memory qualification, verify assets and publish accurately labelled preview.
 Issue #19 remains open for supervised hardware/unsupported motion scope acceptance. No real
 printer connections/actions or owner profile/device changes. Physical clearance, human audio,
