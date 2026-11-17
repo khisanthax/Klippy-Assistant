@@ -178,11 +178,15 @@ async def test_unknown_parameters_blocked(rig):
     assert not sim.writes
 
 
-async def test_heat_needs_reviewed_limits(rig):
+async def test_heat_needs_active_limits_even_with_owner_cap(rig):
     store, sim, engine, _ = rig
+    sim.settings.pop('extruder')
     with pytest.raises(Rejected):
         await engine.propose(intent(Action.HEAT, params={"temperature": 200, "heater": 0}))
     store.set("heater_limits", {"sim": {"0": 220}})
+    with pytest.raises(Rejected):
+        await engine.propose(intent(Action.HEAT, params={"temperature": 200, "heater": 0}))
+    sim.settings['extruder'] = {'min_temp': 0, 'max_temp': 250}
     with pytest.raises(Rejected):
         await engine.propose(intent(Action.HEAT, params={"temperature": 230, "heater": 0}))
     assert not sim.writes

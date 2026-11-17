@@ -104,7 +104,7 @@ class Moonraker:
             raise ValueError("No validated command")
         return await self.request("POST", "/printer/gcode/script", {"script": script})
 
-    async def notifications(self):
+    async def notifications(self, objects=None):
         """Read-only subscription. Actions never originate from this channel."""
         parsed = urlsplit(self.printer.url)
         addresses = await asyncio.to_thread(lan_addresses, self.printer.url)
@@ -118,7 +118,7 @@ class Moonraker:
         async with connect(f"{scheme}://{host}:{port}/websocket{suffix}",
                            proxy=None, open_timeout=6, max_size=2**20) as ws:
             await ws.send(json.dumps({"jsonrpc": "2.0", "id": 1, "method": "printer.objects.subscribe",
-                                      "params": {"objects": {"webhooks": None, "print_stats": None}}}))
+                                      "params": {"objects": objects or {"webhooks": None, "print_stats": None}}}))
             async for message in ws:
                 value = json.loads(message)
                 if value.get("method", "").startswith("notify_"):

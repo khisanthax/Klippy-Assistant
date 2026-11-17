@@ -84,6 +84,11 @@ def qualify_preview_report(report):
         len(negatives) == 6 and all(row.get("accepted_requests") == [] and row.get("session_open") is False
                                     for row in negatives))
     report["engineering_preview_passed"] = all(report["preview_gates"].values())
+    limits = report.get('limits_probe', {})
+    report['preview_gates']['capability_limits_and_motion_safety'] = (
+        limits.get('passed') is True and limits.get('printer_writes') == 0
+        and len(limits.get('cases', [])) == 8 and all(row.get('passed') is True for row in limits['cases']))
+    report['engineering_preview_passed'] = all(report['preview_gates'].values())
     if "heat_fix_probe" in report:
         commands = report["heat_fix_probe"]
         report["preview_gates"]["heating_parser_and_cancel_safety"] = (
@@ -288,6 +293,8 @@ def run(pack, checkpoint=None):
     progress('language_queries_complete')
     from .command_probe import run as command_probe
     report["heat_fix_probe"] = asyncio.run(command_probe())
+    from .limits_probe import run as limits_probe
+    report['limits_probe'] = asyncio.run(limits_probe())
     # All inference integration above has no command transport. Verify read-only conversation
     # separately against an injected simulator whose every write raises immediately.
     import tempfile

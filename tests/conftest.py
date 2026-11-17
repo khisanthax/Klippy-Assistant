@@ -4,6 +4,7 @@ import httpx
 import pytest
 
 from klippy.domain import Printer
+from klippy.limits_probe import synthetic_settings, synthetic_status
 from klippy.moonraker import Moonraker
 from klippy.safety import SafetyEngine
 from klippy.storage import Store
@@ -17,6 +18,8 @@ class Simulator:
     timeout_on_write: bool = False
     config: dict = field(default_factory=lambda: {"gcode_macro LOAD_FILAMENT": {"gcode": "M83\nG1 E5 F60"}})
     writes: list = field(default_factory=list)
+    settings: dict = field(default_factory=synthetic_settings)
+    eventtime: int = 0
 
     def handle(self, request):
         if self.offline:
@@ -32,7 +35,16 @@ class Simulator:
             elif request.url.path.endswith("cancel"):
                 self.state = "cancelled"
             return httpx.Response(200, json={"result": "ok"})
-        if "configfile" in request.url.query.decode():
+        if request.url.path.endswith('/list'):
+            result = {'objects': list(synthetic_status())}
+        elif "configfile=settings" in str(request.url):
+            self.eventtime += 1
+            status = synthetic_status()
+            status['configfile']['settings'] = self.settings
+            status['webhooks']['state'] = 'ready' if self.ready else 'shutdown'
+            status['print_stats']['state'] = self.state
+            result = {'status': status, 'eventtime': self.eventtime}
+        elif "configfile" in request.url.query.decode():
             result = {"status": {"configfile": {"config": self.config}}}
         else:
             result = {"status": {"webhooks": {"state": "ready" if self.ready else "shutdown"},

@@ -1,4 +1,4 @@
-Klippy Assistant 0.7.0-preview.1 - Conversation Controls Engineering Preview
+Klippy Assistant 0.8.0-preview.1 - Capability Limits Engineering Preview
 
 This package is unsigned and is not a stable v1.0 release.
 
@@ -19,3 +19,10 @@ See README.md for backup, reset, data removal and known limitations.
 
 Optional local history is OFF by default, with separate text consent. No audio recordings.
 Grounded dialogue, inner follow-up countdown and clarification choices retain safety checks.
+
+Active configuration limits are discovered per approved printer. Existing owner heater caps
+remain restrictive. Direct single-axis XYZ movement supports verified Cartesian/CoreXY only;
+it always needs fresh stationary/homed state and an exact destination confirmation.
+Delta/other kinematics, active motion transforms, physical bed directions and direct extrusion
+are blocked. Firmware limits are not proof of physical clearance. Supervised hardware
+acceptance remains open; no physical printer actions were used in qualification.

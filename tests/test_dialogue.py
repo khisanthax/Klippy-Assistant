@@ -204,6 +204,7 @@ def test_dialogue_failure_blocks_preview_even_when_other_gates_pass(defect):
             ]
         },
     }
+    report['limits_probe'] = {'passed':True,'printer_writes':0,'cases':[{'passed':True} for _ in range(8)]}
     qualify_preview_report(report)
     assert report["engineering_preview_passed"]
     if defect == "summary":

@@ -22,6 +22,7 @@ class Action(StrEnum):
     CANCEL = "cancel"
     HOME = "home"
     HEAT = "heat"
+    MOVE = "move"
     MACRO = "macro"
     EMERGENCY = "emergency_stop"
 

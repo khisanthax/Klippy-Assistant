@@ -17,6 +17,20 @@ def name_spans(printer, text):
     labels = {normalize(n) for n in (printer.name, *printer.aliases)}
     spans = [(match.start(), match.end()) for label in labels if label
              for match in re.finditer(r"(?<!\w)" + re.escape(label) + r"(?!\w)", text)]
+    from .limits import LimitsUnavailable
+    from .motion import motion_request, parse_motion
+    if motion_request(text):
+        def complete(value):
+            try:
+                return parse_motion(value, printer.id) is not None
+            except LimitsUnavailable:
+                return False
+        # Axis names/numbers/units in a complete movement are operands, not printers.
+        if complete(text):
+            return []
+        return [(start, end) for start, end in spans if complete(
+            re.sub(r'\s+(?:on|for)(?: the| my)?(?: printer)?\s*$', '',
+                   ' '.join((text[:start] + ' ' + text[end:]).split())))]
     if not heating_request(text):
         return spans
     # An already complete request names a heater/value/unit, not another printer.
@@ -43,9 +57,14 @@ def matching(printers, text):
 def remove_names(printer, text):
     text = normalize(text)
     characters = list(text)
-    for start, end in name_spans(printer, text):
+    spans = name_spans(printer, text)
+    for start, end in spans:
         characters[start:end] = " " * (end - start)
-    return " ".join("".join(characters).split())
+    result = " ".join("".join(characters).split())
+    from .motion import motion_request
+    if spans and motion_request(result):
+        result = re.sub(r'\s+(?:on|for)(?: the| my)?(?: printer)?\s*$', '', result)
+    return result
 
 
 def validate_names(store, printer, name, aliases):

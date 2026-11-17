@@ -20,9 +20,10 @@ from .safety import READ_ONLY
 
 
 class QueryManager(QWidget):
-    def __init__(self, store, service, refresh, voice_state, aliases):
+    def __init__(self, store, service, refresh, voice_state, aliases, limits=None):
         super().__init__()
         self.store, self.service, self.voice_state = store, service, voice_state
+        self.limits = limits
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Read-only information and state-changing operations are listed separately. Select a row for details."))
         self.search = QLineEdit()
@@ -68,6 +69,13 @@ class QueryManager(QWidget):
             operations.append((key, action.value.replace("_", " "), names, self.voice_state(),
                                "CHANGES PRINTER STATE", "Mandatory safety validation; confirmation policy applies"))
             self.details[key] = "Review and execution occur through the safety engine. Browsing this inventory sends no command."
+            if action == Action.MOVE:
+                operations[-1] = (key, 'Move X minus 20 / go to X 150 / raise Z by 10', names, self.voice_state(),
+                                  'STATE CHANGE: MOVE / ALWAYS CONFIRM', 'Fresh verified Cartesian/CoreXY single-axis XYZ only')
+                self.details[key] += '\nAbsolute destinations are MACHINE coordinates. Physical directions/bed moves require clarification. ' \
+                                     'Active mesh/transforms, delta and other unsupported kinematics are blocked. Physical clearance is never inferred.'
+                if self.limits:
+                    self.details[key] += '\n' + json.dumps({p.name:self.limits.describe(p.id) for p in printers}, indent=2)
         for printer in printers:
             for macro in self.store.macros(printer.id).values():
                 key = f"macro:{printer.id}:{macro.name}"

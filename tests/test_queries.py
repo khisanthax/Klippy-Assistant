@@ -547,6 +547,7 @@ def test_preview_envelope_never_changes_or_claims_full_voice_acceptance(broken):
               "paced_pipeline_transcripts": ["Klippy", "status"], "paced_status_response": "63% complete",
               "query_catalog": {"passed": True, "printer_writes": 0, "pending_write": False},
               "negative_composite": [{"accepted_requests": [], "session_open": False} for _ in range(6)]}
+    report['limits_probe'] = {'passed':True,'printer_writes':0,'cases':[{'passed':True} for _ in range(8)]}
     if broken in report["gates"]:
         report["gates"][broken] = False
     elif broken == "paced_status":

@@ -1,5 +1,16 @@
 # Roadmap
 
+## Printer capability / safety limits registry - 0.8 candidate
+
+Per-printer active configuration plus runtime state discovery, optional strictly narrower
+owner caps, Cartesian/CoreXY single-axis relative/absolute movement and mandatory bound
+confirmations implemented. Other kinematics/uncertain transforms remain blocked for movement;
+native capability discovery does not imply physical clearance. Existing heater caps are
+preserved and intersected with firmware authority. Settings inspection/editing and packaged
+read-only qualification added. Issue #19 tracks supervised acceptance and broader scope.
+Full Windows package qualification/publication pending; see PREVIEW8_REPORT.md and
+docs/PRINTER_LIMITS.md. No physical printer actions. Existing hardware gates stay open.
+
 ## Query/capture reliability - 0.7.2 preview published
 
 Deterministic spatial queries, conservative measurement clarification, reduced background

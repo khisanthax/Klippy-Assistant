@@ -385,6 +385,12 @@ class Conversation:
             )
         # Explicit heating verbs are actions, including polite requests and incomplete ones.
         # Never route them to a temperature query or a model that might guess values/units.
+        from .limits import LimitsUnavailable
+        from .motion import parse_motion
+        try:
+            motion = parse_motion(text, selected)
+        except LimitsUnavailable as exc:
+            raise Rejected(str(exc), code="motion_needs_clarification") from None
         heat = heat_intent(text, selected)
         explanation_followup = (
             text
@@ -417,7 +423,7 @@ class Conversation:
             raise Rejected(str(exc)) from None
         if text.startswith("what about") and query is None:
             raise Rejected("Please identify an enrolled printer and a previous information query")
-        basic = heat or self.basic(text, selected)
+        basic = motion or heat or self.basic(text, selected)
         # Keep the snapshot-only embedded Conversation API compatible. The desktop
         # supplies QueryService and routes all catalog reads through verified discovery.
         legacy_read = self.queries is None and basic and basic.action in {Action.STATUS, Action.TEMPERATURES}
@@ -518,6 +524,8 @@ class Conversation:
         if generation != self.generation:
             return None  # A wake/correction/cancel superseded inference while it was awaited.
         validate_intent_fields(intent)
+        if interpreted and intent.action == Action.MOVE:
+            raise Rejected("Please state an explicit axis and relative distance or absolute position. A model cannot authorize movement.", code="model_motion_blocked")
         self.engine.audit("intent", intent=intent.action.value, printer_id=intent.printer_id)
         if interpreted and intent.action == Action.HEAT:
             validate_model_heat(intent, text)
@@ -853,6 +861,7 @@ class LocalLLM:
             if m.approved and m.enabled and m.reviewed
         ]
         schema = Interpretation.model_json_schema()
+        schema["$defs"]["Action"]["enum"].remove("move")
         schema["$defs"]["Intent"]["properties"]["printer_id"] = {"type": "string", "const": printer_id}
         schema["$defs"]["Intent"]["properties"]["macro"] = {"enum": [None, *[m["name"] for m in allowed]]}
         if not allowed:

@@ -52,6 +52,7 @@ from .dialogue import preferences as dialogue_preferences
 from .domain import Printer
 from .history import InteractionHistory
 from .history_ui import HistoryPage
+from .limits import LimitsUnavailable, validate_overrides
 from .listening import listening_enabled, validate_windows
 from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
@@ -142,7 +143,7 @@ class Window(QMainWindow):
             outcome='expired' if reason=='timeout' else 'canceled' if reason in {'muted','canceled'} else None)
         self.engine.confirmation_seconds = self.store.get("confirmation_seconds", 30)
         self.conversation.timeout = self.conversation.session.timeout = self.store.get("followup_seconds", 30)
-        self.monitor = Monitor(store, self.client, queries=self.queries)
+        self.monitor = Monitor(store, self.client, queries=self.queries, limits=self.engine.limits)
         self.polling = False
         self.command_busy = False
         self.quitting = False
@@ -160,7 +161,7 @@ class Window(QMainWindow):
         self.make_macros()
         self.query_manager = QueryManager(store, self.queries, self.refresh_capabilities,
                                          self.voice_availability,
-                                         self.edit_printer_aliases)
+                                         self.edit_printer_aliases, limits=self.engine.limits)
         self.tabs.addTab(self.query_manager, "Queries && Commands")
         self.make_settings()
         self.history_page = HistoryPage(self.history,store,self.latest_voice_diagnostic)
@@ -222,6 +223,10 @@ class Window(QMainWindow):
             async def one(printer):
                 async with semaphore:
                     await self.queries.refresh(printer, force=True)
+                    try:
+                        await self.engine.limits.refresh(printer)
+                    except LimitsUnavailable:
+                        pass  # The registry reports unknown rather than granting permissions.
             await asyncio.gather(*(one(p) for p in self.store.printers() if p.approved))
         self.worker.submit("capabilities", refresh())
 
@@ -379,6 +384,7 @@ class Window(QMainWindow):
         layout.addWidget(self.response_style)
         layout.addWidget(self.button("Load local voice pack", self.load_voice))
         layout.addWidget(self.button("Review selected printer heater limits", self.review_heater_limits))
+        layout.addWidget(self.button("Printer capabilities and stricter safety limits", self.review_printer_limits))
         self.sensitivity = QDoubleSpinBox()
         self.sensitivity.setRange(0.01, 1.0)
         self.sensitivity.setSingleStep(0.01)
@@ -503,6 +509,61 @@ class Window(QMainWindow):
                 control.setValue(value)
             control.blockSignals(False)
 
+    def review_printer_limits(self):
+        printer = self.target()
+        if not printer or not printer.approved:
+            self.failure("Select an approved printer before discovering limits")
+            return
+        async def read():
+            try:
+                return printer, await self.engine.limits.refresh(printer)
+            except LimitsUnavailable as exc:
+                raise Rejected(str(exc)) from None
+        self.worker.submit("limits_review", read())
+
+    def show_printer_limits(self, printer, record):
+        if self.target() != printer:
+            self.failure("Printer changed; refresh its limits again")
+            return
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Capabilities and stricter limits · " + printer.name)
+        dialog.resize(750, 650)
+        form = QFormLayout(dialog)
+        notice = QLabel("Discovered limits come from active Klipper configuration. Direct moves always require fresh state and confirmation. "
+                        "Limits do not prove physical clearance. Optional overrides may only restrict configured limits. "
+                        "Extrusion limits are discovered; direct extrusion is unsupported.")
+        notice.setWordWrap(True)
+        form.addRow(notice)
+        details = QTextEdit()
+        details.setReadOnly(True)
+        details.setPlainText(json.dumps(self.engine.limits.describe(printer.id), indent=2))
+        form.addRow("Verified discovery (not movement authorization)", details)
+        editor = QTextEdit()
+        editor.setObjectName("printer_limit_overrides")
+        editor.setPlainText(json.dumps(self.store.get('printer_limit_overrides', {}).get(printer.id, {}), indent=2))
+        editor.setPlaceholderText('{"axes":{"x":{"position_max":200}},"motion":{"max_velocity":100}}')
+        form.addRow("Optional stricter limits (JSON; {} removes overrides)", editor)
+        feedback = QLabel()
+        feedback.setWordWrap(True)
+        form.addRow(feedback)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+        def save():
+            try:
+                if self.target() != printer or self.engine.limits.records.get(printer.id) is not record:
+                    raise LimitsUnavailable("Printer or discovered configuration changed. Close and refresh before saving.")
+                overrides = validate_overrides(json.loads(editor.toPlainText()), record.capabilities)
+                saved = self.store.get('printer_limit_overrides', {})
+                saved[printer.id] = overrides
+                self.engine.limits.invalidate(printer.id)
+                self.store.set('printer_limit_overrides', saved)
+                dialog.accept()
+            except (ValueError, LimitsUnavailable) as exc:
+                feedback.setText(str(exc))
+        buttons.accepted.connect(save)
+        buttons.rejected.connect(dialog.reject)
+        form.addRow(buttons)
+        dialog.exec()
+
     def review_heater_limits(self):
         printer = self.target()
         if not printer or not printer.approved:
@@ -511,8 +572,9 @@ class Window(QMainWindow):
         dialog = QDialog(self)
         dialog.setWindowTitle("Review heater limits for " + printer.name)
         form = QFormLayout(dialog)
-        notice = QLabel("Enter maximum temperatures verified against this printer's configuration/specification. "
-                        "Unknown limits block heating. Saving changes only local permissions.")
+        notice = QLabel("Optional additional maximum temperatures for this printer. Active Klipper bounds always apply, "
+                        "and these caps can only restrict the effective target. Unknown firmware limits block heating. "
+                        "Saving changes only local permissions.")
         notice.setWordWrap(True)
         form.addRow(notice)
         limits = self.store.get("heater_limits", {}).get(printer.id, {})
@@ -648,7 +710,7 @@ class Window(QMainWindow):
                 Credentials.set(printer.id, secret.text())
                 self.store.save_printer(printer)
                 self.reload_printers()
-                self.worker.submit("capabilities", self.queries.refresh(printer, force=True))
+                self.refresh_capabilities()
             except Exception:
                 self.failure("Printer not saved. Check the name, URL and Windows credential vault.")
 
@@ -658,6 +720,11 @@ class Window(QMainWindow):
             async def test():
                 snapshot = await self.client(printer).snapshot()
                 await self.queries.refresh(printer, force=True)
+                if printer.approved:
+                    try:
+                        await self.engine.limits.refresh(printer)
+                    except LimitsUnavailable:
+                        pass
                 return snapshot
             self.worker.submit("test", test())
 
@@ -667,13 +734,14 @@ class Window(QMainWindow):
             self.engine.cancel()
             self.store.save_printer(printer.model_copy(update={"approved": True}))
             self.reload_printers()
-            self.worker.submit("capabilities", self.queries.refresh(printer, force=True))
+            self.refresh_capabilities()
 
     def remove_printer(self):
         printer = self.fleet_target()
         if printer:
             self.engine.cancel()
             self.queries.invalidate(printer.id)
+            self.engine.limits.invalidate(printer.id)
             self.client_cache.pop(printer.id, None)
             Credentials.set(printer.id, "")
             self.store.remove_printer(printer.id)
@@ -851,6 +919,9 @@ class Window(QMainWindow):
             self.conversation.session.response_complete()
 
     def result(self, name, value):
+        if name == "limits_review":
+            self.show_printer_limits(*value)
+            return
         if name == "capabilities":
             self.query_manager.reload()
         elif name == "reaction":

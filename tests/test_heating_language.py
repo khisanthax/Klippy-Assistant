@@ -161,6 +161,9 @@ async def test_printer_specific_limits_and_bed_selection(heating):
     store, sim, engine, _ = heating
     other = Printer(id="other",name="SV08",url="http://127.0.0.1:17126",approved=True)
     store.save_printer(other)
+    # Active firmware discovery is authoritative even without a manual cap.
+    # An explicit stricter cap remains individual to this printer.
+    store.set('heater_limits', {'sim': {'0': 200, '1': 100}, 'other': {'0': 80}})
     with pytest.raises(Rejected, match="limits"):
         await Conversation(engine).hear("Heat SV08 nozzle 90")
     assert store.get("selected") == "other" and not sim.writes

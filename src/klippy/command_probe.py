@@ -7,6 +7,7 @@ import httpx
 
 from .conversation import Conversation
 from .domain import Action, Intent, Printer
+from .limits_probe import synthetic_status
 from .moonraker import Moonraker
 from .safety import Rejected, SafetyEngine
 from .storage import Store
@@ -14,13 +15,16 @@ from .storage import Store
 
 async def run():
     writes, model_calls, cases = [], [], []
+    eventtime = 0
     def transport(request):
+        nonlocal eventtime
         if request.method != "GET":
             writes.append(request.url.path)
             raise AssertionError("Command qualification cannot send a heating operation")
-        return httpx.Response(200, json={"result": {"status": {
-            "webhooks": {"state": "ready"}, "print_stats": {"state": "standby"},
-            "extruder": {"temperature": 23.0}, "heater_bed": {"temperature": 21.0}}}})
+        eventtime += 1
+        status = synthetic_status()
+        result = {'objects': list(status)} if request.url.path.endswith('/list') else {'status': status, 'eventtime': eventtime}
+        return httpx.Response(200, json={'result': result})
     class NoModel:
         async def interpret(self, *args):
             model_calls.append(True)

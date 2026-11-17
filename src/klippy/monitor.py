@@ -6,16 +6,24 @@ from .moonraker import ConnectionFailure
 class Monitor:
     """Notification-only; deliberately has no reference to SafetyEngine or execute."""
 
-    def __init__(self, store, clients, queries=None):
+    def __init__(self, store, clients, queries=None, limits=None):
         self.store, self.clients = store, clients
         self.previous = {}
         self.cycles = 0
         self.mmu = {}
         self.semaphore = None
         self.queries = queries
+        self.limits = limits
 
     async def poll(self):
         import asyncio
+        if self.limits:
+            current = {p.id:p for p in self.store.printers() if p.approved}
+            for printer_id, (printer, task) in list(self.limits.watchers.items()):
+                if current.get(printer_id) != printer:
+                    task.cancel()
+                    self.limits.watchers.pop(printer_id, None)
+                    self.limits.invalidate(printer_id)
         self.cycles += 1
         if self.semaphore is None:
             self.semaphore = asyncio.Semaphore(4)
@@ -23,6 +31,8 @@ class Monitor:
             async with self.semaphore:
                 return await one(printer)
         async def one(printer):
+            if self.limits:
+                self.limits.watch(printer, self.queries)
             try:
                 snapshot = await self.clients(printer).snapshot()
             except (ConnectionFailure, KeyError, ValueError):
@@ -31,6 +41,18 @@ class Monitor:
             self.previous[printer.id] = snapshot
             reconnect = snapshot.connected and snapshot.ready and (
                 previous is None or not previous.connected or not previous.ready)
+            if self.limits:
+                if not snapshot.connected or not snapshot.ready:
+                    self.limits.invalidate(printer.id)
+                elif reconnect or self.cycles % 12 == 0:
+                    from .limits import LimitsUnavailable
+                    if reconnect:
+                        self.limits.watermarks.pop(printer.id, None)
+                        self.limits.invalidate(printer.id)
+                    try:
+                        await self.limits.refresh(printer)
+                    except LimitsUnavailable:
+                        pass  # Unknown capabilities cannot authorize writes.
             if self.queries:
                 if not snapshot.connected or not snapshot.ready:
                     self.queries.invalidate(printer.id)

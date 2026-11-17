@@ -15,17 +15,20 @@ def test_recovery_preserves_prior_wal_settings_and_resets_sensitive_preferences(
     store.set("followup_seconds", 90)
     store.set("confirmations", {"home": False})
     store.set("heater_limits", {"sim": {"0": 300}})
+    store.set('printer_limit_overrides', {'sim':{'motion':{'max_velocity':100}}})
     backup = store.restore(path)
     assert backup.is_file()
     previous = Store(backup)
     try:
         assert previous.get("followup_seconds") == 90
         assert previous.printers()[0].approved
+        assert previous.get('printer_limit_overrides') == {'sim':{'motion':{'max_velocity':100}}}
     finally:
         previous.close()
     assert store.get("followup_seconds") == 45
     assert store.get("confirmations") == {}
     assert store.get("heater_limits") is None
+    assert store.get('printer_limit_overrides') is None
     assert store.get("listening") == {"mode": "manual", "enabled": False}
     assert not store.printers()[0].approved
     assert store.get("selected") is None

@@ -172,6 +172,7 @@ class Store:
                 self.db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, json.dumps(value)))
             # Heater bounds belong to a reviewed physical device, not a restored identifier.
             self.db.execute("DELETE FROM settings WHERE key='heater_limits'")
+            self.db.execute("DELETE FROM settings WHERE key='printer_limit_overrides'")
             # Recovery never silently restores immediate actions or an enabled microphone.
             self.db.execute("INSERT OR REPLACE INTO settings VALUES ('confirmations','{}')")
             self.db.execute("INSERT OR REPLACE INTO settings VALUES ('listening',?)",

@@ -18,6 +18,8 @@ try:
                                   url="http://127.0.0.1:17125"))
         store.set("selected", "qa-simulation")
         store.set("response_style", "detailed")
+        store.set('printer_limit_overrides', {'qa-simulation':{'axes':{'x':{'position_max':200}}}})
+        store.set('heater_limits', {'qa-simulation':{'0':200,'1':100}})
         store.set("conversation_log", {"enabled": True, "transcripts": True, "responses": True,
                                        "timing": True, "retention_days": 7, "max_entries": 1000})
         store.set("voice_orb", {"diameter": 256, "position": "custom", "custom_position": [40, 50], "animations": False})
@@ -33,6 +35,8 @@ try:
         assert any(p.id == "qa-simulation" and not p.approved for p in store.printers())
         assert next(p for p in store.printers() if p.id == "qa-simulation").aliases == ("QA One", "Q1")
         assert store.get("selected") == "qa-simulation" and store.get("response_style") == "detailed"
+        assert store.get('printer_limit_overrides') == {'qa-simulation':{'axes':{'x':{'position_max':200}}}}
+        assert store.get('heater_limits') == {'qa-simulation':{'0':200,'1':100}}
         assert store.get("conversation_log") == {"enabled": True, "transcripts": True, "responses": True,
                                                  "timing": True, "retention_days": 7, "max_entries": 1000}
         assert store.get("voice_orb") == {"diameter": 256, "position": "custom", "custom_position": [40, 50], "animations": False}

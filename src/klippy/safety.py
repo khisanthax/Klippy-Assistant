@@ -12,6 +12,7 @@ from decimal import Decimal
 from .diagnostics import current as reaction_context
 from .diagnostics import timings
 from .domain import Action, Intent, Snapshot, digest, safe_macro_name
+from .limits import LimitsRegistry, LimitsUnavailable, number
 from .macros import discover
 from .moonraker import ConnectionFailure
 
@@ -33,7 +34,7 @@ def validate_intent_fields(intent):
             "The macro name doesn't match the requested operation. Please restate your request.",
             code="intent_macro_action_mismatch",
         )
-    if intent.action not in (Action.MACRO, Action.HEAT) and intent.params:
+    if intent.action not in (Action.MACRO, Action.HEAT, Action.MOVE) and intent.params:
         raise Rejected(
             "I couldn't match those settings to a heating or macro request. Please restate the operation and target; I haven't sent a command.",
             code="intent_parameters_for_" + intent.action.value,
@@ -69,6 +70,13 @@ def action_details(intent):
 READ_ONLY = {Action.STATUS, Action.TEMPERATURES, Action.MACROS}
 
 
+class Validation(tuple):
+    def __new__(cls, client, state, script, binding, review=None):
+        result = super().__new__(cls, (client, state, script, binding))
+        result.review = review
+        return result
+
+
 @dataclass(frozen=True)
 class Pending:
     token: str
@@ -92,6 +100,15 @@ class SafetyEngine:
         self.confirmation_seconds = 25
         self.history = None
         self.pending_trace = None
+        self.limits = LimitsRegistry(store, clients, clock=clock)
+        self.limits.on_invalidate = self.limits_invalidated
+
+    def limits_invalidated(self, printer_id):
+        with self.state_lock:
+            if self.pending:
+                intent = Intent.model_validate_json(self.pending.intent_json)
+                if intent.printer_id == printer_id and intent.action in {Action.MOVE, Action.HEAT}:
+                    self.cancel("capability_changed")
 
     def audit(self, event, *, trace=None, **fields):
         if self.history:
@@ -141,7 +158,10 @@ class SafetyEngine:
 
     async def validate(self, intent: Intent):
         with timings.span('command_validation'):
-            return await self._validate(intent)
+            try:
+                return await self._validate(intent)
+            except LimitsUnavailable as exc:
+                raise Rejected(str(exc), code="printer_limits_unavailable") from None
 
     async def _validate(self, intent: Intent):
         printer = next((p for p in self.store.printers() if p.id == intent.printer_id), None)
@@ -155,7 +175,7 @@ class SafetyEngine:
         state = Snapshot(connected=True) if intent.action == Action.EMERGENCY else await client.snapshot()
         if not state.connected:
             raise Rejected("Printer disconnected")
-        script, policy = None, {}
+        script, policy, motion_review = None, {}, None
         if intent.action not in READ_ONLY and intent.action != Action.EMERGENCY:
             if not state.ready:
                 raise Rejected("Printer is not ready")
@@ -165,6 +185,7 @@ class SafetyEngine:
                 Action.CANCEL: {"printing", "paused"},
                 Action.HOME: {"standby", "complete", "cancelled"},
                 Action.HEAT: {"standby", "complete", "cancelled", "paused"},
+                Action.MOVE: {"standby", "complete", "cancelled"},
                 Action.MACRO: {"standby", "complete", "cancelled"},
             }
             if state.state not in required.get(intent.action, set()):
@@ -172,7 +193,7 @@ class SafetyEngine:
         if intent.action == Action.HOME:
             script = "G28"
         if intent.action == Action.HEAT:
-            # No guessed heater limits. Installations must have verified limits in settings.
+            # Firmware authority plus optional stricter owner caps; no guessed limits.
             if set(intent.params) != {"temperature", "heater"}:
                 raise Rejected("Specify heater (0=nozzle, 1=bed) and temperature")
             heater, temperature = intent.params["heater"], intent.params["temperature"]
@@ -185,17 +206,36 @@ class SafetyEngine:
                     "The selected printer isn't reporting a valid temperature for that heater. Check its connection before requesting heat.",
                     code="heat_heater_unavailable",
                 )
-            limits = self.store.get("heater_limits", {}).get(printer.id, {})
-            maximum = limits.get(str(int(heater)))
-            if type(maximum) not in (int, float) or not math.isfinite(maximum) or maximum < 0:
-                raise Rejected(
-                    "Please review this printer's heater limits in Settings before requesting heat.",
-                    code="heat_limits_need_review",
-                )
-            if not 0 <= temperature <= maximum:
-                raise Rejected("Temperature is outside locally reviewed heater limits")
-            policy = {"maximum": maximum}
+            record = await self.limits.refresh(printer)
+            if (heater == 0 and record.status.get('toolhead', {}).get('extruder') != 'extruder'
+                    or ('M140' if heater == 1 else 'M104') in record.capabilities['shadowed_commands']):
+                raise Rejected("The active heater or overridden heater command cannot be verified; use supervised printer controls.")
+            if record.status.get('print_stats', {}).get('state') not in {"standby", "complete", "cancelled", "paused"}:
+                raise Rejected("Current printer state does not permit heating")
+            reported = record.status.get(name, {}).get('temperature')
+            if number(reported) is None or reported < -273.15:
+                raise Rejected("The selected heater is not reporting a valid current temperature.", code="heat_heater_unavailable")
+            configured = self.limits.effective(record)['heaters'].get(name, {})
+            minimum, maximum = configured.get('min_temp'), configured.get('max_temp')
+            if number(minimum) is None or number(maximum) is None or minimum >= maximum or maximum <= 0:
+                raise Rejected("Active Klipper heater limits are unavailable or invalid; heating is blocked.", code="heat_limits_unknown")
+            caps = self.store.get("heater_limits", {}).get(printer.id, {})
+            owner_cap = caps.get(str(int(heater)))
+            if str(int(heater)) in caps:
+                if number(owner_cap) is None or owner_cap < 0:
+                    raise Rejected("The owner's heater limits are invalid; review local limits.")
+                maximum = min(maximum, owner_cap)
+            if not (temperature == 0 or max(0,minimum) <= temperature <= maximum) or temperature > maximum:
+                raise Rejected("Temperature is outside the active Klipper or stricter owner heater limits.")
+            policy = {"minimum": minimum, "maximum": maximum, "configuration":record.fingerprint,
+                      "generation":record.generation, "owner_caps":caps,
+                      "owner_overrides":self.store.get('printer_limit_overrides',{}).get(printer.id,{})}
             script = f"{'M104' if heater == 0 else 'M140'} S{numeric_text(temperature)}"
+        if intent.action == Action.MOVE:
+            from .motion import plan_move
+            record = await self.limits.refresh(printer)
+            plan = plan_move(intent,record,self.limits.effective(record),self.store.get('printer_limit_overrides',{}).get(printer.id,{}))
+            script, policy, motion_review = plan.script, plan.binding, plan.review
         if intent.action == Action.MACRO:
             if not intent.macro or not safe_macro_name(intent.macro):
                 raise Rejected("Invalid macro")
@@ -253,13 +293,14 @@ class SafetyEngine:
                 "confirmations": self.store.get("confirmations", {}),
             }
         )
-        return client, state, script, binding
+        return Validation(client, state, script, binding, motion_review)
 
     async def propose(self, intent: Intent, *, defer_confirmation=False, force_confirmation=False):
         async with self.lock:
             self.cancel()
             generation = self.generation
-            client, state, _script, binding = await self.validate(intent)
+            validated = await self.validate(intent)
+            client, state, _script, binding = validated
             if generation != self.generation:
                 raise Rejected("Request was canceled or target changed during validation")
             if intent.action in READ_ONLY:
@@ -293,12 +334,12 @@ class SafetyEngine:
             printer = next(p for p in self.store.printers() if p.id == intent.printer_id)
             warning = (
                 " Check the bed and toolhead path are clear."
-                if intent.action in (Action.HOME, Action.MACRO)
+                if intent.action in (Action.HOME, Action.MACRO, Action.MOVE)
                 else ""
             )
             provenance = "Model interpretation requires explicit review. " if force_confirmation else ""
             review = (
-                f"{provenance}Confirm {action_details(intent)} on {printer.name}?{warning} "
+                f"{provenance}Confirm {validated.review or action_details(intent)} on {printer.name}?{warning} "
                 f"Say exactly 'confirm' or choose Confirm within {self.confirmation_seconds} seconds after the prompt finishes."
             )
             if len(review) > 550:

@@ -1,5 +1,39 @@
 # Logbook
 
+## 2026-11-17 - Capability registry and deterministic direct-motion candidate
+
+Reviewed current official Moonraker object API and Klipper status/config/G-code references,
+plus Cartesian/CoreXY and gcode_move implementations. Startup settings differ from runtime
+velocity/acceleration; G92 mapping must use current machine/G-code position difference.
+Implemented limits.py, motion.py and SafetyEngine integration. No generic endpoint writes,
+model motion authority, automatic retries or firmware-setting modifications introduced.
+
+Registry is per approved printer, sanitizes discovered values, tracks configuration digest,
+generation/freshness and replay watermark, refreshes on enrollment/reconnect/lifecycle/config
+changes and revokes pending motion/heating. Unknown/nonrectangular layouts retain native
+capabilities while movement blocks. Exact one-axis destinations, homing, stationary/live
+coherence, modes/offsets, global/Z caps and optional stricter owner policy are checked twice.
+State is saved/restored without MOVE; confirmation always required for direct motion.
+
+Heating now requires active firmware bounds, actual heater telemetry and selected extruder;
+old owner caps remain restrictive. Explicit malformed owner caps and shadowed standard
+commands block. Two previous manual-cap-only fixtures now supply real synthetic active
+configuration; absent authority remains tested even when an owner cap is supplied.
+
+Added limits Settings inspection/strict-only JSON editor and separate movement inventory.
+Native desktop passed 29 orb/26 feature checks, including actual edit controls. Focused 117
+limits/motion cases pass; full regression/Ruff and native model/package qualification are in
+progress. Earlier local iterations exposed numeric 'minus 200' normalization, an inventory
+classification label and test fixtures with colliding aliases; corrected with regressions.
+Packaged limits probe forbids all HTTP writes and is a mandatory preview gate. Existing
+acoustic/interrupt/query/dialogue/audio/model protections retained. Models unchanged.
+
+Next: finish complete suite and native probes, exact-source Windows build/0.7.2 upgrade/offline/
+settings/recovery/memory qualification, verify assets and publish accurately labelled preview.
+Issue #19 remains open for supervised hardware/unsupported motion scope acceptance. No real
+printer connections/actions or owner profile/device changes. Physical clearance, human audio,
+clean desktop VM, actual16GB and sustained device-load gates remain open.
+
 ## 2026-11-15 - 0.7.2 preview published and owner installation updated
 
 Published https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.2-preview.1 at qualified source

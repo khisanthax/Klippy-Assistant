@@ -2,6 +2,13 @@
 
 Fully local Windows desktop companion for explicitly approved Klipper/Moonraker printers.
 
+The **0.8 capability limits candidate** adds per-printer active configuration discovery,
+stricter owner limits, and mandatory reviewed single-axis relative/absolute movement on
+verified Cartesian/CoreXY setups. Unsupported kinematics/transforms and ambiguous bed
+directions block safely. Firmware heater limits intersect existing local caps. See
+[Printer capabilities and limits](docs/PRINTER_LIMITS.md) and [candidate qualification](PREVIEW8_REPORT.md).
+Publication is pending complete Windows qualification; firmware limits never prove physical clearance.
+
 Current engineering preview **[0.7.2-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.2-preview.1)** fixes spatial query routing:
 Z-height/elevation/coordinate questions and axis follow-ups use deterministic matching and
 validated commanded positions. Unrelated model-selected measurements ask for clarification.
