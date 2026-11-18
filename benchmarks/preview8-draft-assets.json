@@ -1,0 +1,72 @@
+{
+  "release_candidate": "v0.8.0-preview.1",
+  "draft": true,
+  "published": false,
+  "qualified_for_publication": false,
+  "source_commit": "5862ec29cbaa37dc2e7b8501dac3033b135e47d1",
+  "draft_url": "https://github.com/khisanthax/Klippy-Assistant/releases/tag/untagged-81cfe0d1fb46b1857f5f",
+  "release_id": 449346304,
+  "blocker": "GitHub Actions budget prevents required Windows CI/installed qualification",
+  "verified_assets": [
+    {
+      "name": "Klippy-Setup-0.8.0-preview.1.exe",
+      "bytes": 1489543358,
+      "sha256": "c4f78386009211369424f013e8165de925275a26734c5f9214751a39b6110256",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "Klippy-Setup-0.8.0-preview.1.exe.sha256",
+      "bytes": 100,
+      "sha256": "03f919c896593b023576b7809b547d262b73308c328cf0bbde3312770030cb80",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "preview8-local-frozen-orb.json",
+      "bytes": 6598,
+      "sha256": "0ee089b5a77aa0f694baa590ed8b3f632ae4ecace0e7dfd02bcfd8a134762660",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "preview8-local-frozen-wake.json",
+      "bytes": 9524,
+      "sha256": "8b198cf87277587e29f2c1dc8af1449153f803842669d9f80a8284beda3cbd67",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "preview8-local-frozen.json",
+      "bytes": 22677,
+      "sha256": "b6ef72ac430fb592207723bb4aea68a14747627af22e64027be137b49e9025e3",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "preview8-local-memory-voice.json",
+      "bytes": 22678,
+      "sha256": "0c378beaba8620486a567684bb150af677fe1d59597adf4773311fe64352e488",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "preview8-local-memory.json",
+      "bytes": 638,
+      "sha256": "664cdd51d6ac240ab8fd350cf957fbc967312c8cd129a82cb057598cff993a80",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "preview8-local-package-qualification.json",
+      "bytes": 68300,
+      "sha256": "9da332c65a62207131c29eaebe0932b7f6632ed814046abc9cb6b91199a90e70",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "PREVIEW8_REPORT.md",
+      "bytes": 4609,
+      "sha256": "a2a5f0bc32c38001c22f247d257215d289b99f07855c45d56366a4c30719af85",
+      "remote_digest_verified": true
+    },
+    {
+      "name": "PRINTER_LIMITS.md",
+      "bytes": 9290,
+      "sha256": "fbcb38b2e5060a4925faaea1fec563d665e87abf4ae7b9ac3873567c69aeba32",
+      "remote_digest_verified": true
+    }
+  ]
+}

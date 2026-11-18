@@ -1,5 +1,18 @@
 # Logbook
 
+## 2026-11-17 - Unpublished 0.8 draft prepared and all assets verified
+
+Prepared GitHub draft release 449346304 at exact app source 5862ec2. All ten candidate assets,
+including the installer, match local sizes and SHA-256 against GitHub server digests. Receipt:
+benchmarks/preview8-draft-assets.json. It remains draft=True, prerelease=True, published=False,
+qualified_for_publication=False. Latest published 0.7.2 and owner installation are unchanged.
+Implementation and evidence pushed to main; no forced history edits or printer actions.
+
+Required next action: enable GitHub Actions budget, rerun workflow 44202364931 on exact source,
+complete all Windows and installed/offline/upgrade/memory gates, verify the resulting CI-built
+installer and assets, then publish the qualified preview. Do not publish the local candidate
+in place of missing CI evidence. Issue #19 and PREVIEW8_REPORT.md explain the open gates.
+
 ## 2026-11-17 - 0.8 local frozen package passed; publication blocked by Actions budget
 
 Exact app source 5862ec29cbaa37dc2e7b8501dac3033b135e47d1. Local build reran 886 tests/Ruff and verified
