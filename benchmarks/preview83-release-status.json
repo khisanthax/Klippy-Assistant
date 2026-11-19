@@ -1,0 +1,150 @@
+{
+  "version": "v0.8.0-preview.3",
+  "source_sha": "ffcff59f6ff8b7a1ef2f9691098d5e2adc1c2ca7",
+  "qualified_for_publication": false,
+  "published": false,
+  "installer": {
+    "filename": "Klippy-Setup-0.8.0-preview.3.exe",
+    "bytes": 1489583311,
+    "sha256": "3d821a9d01a814a0543db6a3c72cdbde73170d68df85cf9a66221fc9fe3c9d64"
+  },
+  "portable_executable_sha256": "412dbdd10c61e6d467209ff1118b096b8ec99009ab9120b51018eef85a106800",
+  "local_windows": {
+    "tests_passed": 922,
+    "ruff": "passed",
+    "verified_model_assets": 57,
+    "frozen_startup": "passed",
+    "orb_checks": 29,
+    "qt_feature_checks": 26,
+    "wake_cases": 25,
+    "voice_gates": {
+      "standalone_wake": true,
+      "own_echo": true,
+      "verified_interruption": true,
+      "local_language": true,
+      "no_printer_writes": true,
+      "wake_cases_present": true,
+      "paced_captured_status": true,
+      "three_unprefixed_followups": true,
+      "grounded_dialogue": true,
+      "audio_signal_and_delivery": true,
+      "read_only_query_catalog": true,
+      "no_negative_query_activation": true,
+      "capability_limits_and_motion_safety": true,
+      "heating_parser_and_cancel_safety": true
+    },
+    "read_only_query_cases": 11,
+    "heating_and_cancel_cases": 21,
+    "limit_cases": 10,
+    "simulated_probe_writes": 0,
+    "continuous_wake_and_request": true,
+    "frozen_profile_before_after_matching_sha256": {
+      "on": "01075b00b3854d8a642cf885abc4bf6b3bda2dca25475d1fc7720ce56d540dc2",
+      "off": "78db327c918e48aca5bb0e84d4866a48b03fc2f1f9b82fc3bdd751357b283845"
+    }
+  },
+  "process_tree_budget": {
+    "passed": false,
+    "memory_budget_gib": 16,
+    "peak_job_commit_bytes": 2528735232,
+    "host_ram_bytes": 68630749184,
+    "peak_active_processes": 3,
+    "wall_seconds": 108.224,
+    "cpu_seconds": 192.844
+  },
+  "budgeted_playback": {
+    "first_pcm_render_seconds": 10.09,
+    "queue_gap_seconds": 0.0,
+    "receipt": true,
+    "queue_underruns": 0,
+    "missing_samples": 0,
+    "device_underflows": 0,
+    "device_overflows": 0,
+    "device_status_events": 0,
+    "clipped_samples": 0,
+    "invalid_pcm": 0,
+    "prefill_frames": 161440,
+    "complete_pcm_fallbacks": 1
+  },
+  "budgeted_continuous_wake_and_request": false,
+  "prior_failed_run": "preview82-release-status.json",
+  "report_sha256": {
+    "frozen-build.json": "174e789aa9683fcb5c0c09030a4967ba99f7c9c67ea31a524fa5f12a56ed1845",
+    "frozen-orb.json": "99a71d0afd4e9a7b188e0cd3f7fdbb70cd00f540ff27f8ddb037c0096d55d179",
+    "frozen-profile-off.txt": "6a094b8cba94f40ee80fa0c6d670e49c904ff43d864a9a71496a8cd644367f33",
+    "frozen-profile-on.txt": "6a094b8cba94f40ee80fa0c6d670e49c904ff43d864a9a71496a8cd644367f33",
+    "frozen-profile-receipts.json": "bcde4c69679fb3e6f6ee72bc4ebf2f7bc4eb7e32c1e34d9d0e8ae5a9f6c86cba",
+    "frozen-smoke.txt": "6a094b8cba94f40ee80fa0c6d670e49c904ff43d864a9a71496a8cd644367f33",
+    "frozen-voice.json": "a3b1d1a19ca41c30ef4502dd342c873ace5620de5ac44c9e1f6e48ffcc021a2e",
+    "frozen-wake.json": "d5eefbb75bfb080bf21e35720ba1506d8063b9378d5d6d07c39e2322293f66d7",
+    "performance-budget.json": "7ac9b3f8c417941c14f8918cbd3f4906471451f6b399553d75d9237203c55440",
+    "performance-voice.json": "dabf6a4daf58d6cc5fd5457045d8fae89bf4393128d8fd3b77ddbc222e1eca32"
+  },
+  "hosted_windows": {
+    "status": "infrastructure-blocked",
+    "run_id": "44616461107",
+    "attempt": 1,
+    "steps_executed": 0,
+    "reason": "GitHub Actions account budget",
+    "pull_request": 20
+  },
+  "open_publication_gates": [
+    "consistent verified synthetic interruption under the process-tree budget",
+    "hosted Windows build",
+    "installed runtime with external networking blocked",
+    "previous-version upgrade, reinstall and uninstall for both consent profiles",
+    "installed 16 GiB process-tree test",
+    "hosted release evidence verification"
+  ],
+  "open_hardware_acceptance": [
+    "owner microphone and room",
+    "supervised physical printer",
+    "clean Windows desktop VM",
+    "actual 16 GB host"
+  ],
+  "budgeted_attempts": [
+    {
+      "attempt": "budget-attempt-1",
+      "passed": false,
+      "failed_gates": [
+        "verified_interruption"
+      ],
+      "peak_job_commit_bytes": 2528735232,
+      "peak_active_processes": 3,
+      "wall_seconds": 108.224,
+      "playback_gap_seconds": 0.0,
+      "delivery_receipt": true,
+      "playback_flushed": true,
+      "barge_requests": [],
+      "final_synthetic_asr": "Clibby stop talking",
+      "continuous_wake_and_request": false,
+      "printer_writes": 0,
+      "report_sha256": {
+        "performance-budget.json": "7ac9b3f8c417941c14f8918cbd3f4906471451f6b399553d75d9237203c55440",
+        "performance-voice.json": "dabf6a4daf58d6cc5fd5457045d8fae89bf4393128d8fd3b77ddbc222e1eca32"
+      }
+    },
+    {
+      "attempt": "budget-attempt-2",
+      "passed": true,
+      "failed_gates": [],
+      "peak_job_commit_bytes": 2539888640,
+      "peak_active_processes": 3,
+      "wall_seconds": 108.378,
+      "playback_gap_seconds": 0.0,
+      "delivery_receipt": true,
+      "playback_flushed": true,
+      "barge_requests": [
+        "Klippy stop talking"
+      ],
+      "final_synthetic_asr": "Clippy stop talking",
+      "continuous_wake_and_request": true,
+      "printer_writes": 0,
+      "report_sha256": {
+        "performance-budget.json": "7e4830ace9bcc671ad5812ad7d7e1df4f342cf23459be196cea456bc412bff79",
+        "performance-voice.json": "975b384df4b7b4de0a7f05871b7aa580089976f95bec213fdde604f10c7e0947"
+      }
+    }
+  ],
+  "budgeted_attempts_passed": 1
+}

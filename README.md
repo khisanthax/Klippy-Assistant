@@ -6,11 +6,13 @@ The **0.8 capability limits candidate** adds per-printer active configuration di
 stricter owner limits, and mandatory reviewed single-axis relative/absolute movement on
 verified Cartesian/CoreXY setups. Unsupported kinematics/transforms and ambiguous bed
 directions block safely. Firmware heater limits intersect existing local caps. See
-[Printer capabilities and limits](docs/PRINTER_LIMITS.md) and the [preview.2 qualification record](benchmarks/preview82-release-status.json).
-The unpublished preview.2 candidate passed 920 local Windows tests and Ruff. It checks for
+[Printer capabilities and limits](docs/PRINTER_LIMITS.md) and the [preview.3 qualification record](benchmarks/preview83-release-status.json).
+The unpublished preview.3 candidate passed 922 local Windows tests and Ruff. It checks for
 cancellation and changes to the reviewed policy immediately before transmission. Restored
-printers require a separate limits review. The Actions budget blocks hosted Windows installer
-qualification. Firmware limits
+printers require a separate limits review. Slow multi-sentence speech waits for complete
+audio when the first group takes its full playback duration to generate. The Actions
+budget blocks hosted Windows installer qualification. Both budgeted runs passed playback
+delivery. One of two passed the synthetic interruption check. Firmware limits
 never prove physical clearance.
 
 Current engineering preview **[0.7.2-preview.1](https://github.com/khisanthax/Klippy-Assistant/releases/tag/v0.7.2-preview.1)** fixes spatial query routing:

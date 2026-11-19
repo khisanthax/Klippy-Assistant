@@ -1,5 +1,28 @@
 # Logbook
 
+## 2026-11-19 - Preview.3 packaged, publication still open
+
+Application source `ffcff59f6ff8b7a1ef2f9691098d5e2adc1c2ca7` is on PR #20.
+The Windows build passed 922 tests, Ruff, 57 asset checks, frozen startup, 29 orb
+checks, 26 desktop feature checks and the native voice suite. Both synthetic consent
+profiles preserved their seeded SQLite content after frozen startup. The independently
+verified installer is in `dist/Klippy-Setup-0.8.0-preview.3.exe`.
+
+Both 16 GiB process-tree runs had zero playback gaps and successful delivery receipts.
+In the measured slow replay, playback started at 12.08 seconds, compared with 4.53 seconds
+before the correction. The fast control started at 0.30 seconds. One of two budgeted
+runs passed overall. Playback stopped in both. The first run rejected the synthetic
+transcript “Clibby stop talking” and delivered zero commands. The second recognized
+“Clippy stop talking.” Continuous wake-plus-request also varied between the two runs.
+The peak process-tree commit was 2.37 GiB. The microphone and physical printers were
+outside this test. Both raw runs are retained under `local/preview83-qualification`.
+
+GitHub Actions run 44616461107 stopped before its first step because of the account
+budget. The next release checks are reproducible synthetic interruption and a hosted
+installer upgrade, offline run, reinstall and uninstall against both consent profiles.
+Clean desktop, actual 16 GB host and supervised hardware acceptance remain open.
+[Qualification record and digests](benchmarks/preview83-release-status.json)
+
 ## 2026-11-19 - Measured multi-sentence playback regression
 
 The preview.2 frozen run passed, but the 16 GiB job on the identical binary reproduced a
