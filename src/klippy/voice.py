@@ -23,7 +23,6 @@ from .audio import (
     EchoFilter,
     Playback,
     default_device_pair,
-    synthesis_reserve,
 )
 from .diagnostics import current, timings
 from .models import verify_pack
@@ -365,14 +364,11 @@ class VoiceLoop:
                             converter = SpeechResampler(rate)
                         elif rate != converter.source:
                             raise ValueError('TTS changed sample rate mid-utterance')
-                        # SDK progress describes completed sentence groups. Under slow
-                        # generation, reserve bounded time for future chunks; never sleep
-                        # or resample inside capture/render callbacks.
+                        # SDK progress describes completed sentence groups.
                         if first_chunk and 0 < progress < 1 and len(pcm):
                             now = time.monotonic()
                             duration = len(pcm)/rate
-                            reserve=synthesis_reserve(now-synth_began,duration,progress)
-                            self.playback.defer_start(epoch,stream,now+min(2.0,reserve),complete_first=reserve>2.0)
+                            self.playback.buffer_first_chunk(epoch, stream, now-synth_began, duration, progress)
                         first_chunk = False
                         timings.mark("tts_first_pcm")
                         self.playback.enqueue(converter.push(pcm),epoch,stream=stream)

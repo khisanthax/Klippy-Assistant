@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "klippy-assistant"
-version = "0.8.0.dev2"
+version = "0.8.0.dev3"
 description = "Local Windows companion for approved Klipper printers"
 requires-python = ">=3.12"
 dependencies = ["PySide6>=6.8,<7", "httpx>=0.28,<1", "websockets>=15,<18", "pydantic>=2.10,<3", "keyring>=25,<26", "zeroconf>=0.145,<1", "numpy>=2,<3", "sounddevice>=0.5,<1", "sherpa-onnx>=2.0,<3", "pywebrtc-audio==0.2.0"]

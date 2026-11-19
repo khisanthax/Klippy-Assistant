@@ -9,13 +9,6 @@ RATE = 16000
 FRAME = 160  # WebRTC AEC uses 10 ms frames.
 
 
-def synthesis_reserve(elapsed, chunk_seconds, progress):
-    """Estimated reserve; callers complete PCM first if it exceeds two seconds."""
-    if not (np.isfinite(progress) and 0<progress<1 and elapsed>=0 and chunk_seconds>0):
-        return 0.0
-    return max(0.0,elapsed/progress-chunk_seconds/progress+chunk_seconds+.12-elapsed)
-
-
 class AudioLevels:
     """Best-effort numeric telemetry. Never blocks audio or retains PCM/transcripts."""
 
@@ -92,6 +85,15 @@ class Playback:
             self.prefill, self.not_before = prefill, 0.0
             self.complete_first = False
             return self.stream_token
+
+    def buffer_first_chunk(self, generation, stream, elapsed, seconds, progress):
+        if not (0 < progress < 1 and elapsed >= 0 and seconds > 0):
+            return
+        # If the producer already trails playback, one chunk cannot predict how
+        # long the remaining sentences take. EOF supplies the delivery boundary.
+        complete_first = elapsed >= seconds
+        delay = max(0.0, .12 - (seconds - elapsed) * (1 / progress - 1)) if not complete_first else 0.0
+        self.defer_start(generation, stream, self.clock() + delay, complete_first=complete_first)
 
     def defer_start(self, generation, stream, when, *, complete_first=False):
         with self.lock:

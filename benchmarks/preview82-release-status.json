@@ -1,0 +1,100 @@
+{
+  "version": "v0.8.0-preview.2",
+  "source_sha": "6e69120652dccb5da3c62433e57531e1fa23d3b9",
+  "qualified_for_publication": false,
+  "published": false,
+  "local_installer": {
+    "filename": "Klippy-Setup-0.8.0-preview.2.exe",
+    "bytes": 1489579864,
+    "sha256": "97de6b2c57303f2fc2399cd5ea61825632734e69ffb3fc1ffc398d8ce69ee817",
+    "portable_executable_sha256": "ca6538e96aad5f1742ba8e32fc2291e8218e94e3ae4f1f05a394c7b7a261b01e"
+  },
+  "windows_source_tests": {
+    "passed": 920,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "ruff": "passed"
+  },
+  "verified_model_assets": 57,
+  "frozen_startup": "passed",
+  "frozen_orb_checks": 29,
+  "frozen_qt_feature_checks": 26,
+  "frozen_wake_cases": 25,
+  "frozen_native_gates": {
+    "standalone_wake": true,
+    "own_echo": true,
+    "verified_interruption": true,
+    "local_language": true,
+    "no_printer_writes": true,
+    "wake_cases_present": true,
+    "paced_captured_status": true,
+    "three_unprefixed_followups": true,
+    "grounded_dialogue": true,
+    "audio_signal_and_delivery": true,
+    "read_only_query_catalog": true,
+    "no_negative_query_activation": true,
+    "capability_limits_and_motion_safety": true,
+    "heating_parser_and_cancel_safety": true
+  },
+  "frozen_continuous_wake_and_request": false,
+  "frozen_query_cases": 11,
+  "frozen_command_cases": 21,
+  "frozen_limits_cases": 10,
+  "simulated_probe_printer_writes": 0,
+  "frozen_profile_smoke_pre_post_matching_sha256": {
+    "on": "f66ca1c5ee0ec5a574c6bc559f22aa2f428d19608502ae92253b8727c0993470",
+    "off": "78db327c918e48aca5bb0e84d4866a48b03fc2f1f9b82fc3bdd751357b283845"
+  },
+  "local_process_tree_budget": {
+    "passed": false,
+    "memory_budget_gib": 16,
+    "peak_job_commit_bytes": 2528866304,
+    "peak_active_processes": 3,
+    "wall_seconds": 122.61,
+    "cpu_seconds": 185.203,
+    "host_ram_bytes": 68630749184
+  },
+  "local_report_sha256": {
+    "frozen-orb.json": "3e3296171c87fa1b7d460c7696d9c46196bb9ee2f89d5070065b0b358bf57712",
+    "frozen-wake.json": "cc38877a820256061188d4768c73138b0e74194d7be308bbbdb7edbb91854c6b",
+    "frozen-smoke.txt": "6a094b8cba94f40ee80fa0c6d670e49c904ff43d864a9a71496a8cd644367f33",
+    "frozen-voice.json": "04b6f67c8bec64afe0d0b1d6573f8feac18364f5e23ad8d652c04b6c5033812c",
+    "performance-budget.json": "4f50ae4334174de09dd04166ba6c2c339f2191ebd36b9c87bd84e1d733482f79",
+    "performance-voice.json": "42f4edb49c4ec0ffcd54c858e91836eeb210e0564aded05f0ed570af0b852a58",
+    "frozen-profile-receipts.json": "33de9de100b12dcb8b3644936b44eb3b4d3ac24cd76d9604d392fb07fbbfa5cb"
+  },
+  "budgeted_playback": {
+    "first_pcm_render_seconds": 4.53,
+    "queue_gap_seconds": 1.63,
+    "receipt": false,
+    "queue_underruns": 1,
+    "missing_samples": 26100,
+    "device_underflows": 0,
+    "device_overflows": 0,
+    "device_status_events": 0,
+    "clipped_samples": 0,
+    "invalid_pcm": 0,
+    "prefill_frames": 98560,
+    "complete_pcm_fallbacks": 0
+  },
+  "hosted_windows": {
+    "status": "infrastructure-blocked",
+    "run_id": "44612720342",
+    "attempt": 1,
+    "steps_executed": 0,
+    "reason": "GitHub Actions account budget"
+  },
+  "missing_release_evidence": [
+    "hosted Windows build",
+    "firewall-blocked installed runtime",
+    "cross-version upgrade, reinstall and uninstall with both consent profiles",
+    "installed process-tree budget run"
+  ],
+  "open_acceptance": [
+    "owner microphone and room",
+    "supervised physical printer",
+    "clean Windows desktop VM",
+    "actual 16 GB host"
+  ]
+}

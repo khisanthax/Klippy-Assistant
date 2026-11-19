@@ -1,5 +1,9 @@
 # Klippy process audit, 19 November 2026
 
+The corrections from this audit landed in application source `6e69120`. The qualification
+record includes the local installer digest, test results and open acceptance gates.
+[Preview.2 status](../benchmarks/preview82-release-status.json)
+
 Reviewed main at 9081c56. Three fresh experiments used temporary profiles and synthetic status through the conversation and safety paths. One recorded a POST inside HTTPX MockTransport. No network connection to a printer or access to the owner's history was needed. The 886-test result belongs to the candidate's existing qualification evidence. This audit did not rerun the suite.
 
 | Priority | Finding and evidence | Corrective action and acceptance criterion |

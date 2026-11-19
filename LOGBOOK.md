@@ -1,5 +1,18 @@
 # Logbook
 
+## 2026-11-19 - Measured multi-sentence playback regression
+
+The preview.2 frozen run passed, but the 16 GiB job on the identical binary reproduced a
+1.63-second queue gap. Kokoro delivered 73,114 samples at 24 kHz after 3.50 seconds.
+The estimated delay allowed playback to start while the producer was already behind.
+The receipt correctly failed. Peak job commit was 2,528,866,304 bytes across three processes.
+The preview.2 evidence retains that failed run. All printer services were simulated.
+
+Preview.3 uses the existing interruptible complete-PCM buffer when generating the first
+sentence group takes at least as long as its audio duration. A deterministic replay
+uses the measured arrivals and lengths. A faster replay checks that playback still starts
+before synthesis finishes. The microphone and confirmation receipt paths are unchanged.
+
 ## 2026-11-19 - Final dispatch state and artifact identity
 
 A second review traced edits to the local cap and confirmation policy during final endpoint
