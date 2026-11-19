@@ -180,31 +180,11 @@ def test_personality_preferences_backup_restore_is_validated_atomically(rig, tmp
 
 
 @pytest.mark.parametrize("defect", ["summary", "actual_model_composed", "no_pending_or_writes"])
-def test_dialogue_failure_blocks_preview_even_when_other_gates_pass(defect):
-    from pathlib import Path
+def test_dialogue_failure_blocks_preview_even_when_other_gates_pass(defect, preview_evidence):
 
     from klippy.voice_probe import qualify_preview_report
 
-    report = json.loads(
-        (Path(__file__).parents[1] / "benchmarks/preview6-release-frozen.json").read_text(encoding="utf-8")
-    )
-    report["dialogue"] = {
-        "passed": True,
-        "checks": {
-            key: True
-            for key in [
-                "routine_no_model",
-                "routine_verified_nozzle",
-                "followup_bed",
-                "actual_model_composed",
-                "explanation_keeps_verified_observation",
-                "casual_without_printer",
-                "no_pending_or_writes",
-                "model_latency_bounded",
-            ]
-        },
-    }
-    report['limits_probe'] = {'passed':True,'printer_writes':0,'cases':[{'passed':True} for _ in range(8)]}
+    report = preview_evidence
     qualify_preview_report(report)
     assert report["engineering_preview_passed"]
     if defect == "summary":

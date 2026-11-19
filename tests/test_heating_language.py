@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from unittest.mock import patch
 
 import httpx
@@ -367,10 +366,9 @@ async def test_packaged_command_probe_requires_all_twenty_one_cases_without_writ
 
 @pytest.mark.parametrize("field,value", [("passed",False), ("printer_writes",1),
                                        ("supported_request_llm_calls",1), ("pending_write",True)])
-def test_preview_rejects_failed_command_qualification(field, value):
+def test_preview_rejects_failed_command_qualification(field, value, preview_evidence):
     from klippy.voice_probe import qualify_preview_report
-    report = json.loads((Path(__file__).parents[1] / "benchmarks/preview5-release-frozen.json").read_text())
-    report["heat_fix_probe"] = {"passed":True,"printer_writes":0,"supported_request_llm_calls":0,"pending_write":False}
+    report = preview_evidence
     report["heat_fix_probe"][field] = value
     qualify_preview_report(report)
     assert not report["preview_gates"]["heating_parser_and_cancel_safety"]

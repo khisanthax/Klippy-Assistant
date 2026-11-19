@@ -1,0 +1,6 @@
+{
+  "upstream_revision": "a86759335197374d2787c87477b21e2af6fa07e1",
+  "sources": ["klippy/toolhead.py", "klippy/extras/gcode_move.py"],
+  "toolhead": {"extruder": "extruder", "extra_axes": {"extruder": 3}},
+  "gcode_move": {"axis_map": {"X": 0, "Y": 1, "Z": 2, "E": 3}}
+}

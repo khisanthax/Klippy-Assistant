@@ -539,15 +539,9 @@ async def test_delayed_old_endpoint_response_cannot_poison_new_printer_cache(que
 
 @pytest.mark.parametrize("broken", [None, "negative_accept", "negative_session", "standalone_wake", "own_echo", "verified_interruption",
                                       "local_language", "no_printer_writes", "paced_status", "query", "query_write"])
-def test_preview_envelope_never_changes_or_claims_full_voice_acceptance(broken):
+def test_preview_envelope_never_changes_or_claims_full_voice_acceptance(broken, preview_evidence):
     from klippy.voice_probe import qualify_preview_report
-    report = {"passed": False, "gates": {"captured_status": False, "negative_words": False,
-              "standalone_wake": True, "own_echo": True, "verified_interruption": True,
-              "local_language": True, "no_printer_writes": True},
-              "paced_pipeline_transcripts": ["Klippy", "status"], "paced_status_response": "63% complete",
-              "query_catalog": {"passed": True, "printer_writes": 0, "pending_write": False},
-              "negative_composite": [{"accepted_requests": [], "session_open": False} for _ in range(6)]}
-    report['limits_probe'] = {'passed':True,'printer_writes':0,'cases':[{'passed':True} for _ in range(8)]}
+    report = preview_evidence
     if broken in report["gates"]:
         report["gates"][broken] = False
     elif broken == "paced_status":

@@ -1,6 +1,6 @@
-param([string]$Installer = 'dist\Klippy-Setup-0.8.0-preview.1.exe', [string]$PreviousInstaller = '',
+param([string]$Installer = 'dist\Klippy-Setup-0.8.0-preview.2.exe', [string]$PreviousInstaller = '',
       [string]$Python = '.venv\Scripts\python.exe', [switch]$BlockExternalNetwork,
-      [switch]$MeasurePerformance)
+      [switch]$MeasurePerformance, [ValidateSet('on','off')][string]$Consent='on')
 $ErrorActionPreference = 'Stop'
 function Wait-QaProcess {
     param($Process, [int]$Seconds)
@@ -14,7 +14,7 @@ Set-Location (Split-Path $PSScriptRoot -Parent)
 $taskRoot = (Resolve-Path -LiteralPath '.').Path
 $taskQaRoot = Join-Path $taskRoot 'local\installer-qa'
 $taskInstallDir = Join-Path $taskQaRoot 'application'
-$taskDataDir = Join-Path $taskQaRoot 'data'
+$taskDataDir = Join-Path $taskQaRoot ("profile-" + $Consent + "-" + [Guid]::NewGuid())
 if (Test-Path -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{D51FBA83-D0C3-4CA5-BA79-EE038805EC21}_is1') {
     throw 'A Klippy installation is already registered. Use a clean Windows VM to avoid altering it.'
 }
@@ -25,20 +25,31 @@ $taskOriginalLocalAppData = $env:LOCALAPPDATA
 $taskFirewallGroup = "Klippy-QA-" + [Guid]::NewGuid().ToString()
 $env:LOCALAPPDATA = $taskDataDir
 try {
-    & $Python scripts/installer_settings.py prepare
+    & $Python scripts/installer_settings.py prepare $Consent
     if ($LASTEXITCODE -ne 0) { throw 'Could not prepare isolated settings' }
     $taskIteration = 0
     $taskInstallers = @($PreviousInstaller, $Installer, $Installer) | Where-Object { $_ }
     foreach ($taskTargetInstaller in $taskInstallers) {
         $taskIteration++
+        if ($taskTargetInstaller -eq $PreviousInstaller -and (Get-FileHash $PreviousInstaller).Hash -ne '0c308b113082c2bca18ba328d005e4d659ace77b909c497012775b79b0095238') {
+            throw 'Previous installer differs from the published v0.7.2-preview.1 digest.'
+        }
         $taskInstallerProcess = Start-Process -FilePath (Resolve-Path -LiteralPath $taskTargetInstaller).Path -WindowStyle Hidden -PassThru -ArgumentList @(
             '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CURRENTUSER','/NOICONS','/TASKS=""',
             ('/DIR="' + $taskInstallDir + '"'),('/LOG="' + (Join-Path $taskQaRoot "install-$taskIteration.log") + '"'))
         Wait-QaProcess $taskInstallerProcess 240
         if (-not (Test-Path -LiteralPath (Join-Path $taskInstallDir 'Klippy.exe'))) { throw 'Application missing after install' }
         if ((Get-Content -LiteralPath $taskSentinel) -ne 'Klippy installer QA sentinel') { throw 'Settings sentinel changed' }
-        & $Python scripts/installer_settings.py verify
+        & $Python scripts/installer_settings.py verify $Consent
         if ($LASTEXITCODE -ne 0) { throw 'SQLite settings were not preserved' }
+        if ($taskTargetInstaller -eq $Installer) {
+            $env:KLIPPY_SMOKE_QA_PROFILE = $taskDataDir
+            $taskBoot = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList '--smoke-test'
+            Wait-QaProcess $taskBoot 30
+            Remove-Item Env:KLIPPY_SMOKE_QA_PROFILE
+            & $Python scripts/installer_settings.py verify $Consent
+            if ($LASTEXITCODE -ne 0) { throw 'Opening the upgraded profile changed protected records' }
+        }
     }
     if ($BlockExternalNetwork) {
         if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
@@ -52,10 +63,12 @@ try {
             New-NetFirewallRule -DisplayName $taskFirewallGroup -Group $taskFirewallGroup -Direction Outbound -Action Block -Program $taskProgram -RemoteAddress $taskExternalAddresses | Out-Null
         }
     }
+    $env:KLIPPY_SMOKE_QA_PROFILE = $taskDataDir
     $taskSmokeReport = Join-Path $taskQaRoot 'installed-smoke.txt'
     $taskApp = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '--smoke-test','--smoke-report',('"' + $taskSmokeReport + '"'))
     if (-not $taskApp.WaitForExit(30000) -or $taskApp.ExitCode -ne 0) { throw 'Installed startup failed' }
+    Remove-Item Env:KLIPPY_SMOKE_QA_PROFILE
     $taskOrbReport = Join-Path $taskQaRoot 'installed-orb.json'
     $taskOrb = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '--orb-self-test','--smoke-report',('"' + $taskOrbReport + '"'))
@@ -74,12 +87,17 @@ try {
     if ($MeasurePerformance) {
         & (Join-Path $PSScriptRoot 'performance_probe.ps1') -Application 'local\installer-qa\application\Klippy.exe'
     }
+    $taskExecutableHash = (Get-FileHash (Join-Path $taskInstallDir 'Klippy.exe')).Hash.ToLowerInvariant()
     $taskUninstaller = Start-Process -FilePath (Join-Path $taskInstallDir 'unins000.exe') -WindowStyle Hidden -PassThru -ArgumentList @(
         '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="' + (Join-Path $taskQaRoot 'uninstall.log') + '"'))
     Wait-QaProcess $taskUninstaller 120
     if (Test-Path -LiteralPath (Join-Path $taskInstallDir 'Klippy.exe')) { throw 'Application executable remains after uninstall' }
     if (-not (Test-Path -LiteralPath $taskSentinel)) { throw 'Uninstall removed preserved user data' }
+    & $Python scripts/installer_settings.py verify $Consent
+    if ($LASTEXITCODE -ne 0) { throw 'Uninstall or application startup changed protected SQLite records' }
     @{
+        executable_sha256=$taskExecutableHash; consent=$Consent; preserved_profile_sha256=(Get-Content -Raw ($taskDataDir + '.sha256')).Trim();
+        source_sha=(git rev-parse HEAD); run_id=$env:GITHUB_RUN_ID; run_attempt=$env:GITHUB_RUN_ATTEMPT;
         status='passed'; environment=$(if ($env:GITHUB_ACTIONS -eq 'true') { 'Fresh Windows CI runner; not a clean Windows desktop VM' } else { 'Development host; not a clean VM' });
         host_ram_bytes=(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory;
         os=[Environment]::OSVersion.VersionString; build_run=$env:KLIPPY_QUALIFIED_BUILD_RUN;
@@ -96,5 +114,6 @@ try {
     Write-Output 'Installer QA passed; see local/installer-qa/results.json for exact scope.'
 } finally {
     if ($BlockExternalNetwork) { Get-NetFirewallRule -Group $taskFirewallGroup -ErrorAction SilentlyContinue | Remove-NetFirewallRule }
+    Remove-Item Env:KLIPPY_SMOKE_QA_PROFILE -ErrorAction SilentlyContinue
     $env:LOCALAPPDATA = $taskOriginalLocalAppData
 }

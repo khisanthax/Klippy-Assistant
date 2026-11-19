@@ -92,7 +92,12 @@ def plan_move(intent, record, caps, owner_policy):
         raise LimitsUnavailable("The printer's coordinate modes are unknown.")
     if decimal(move.get('speed_factor')) != 1:
         raise LimitsUnavailable("Direct voice movement requires a verified 100 percent speed override. Change it through supervised printer controls.")
-    if tool.get('extra_axes') not in (None, []) or move.get('axis_map', {'X':0,'Y':1,'Z':2,'E':3}) != {'X':0,'Y':1,'Z':2,'E':3}:
+    extra_axes = tool.get('extra_axes')
+    axis_map = move.get('axis_map')
+    if (tool.get('extruder') != 'extruder' or extra_axes != {'extruder': 3}
+            or type(extra_axes['extruder']) is not int
+            or axis_map != {'X': 0, 'Y': 1, 'Z': 2, 'E': 3}
+            or any(type(index) is not int for index in axis_map.values())):
         raise LimitsUnavailable("Extra or remapped motion axes are unsupported for direct voice movement.")
     index, relative = params['axis'], params['relative'] == 1
     value = decimal(params['value'])

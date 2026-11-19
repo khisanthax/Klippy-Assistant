@@ -260,6 +260,21 @@ class LimitsRegistry:
                     raise
                 raise LimitsUnavailable("Active printer limits could not be verified. No action was sent.") from None
 
+    def save_review(self, printer, record, overrides, caps=None):
+        if self.records.get(printer.id) is not record or record.identity != printer.url:
+            raise LimitsUnavailable("Printer or configuration changed. Refresh limits before saving.")
+        overrides = validate_overrides(overrides, record.capabilities)
+        if caps is not None:
+            if not isinstance(caps, dict):
+                raise LimitsUnavailable("Enter heater caps as a JSON object.")
+            for key, cap in caps.items():
+                heater = {'0': 'extruder', '1': 'heater_bed'}.get(key)
+                maximum = record.capabilities['heaters'].get(heater, {}).get('max_temp')
+                if number(maximum) is None or number(cap) is None or not 0 <= cap <= maximum:
+                    raise LimitsUnavailable("Each heater cap must be within the discovered heater limits.")
+        self.store.save_reviewed_limits(printer, overrides, caps)
+        self.invalidate(printer.id)
+
     def effective(self, record):
         overrides = self.store.get("printer_limit_overrides", {}).get(record.printer_id, {})
         validate_overrides(overrides, record.capabilities)

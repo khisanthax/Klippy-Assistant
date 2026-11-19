@@ -279,11 +279,11 @@ class Conversation:
         if cancellation(text):
             if self.choice:
                 self.engine.audit("clarification_canceled", trace=self.choice.trace, outcome="canceled")
-            self.engine.audit("canceled", outcome="canceled")
-            self.engine.cancel()
+            had_clarification = bool(self.draft or self.choice)
+            message = self.engine.cancel()
             self.draft = None
             self.choice = None
-            return "Pending action canceled."
+            return "Clarification canceled." if had_clarification and message == "No pending action." else message
         if not is_query and clarification(text):
             self.engine.audit("clarification", outcome="clarification_needed", clarification_requested=True)
             self.engine.require_clarification()

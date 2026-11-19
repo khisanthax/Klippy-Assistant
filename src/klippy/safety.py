@@ -88,6 +88,10 @@ class Pending:
     clarification_required: bool = False
 
 
+CONFIGURABLE_CONFIRMATIONS = (Action.PAUSE, Action.RESUME, Action.CANCEL, Action.HOME, Action.HEAT)
+IN_FLIGHT = "Transmission has already started. Check the printer for the outcome."
+
+
 class SafetyEngine:
     """The single write authority. Each write rechecks enrollment, policy, state and macro freshness."""
 
@@ -97,6 +101,9 @@ class SafetyEngine:
         self.pending: Pending | None = None
         self.lock = asyncio.Lock()
         self.generation = 0
+        self.dispatch_committed = False
+        self.validating = False
+        self.last_dispatch_trace = None
         self.confirmation_seconds = 25
         self.history = None
         self.pending_trace = None
@@ -125,8 +132,16 @@ class SafetyEngine:
                     trace=self.pending_trace,
                     outcome=reason if reason in {"canceled", "expired", "failed"} else None,
                 )
+            had_request = self.pending is not None or self.validating
             self.generation += 1
             self.pending = None
+            if self.dispatch_committed:
+                return IN_FLIGHT
+            return "Pending action canceled." if had_request else "No pending action."
+
+    def confirmation_required(self, action, force=False):
+        return (force or action not in CONFIGURABLE_CONFIRMATIONS
+                or self.store.get("confirmations", {}).get(action.value) is not False)
 
     def delivery_finished(self, token, success):
         with self.state_lock:
@@ -169,6 +184,9 @@ class SafetyEngine:
             raise Rejected("Printer is not approved")
         if self.store.get("selected") != printer.id:
             raise Rejected("Select the target printer first")
+        if (intent.action in {Action.MOVE, Action.HEAT, Action.MACRO, Action.HOME}
+                and printer.id in self.store.get('limits_review_required', {})):
+            raise Rejected("Review the restored limits for this printer in Settings before requesting that action.")
         validate_intent_fields(intent)
         client = self.clients(printer)
         # Explicit emergency commands bypass the ready-state query but never enrollment/selection.
@@ -296,7 +314,10 @@ class SafetyEngine:
         return Validation(client, state, script, binding, motion_review)
 
     async def propose(self, intent: Intent, *, defer_confirmation=False, force_confirmation=False):
+        initial = self.generation
         async with self.lock:
+            if initial != self.generation:
+                raise Rejected("The request changed while waiting for validation.")
             self.cancel()
             generation = self.generation
             validated = await self.validate(intent)
@@ -362,20 +383,10 @@ class SafetyEngine:
                     command=intent.macro,
                     printer_id=intent.printer_id,
                     parameters=intent.params,
-                    confirmation_requested=bool(
-                        force_confirmation
-                        or intent.action
-                        not in {Action.PAUSE, Action.RESUME, Action.CANCEL, Action.HOME, Action.HEAT}
-                        or self.store.get("confirmations", {}).get(intent.action.value) is not False
-                    ),
+                    confirmation_requested=self.confirmation_required(intent.action, force_confirmation),
                     outcome="proposed",
                 )
-            configurable = {Action.PAUSE, Action.RESUME, Action.CANCEL, Action.HOME, Action.HEAT}
-            if (
-                not force_confirmation
-                and intent.action in configurable
-                and self.store.get("confirmations", {}).get(intent.action.value) is False
-            ):
+            if not self.confirmation_required(intent.action, force_confirmation):
                 with self.state_lock:
                     if self.pending is None or generation != self.generation:
                         raise Rejected("Request was canceled")
@@ -416,6 +427,14 @@ class SafetyEngine:
             raise Rejected("Confirmation is missing or expired")
         self.audit("confirmed", trace=pending_trace, outcome="confirmed")
         intent = Intent.model_validate_json(pending.intent_json)
+        self.validating = True
+        try:
+            return await self._dispatch(intent, pending, pending_trace, generation)
+        finally:
+            with self.state_lock:
+                self.validating = self.dispatch_committed = False
+
+    async def _dispatch(self, intent, pending, pending_trace, generation):
         try:
             client, _state, script, binding = await self.validate(intent)
         except Rejected as exc:
@@ -424,8 +443,23 @@ class SafetyEngine:
         if generation != self.generation or binding != pending.binding:
             raise Rejected("Printer state, macro, or permissions changed; request again")
         try:
-            await client.execute(intent, script)
+            checked = self.clock()
+            limited = intent.action in (Action.MOVE, Action.HEAT)
+            record = self.limits.records.get(intent.printer_id)
+            def commit():
+                with self.state_lock:
+                    if (generation != self.generation or self.clock() >= pending.expires
+                            or self.store.get("selected") != intent.printer_id
+                            or client.printer not in self.store.printers()
+                            or self.clock() - checked > self.limits.maximum_read_seconds
+                            or limited and (record is None or self.limits.records.get(intent.printer_id) is not record)):
+                        raise Rejected("Request expired, was canceled, or printer state changed before transmission.")
+                    self.dispatch_committed = True
+                    self.last_dispatch_trace = reaction_context.get()
+            await client.execute(intent, script, before_send=commit)
         except ConnectionFailure:
+            if not self.dispatch_committed:
+                raise Rejected("The printer connection could not be prepared. No command was sent.") from None
             self.audit(
                 "dispatch_uncertain", trace=pending_trace, outcome="failed", diagnostic="outcome_unknown"
             )

@@ -2,7 +2,16 @@
 
 Stable release is blocked until every applicable item has evidence.
 
-For the 0.8 limits candidate, require the new eight-case read-only limits probe in every
+For 0.8.0-preview.2 onward, the Windows release-evidence job produces release-status.json.
+It binds the exact source, workflow attempt, installer and executable hashes to the frozen,
+installed, memory-budget and two consent-profile checks. Use its publication verdict for the
+same installer. Review the GitHub Actions budget alert and available Windows minutes before a
+release run. A push with `[qualify preview]` runs the complete pipeline once. A manual dispatch
+is available for requalification. The local retention report is `scripts/artifact_retention.ps1`.
+Run it without arguments to inspect reclaimable bytes. The owner voice procedure is in
+docs/OWNER_VOICE_ACCEPTANCE.md.
+
+For the historical 0.8.0-preview.1 limits candidate, require the new eight-case read-only limits probe in every
 frozen/installed/memory report, all 886 tests/Ruff, 29 orb/26 Qt feature checks and every
 retained voice/query/audio/dialogue/safety gate. Actual 0.7.2 upgrade/reinstall must preserve
 both existing heater caps and stricter-limit preferences. Tag only the exact qualified app

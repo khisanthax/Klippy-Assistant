@@ -1,5 +1,15 @@
 # Logbook
 
+## 2026-11-19 - Audit corrections for 0.8.0-preview.2
+
+The simulator now exercises cancellation during endpoint lookup and after HTTP handoff, strict
+upstream axis maps and restored owner caps through reapproval. The console renders the current
+confirmation policy. Release QA now requires named voice cases, exact source and binary identity,
+and SQLite content preservation for two consent profiles after upgrade, reinstall and uninstall.
+The focused transport, release-contract and UI run passed 34 tests, including opening both seeded
+profiles with the desktop smoke entry point. Full build and qualification results follow separately.
+Physical printers and the owner profile were outside testing.
+
 ## 2026-11-17 - Unpublished 0.8 draft prepared and all assets verified
 
 Prepared GitHub draft release 449346304 at exact app source 5862ec2. All ten candidate assets,

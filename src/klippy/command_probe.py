@@ -53,7 +53,7 @@ async def run():
             for phrase in ("No, don't do that.", "Cancel that request.", "Never mind.", "Don't heat the nozzle."):
                 await c.hear("heat nozzle 90")
                 answer = await c.hear(phrase)
-                cases.append({"case": "explicit_cancel", "passed": "canceled" in answer and engine.pending is None})
+                cases.append({"case": "explicit_cancel", "synthetic_phrase": phrase, "passed": "canceled" in answer and engine.pending is None})
             for phrase in ("I'm not sure why it didn't understand.", "That's not what I meant.", "I don't know what happened."):
                 await c.hear("heat nozzle 90", defer_confirmation=True)
                 token = engine.pending.token
@@ -64,7 +64,7 @@ async def run():
                     await engine.confirm(token)
                 except Rejected as exc:
                     blocked = exc.code == "confirmation_needs_clarification"
-                cases.append({"case": "clarification_not_cancellation", "passed": bool(blocked and engine.pending
+                cases.append({"case": "clarification_not_cancellation", "synthetic_phrase": phrase, "passed": bool(blocked and engine.pending
                               and engine.pending.token == token and not engine.pending.ready and "canceled" not in answer)})
             for phrase in ("heat nozzle 500 F", "set nozzle temperature", "heat nozzle 90 C F"):
                 blocked = False
@@ -72,7 +72,7 @@ async def run():
                     await c.hear(phrase)
                 except Rejected:
                     blocked = True
-                cases.append({"case": "ambiguous_or_outside_limits", "passed": blocked and engine.pending is None})
+                cases.append({"case": "ambiguous_or_outside_limits", "synthetic_phrase": phrase, "passed": blocked and engine.pending is None})
             store.save_printer(Printer(id="unit",name="F",url="http://127.0.0.1:2",approved=True))
             store.set("heater_limits", {"sim":{"0":200,"1":100},"unit":{"0":40}})
             correct = True

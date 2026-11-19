@@ -103,8 +103,11 @@ For example, with suitable verified firmware limits:
 Unknown names/fields, nonfinite values, inverted bounds and expansions are rejected. An owner
 velocity/acceleration cap below the actual runtime setting can intentionally block a move;
 Klippy does not silently change firmware settings to satisfy it. Saving revokes pending reviews.
-Upgrade/reinstall preserves restrictions. Recovery to a different profile clears device-bound
-restrictions and approvals, with the pre-restore SQLite backup retained for review.
+Recovery stores exported caps as review candidates and revokes approvals. Reapprove the printer,
+select it, refresh its capabilities and open the stricter-limits editor. Review both motion
+overrides and heater caps, check the device-specific acknowledgment and save. Direct moves,
+homing, heat and macros remain blocked until that separate review succeeds. Older backups
+also require review. The pre-restore SQLite backup preserves the previous local settings.
 
 ## Qualification and remaining acceptance
 

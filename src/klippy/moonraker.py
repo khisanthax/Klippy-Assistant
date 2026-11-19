@@ -40,7 +40,7 @@ class Moonraker:
         self.transport = transport  # Injected simulator; no real DNS/network in unit tests.
         self.status_observer = None
 
-    async def request(self, method, path, payload=None):
+    async def request(self, method, path, payload=None, *, before_send=None):
         try:
             # Pin DNS result to avoid rebinding between validation and connection.
             parsed = urlsplit(self.printer.url)
@@ -56,6 +56,8 @@ class Moonraker:
             async with httpx.AsyncClient(timeout=6, trust_env=False, follow_redirects=False,
                                          transport=self.transport) as client:
                 with timings.span("moonraker"):
+                    if before_send is not None:
+                        before_send()
                     response = await client.request(method, endpoint + path, json=payload, headers=headers)
                 response.raise_for_status()
                 value = response.json()
@@ -94,15 +96,15 @@ class Moonraker:
         result = await self.request("GET", "/printer/objects/query?configfile")
         return result["status"]["configfile"].get("config", {})
 
-    async def execute(self, intent, script=None):
+    async def execute(self, intent, script=None, *, before_send=None):
         from .domain import Action
         paths = {Action.PAUSE: "/printer/print/pause", Action.RESUME: "/printer/print/resume",
                  Action.CANCEL: "/printer/print/cancel", Action.EMERGENCY: "/printer/emergency_stop"}
         if intent.action in paths:
-            return await self.request("POST", paths[intent.action])
+            return await self.request("POST", paths[intent.action], before_send=before_send)
         if script is None:
             raise ValueError("No validated command")
-        return await self.request("POST", "/printer/gcode/script", {"script": script})
+        return await self.request("POST", "/printer/gcode/script", {"script": script}, before_send=before_send)
 
     async def notifications(self, objects=None):
         """Read-only subscription. Actions never originate from this channel."""

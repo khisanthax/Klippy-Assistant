@@ -1,6 +1,13 @@
 # Roadmap
 
-## Printer capability / safety limits registry - 0.8 candidate
+## Audit corrections for 0.8.0-preview.2
+
+Revocation at HTTP handoff, the upstream single-extruder axis contract, explicit device
+limits review on restore, live console policy and fail-closed release evidence are implemented.
+The installer qualification now includes synthetic conversation rows and separate consent-on
+and consent-off profiles. Release evidence and remaining external gates are tracked in LOGBOOK.md.
+
+## Printer capability / safety limits registry - historical 0.8.0-preview.1 candidate
 
 Per-printer active configuration plus runtime state discovery, optional strictly narrower
 owner caps, Cartesian/CoreXY single-axis relative/absolute movement and mandatory bound

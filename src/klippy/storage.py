@@ -104,13 +104,19 @@ class Store:
     @serialized
     def export(self, path: Path):
         # Macros/addresses are private user configuration. Never export credentials.
-        payload = {"version": 2, "preferences": {key: self.get(key, default) for key, default in
+        payload = {"version": 3, "preferences": {key: self.get(key, default) for key, default in
                    (("followup_seconds", 30), ("confirmation_seconds", 30), ("spoken", True),
                     ("monitor_enabled", True), ("wake_threshold", .22), ("response_style", "brief"),
                     ("voice_orb", {}),('personality',{'style':'friendly','length':'short'}))}, "printers": [p.model_dump(mode="json") for p in self.printers()],
                    "selected": self.get("selected"), "listening": self.get("listening", {}),
                    "macros": {p.id: [m.model_dump(mode="json") for m in self.macros(p.id).values()]
                               for p in self.printers()}}
+        waiting = self.get('limits_review_required', {})
+        payload['restriction_candidates'] = {
+            p.id: waiting.get(p.id, {'overrides': self.get('printer_limit_overrides', {}).get(p.id, {}),
+                                     'heater_caps': self.get('heater_limits', {}).get(p.id, {})})
+            for p in self.printers()
+        }
         style,length = dialogue_preferences(self)
         payload['preferences']['personality'] = {'style':style,'length':length}
         payload['preferences']['response_style'] = {'short':'brief','standard':'conversational','detailed':'detailed'}[length]
@@ -119,7 +125,7 @@ class Store:
     @serialized
     def restore(self, path: Path):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        if payload.get("version") not in (1, 2):
+        if payload.get("version") not in (1, 2, 3):
             raise ValueError("Unsupported backup")
         printers = [Printer.model_validate_json(json.dumps(p)) for p in payload["printers"]]
         registries = {p.id: [Macro.model_validate_json(json.dumps(m)) for m in
@@ -150,6 +156,16 @@ class Store:
                 raise ValueError("Invalid preference type")
         if 'personality' in preferences:
             preferences['response_style'] = {'short':'brief','standard':'conversational','detailed':'detailed'}[preferences['personality']['length']]
+        candidates = payload.get("restriction_candidates", {})
+        if not isinstance(candidates, dict) or any(
+            not isinstance(item, dict) or set(item) != {"overrides", "heater_caps"}
+            or any(not isinstance(value, dict) for value in item.values()) for item in candidates.values()
+        ):
+            raise ValueError("Invalid restriction candidates")
+        waiting = {p.id: candidates.get(p.id, self.get("limits_review_required", {}).get(p.id, {
+            "overrides": self.get("printer_limit_overrides", {}).get(p.id, {}),
+            "heater_caps": self.get("heater_limits", {}).get(p.id, {})
+        })) for p in printers}
         # A SQLite online backup includes committed WAL pages before any mutation.
         backup = self.path.with_name(self.path.stem + ".before-restore-" + uuid.uuid4().hex[:12] + ".sqlite")
         destination = sqlite3.connect(backup)
@@ -173,11 +189,32 @@ class Store:
             # Heater bounds belong to a reviewed physical device, not a restored identifier.
             self.db.execute("DELETE FROM settings WHERE key='heater_limits'")
             self.db.execute("DELETE FROM settings WHERE key='printer_limit_overrides'")
+            self.db.execute("INSERT OR REPLACE INTO settings VALUES ('limits_review_required',?)", (json.dumps(waiting),))
+            self.db.execute("DELETE FROM settings WHERE key='remembered_choices'")
             # Recovery never silently restores immediate actions or an enabled microphone.
             self.db.execute("INSERT OR REPLACE INTO settings VALUES ('confirmations','{}')")
             self.db.execute("INSERT OR REPLACE INTO settings VALUES ('listening',?)",
                             (json.dumps({"mode": "manual", "enabled": False}),))
         return backup
+
+
+    @serialized
+    def save_reviewed_limits(self, printer, overrides, heater_caps=None):
+        if not printer.approved or printer not in self.printers() or self.get('selected') != printer.id:
+            raise ValueError("Select the same approved printer before saving limits.")
+        waiting = self.get('limits_review_required', {})
+        if printer.id in waiting and heater_caps is None:
+            raise ValueError("Review the restored heater and movement limits together.")
+        changes = {'printer_limit_overrides': overrides}
+        if heater_caps is not None:
+            changes['heater_limits'] = heater_caps
+        waiting.pop(printer.id, None)
+        with self.db:
+            for key, item in changes.items():
+                entries = self.get(key, {})
+                entries[printer.id] = item
+                self.db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, json.dumps(entries)))
+            self.db.execute("INSERT OR REPLACE INTO settings VALUES ('limits_review_required',?)", (json.dumps(waiting),))
 
 
 class Credentials:

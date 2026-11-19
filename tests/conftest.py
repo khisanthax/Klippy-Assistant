@@ -67,3 +67,18 @@ def rig(tmp_path):
     engine = SafetyEngine(store, factory, clock=lambda: clock[0])
     yield store, sim, engine, clock
     store.close()
+
+
+@pytest.fixture
+def preview_evidence():
+    import asyncio
+    import json
+    from pathlib import Path
+
+    from klippy.command_probe import run
+    from klippy.limits_probe import run as limits_probe
+
+    report = json.loads((Path(__file__).parents[1] / 'benchmarks/preview8-local-frozen.json').read_text())
+    report['heat_fix_probe'] = asyncio.run(run())
+    report['limits_probe'] = asyncio.run(limits_probe())
+    return report

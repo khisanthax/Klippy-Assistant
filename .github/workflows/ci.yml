@@ -24,7 +24,8 @@ jobs:
           name: test-results
           path: test-results.xml
   preview-build:
-    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[qualify preview]'))
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,12 +41,13 @@ jobs:
       - run: python scripts/prepare_models.py
       - run: choco install innosetup --no-progress -y
       - shell: pwsh
-        run: ./scripts/build.ps1 -Python python -Iscc 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+        run: ./scripts/build.ps1 -ValidatedSource -Python python -Iscc 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: frozen-qualification-diagnostics
           path: |
+            build/frozen-build.json
             build/frozen-smoke.txt
             build/frozen-orb.json
             build/frozen-orb-images/*
@@ -60,8 +62,12 @@ jobs:
             dist/Klippy-Setup-*.sha256
           retention-days: 14
   installer-qualification:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[qualify preview]'))
     needs: preview-build
+    strategy:
+      fail-fast: false
+      matrix:
+        consent: ['on', 'off']
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -83,11 +89,11 @@ jobs:
           if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
             Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True
           }
-          ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.7.2-preview.1.exe' -BlockExternalNetwork -MeasurePerformance
+          ./scripts/test_installer.ps1 -Python python -PreviousInstaller 'local/previous/Klippy-Setup-0.7.2-preview.1.exe' -BlockExternalNetwork -Consent '${{ matrix.consent }}' -MeasurePerformance:( '${{ matrix.consent }}' -eq 'on' )
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: installer-qualification-evidence
+          name: installer-qualification-evidence-${{ matrix.consent }}
           path: |
             local/installer-qa/results.json
             local/installer-qa/installed-smoke.txt
@@ -98,3 +104,24 @@ jobs:
             local/installer-qa/*.log
             local/performance-budget.json
             local/performance-voice.json
+  release-evidence:
+    if: always() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[qualify preview]')))
+    needs: installer-qualification
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          path: evidence
+      - shell: pwsh
+        run: |
+          $env:PYTHONPATH = "$PWD/src"
+          python scripts/qualify_release.py evidence release-status.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-status
+          path: release-status.json

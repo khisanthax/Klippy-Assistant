@@ -1,4 +1,4 @@
-Klippy Assistant 0.8.0-preview.1 - Capability Limits Engineering Preview
+Klippy Assistant 0.8.0-preview.2 - Capability Limits Engineering Preview
 
 This package is unsigned and is not a stable v1.0 release.
 

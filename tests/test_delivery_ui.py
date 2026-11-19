@@ -167,3 +167,22 @@ async def test_reaction_measurement_cannot_speak_over_pending_confirmation(windo
     window.reaction_test()
     window.result("reaction", (None, "Simulated temperatures"))
     assert not window.voice.jobs and not engine.pending.ready and not sim.writes
+
+
+async def test_console_describes_effective_confirmation_policy(window, rig):
+    store, _, engine, _ = rig
+    window.save_confirmation('heat', False)
+    assert store.printers()[0].name in window.policy_label.text()
+    assert 'without confirmation: heat' in window.policy_label.text()
+    assert engine.confirmation_required(Action.MOVE)
+    assert engine.confirmation_required(Action.HEAT, force=True)
+    assert not engine.confirmation_required(Action.HEAT)
+
+
+def test_console_cancel_keeps_committed_result_visible(window, rig):
+    _, _, engine, _ = rig
+    engine.dispatch_committed = True
+    turn = window.turn
+    window.cancel()
+    assert window.turn == turn and 'Transmission has already started' in window.output.toPlainText()
+    assert 'Pending action canceled' not in window.output.toPlainText()

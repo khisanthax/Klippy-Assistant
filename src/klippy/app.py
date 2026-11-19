@@ -8,6 +8,7 @@ _startup_args = parse_args() if __name__ == "__main__" else None
 
 import asyncio
 import json
+import os
 import sys
 import threading
 import uuid
@@ -52,7 +53,7 @@ from .dialogue import preferences as dialogue_preferences
 from .domain import Printer
 from .history import InteractionHistory
 from .history_ui import HistoryPage
-from .limits import LimitsUnavailable, validate_overrides
+from .limits import LimitsUnavailable
 from .listening import listening_enabled, validate_windows
 from .macros import discover, inferred_parameters
 from .models import ModelUnavailable, verify_pack
@@ -64,7 +65,7 @@ from .printer_names import matching, rename, validate_names
 from .queries import QueryService
 from .query_manager import QueryManager
 from .runtime import LlamaRuntime
-from .safety import Rejected, SafetyEngine
+from .safety import CONFIGURABLE_CONFIRMATIONS, IN_FLIGHT, Rejected, SafetyEngine
 from .storage import Credentials, Store, data_directory
 
 
@@ -322,8 +323,16 @@ class Window(QMainWindow):
         row.addWidget(self.button("Cancel request", self.cancel))
         row.addWidget(self.button("Stop speaking", self.stop_speaking))
         layout.addLayout(row)
-        layout.addWidget(QLabel("Preview: voice requires a verified local model pack. Every printer action requires confirmation.\n"
-                                "Voice control supplements the printer's physical safety controls."))
+        self.policy_label = QLabel()
+        self.policy_label.setWordWrap(True)
+        layout.addWidget(self.policy_label)
+
+    def refresh_policy_label(self):
+        immediate = [action.value for action in CONFIGURABLE_CONFIRMATIONS
+                     if not self.engine.confirmation_required(action)]
+        policy = ("Deterministic requests without confirmation: " + ", ".join(immediate) + "."
+                  if immediate else "All printer actions require confirmation.")
+        self.policy_label.setText(f"{self.active_name()} · {policy} Direct moves, macros and model interpretations require confirmation.")
 
     def make_fleet(self):
         layout = self.page("Printers")
@@ -540,9 +549,16 @@ class Window(QMainWindow):
         form.addRow("Verified discovery (not movement authorization)", details)
         editor = QTextEdit()
         editor.setObjectName("printer_limit_overrides")
-        editor.setPlainText(json.dumps(self.store.get('printer_limit_overrides', {}).get(printer.id, {}), indent=2))
+        review = self.store.get('limits_review_required', {}).get(printer.id)
+        previous = review['overrides'] if review is not None else self.store.get('printer_limit_overrides', {}).get(printer.id, {})
+        editor.setPlainText(json.dumps(previous, indent=2))
         editor.setPlaceholderText('{"axes":{"x":{"position_max":200}},"motion":{"max_velocity":100}}')
         form.addRow("Optional stricter limits (JSON; {} removes overrides)", editor)
+        if review is not None:
+            caps_editor = QTextEdit(json.dumps(review['heater_caps'], indent=2))
+            form.addRow("Restored heater caps (0 = nozzle, 1 = bed)", caps_editor)
+            accept_review = QCheckBox("I verified this printer and accept the displayed limits, including any removed caps.")
+            form.addRow(accept_review)
         feedback = QLabel()
         feedback.setWordWrap(True)
         form.addRow(feedback)
@@ -551,11 +567,13 @@ class Window(QMainWindow):
             try:
                 if self.target() != printer or self.engine.limits.records.get(printer.id) is not record:
                     raise LimitsUnavailable("Printer or discovered configuration changed. Close and refresh before saving.")
-                overrides = validate_overrides(json.loads(editor.toPlainText()), record.capabilities)
-                saved = self.store.get('printer_limit_overrides', {})
-                saved[printer.id] = overrides
-                self.engine.limits.invalidate(printer.id)
-                self.store.set('printer_limit_overrides', saved)
+                overrides = json.loads(editor.toPlainText())
+                caps = None
+                if review is not None:
+                    if not accept_review.isChecked():
+                        raise LimitsUnavailable("Confirm your review of this printer and its limits.")
+                    caps = json.loads(caps_editor.toPlainText())
+                self.engine.limits.save_review(printer, record, overrides, caps)
                 dialog.accept()
             except (ValueError, LimitsUnavailable) as exc:
                 feedback.setText(str(exc))
@@ -620,6 +638,7 @@ class Window(QMainWindow):
         preferences = self.store.get("confirmations", {})
         preferences[action] = enabled
         self.store.set("confirmations", preferences)
+        self.refresh_policy_label()
         self.cancel()
 
     def save_timeout(self, key, value):
@@ -655,6 +674,7 @@ class Window(QMainWindow):
         self.reload_macros()
         if hasattr(self, "query_manager"):
             self.query_manager.reload()
+        self.refresh_policy_label()
         self.sprite.set_printer(self.active_name())
 
     def select_printer(self):
@@ -670,6 +690,7 @@ class Window(QMainWindow):
             self.voice.reset_session()
         self.reload_macros()
 
+        self.refresh_policy_label()
         self.sprite.set_printer(self.active_name())
         self.sprite.clear_activity()
 
@@ -868,6 +889,8 @@ class Window(QMainWindow):
         async def request():
             context = current.set(trace)
             try:
+                if self.turn != turn:
+                    return turn, None, False
                 with timings.span("intent_and_validation"):
                     value = await self.conversation.hear(text, source=source, confirmation_token=confirmation_token,
                                                          defer_confirmation=defer_confirmation)
@@ -888,8 +911,15 @@ class Window(QMainWindow):
             self.submit_turn("confirm", source="voice", confirmation_token=self.engine.pending.token)
 
     def cancel(self):
+        message = self.engine.cancel()
+        delivered = (self.command_busy and self.engine.last_dispatch_trace is not None
+                     and self.engine.last_dispatch_trace == self.reaction_trace)
+        if message == IN_FLIGHT or delivered:
+            self.write_message(IN_FLIGHT)
+            return
+        if self.conversation.choice or self.conversation.draft:
+            message = "Pending clarification canceled."
         self.turn += 1
-        self.history.record('canceled',outcome='canceled')
         self.conversation.clear('canceled')
         if self.voice:
             self.voice.pending_token = None
@@ -897,7 +927,7 @@ class Window(QMainWindow):
         self.command_busy = False
         self.sprite.clear_activity()
         self.send_button.setEnabled(True)
-        self.write_message("Pending action canceled.")
+        self.write_message(message)
 
     def stop_speaking(self):
         if self.voice:
@@ -1125,7 +1155,7 @@ class Window(QMainWindow):
                 self.listening.setCurrentText("manual")
                 self.schedule.setText("[]")
                 self.write_message("Previous SQLite settings backed up to " + str(backup))
-                self.write_message("Restored. Printers and macros require reapproval; credentials were not imported.")
+                self.write_message("Restored. Reapprove each printer, review its recovered limits, and review its macros.")
             except Exception:
                 self.failure("Backup invalid; configuration was not restored")
 
@@ -1275,7 +1305,16 @@ def main(args=None):
     import tempfile
     with tempfile.TemporaryDirectory(prefix="klippy-smoke-") as temp:
         try:
-            store = Store(Path(temp) / "settings.sqlite" if args.smoke_test else data_directory() / "settings.sqlite")
+            profile = Path(temp) if args.smoke_test else data_directory()
+            if args.smoke_test and os.environ.get('KLIPPY_SMOKE_QA_PROFILE'):
+                base = Path(os.environ['KLIPPY_SMOKE_QA_PROFILE']).resolve()
+                if (base != Path(os.environ['LOCALAPPDATA']).resolve() or base.parent.name != 'installer-qa'
+                        or not base.name.startswith(('profile-on-', 'profile-off-'))):
+                    raise ValueError("Invalid installer QA profile")
+                profile = base / 'KlippyAssistant'
+                if not (profile / 'settings.sqlite').is_file():
+                    raise ValueError("Missing installer QA database")
+            store = Store(profile / "settings.sqlite")
             if args.smoke_test:
                 import pywebrtc_audio  # noqa: F401
                 import sherpa_onnx  # noqa: F401

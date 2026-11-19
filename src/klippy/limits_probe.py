@@ -6,7 +6,7 @@ from pathlib import Path
 
 import httpx
 
-from .domain import Printer
+from .domain import Action, Intent, Printer
 from .moonraker import Moonraker
 from .motion import parse_motion
 from .safety import Rejected, SafetyEngine
@@ -34,7 +34,7 @@ def synthetic_status(settings=None):
             'heater_bed': {'temperature': 21.0},
             'toolhead': {'position': position.copy(), 'homed_axes': 'xyz',
                          'axis_minimum': [-10, -10, -10, 0], 'axis_maximum': [300, 300, 300, 0],
-                         'max_velocity': 300, 'max_accel': 3000, 'extruder': 'extruder', 'extra_axes': []},
+                         'max_velocity': 300, 'max_accel': 3000, 'extruder': 'extruder', 'extra_axes': {'extruder': 3}},
             'gcode_move': {'position': position.copy(), 'gcode_position': position.copy(),
                            'homing_origin': [0, 0, 0, 0], 'absolute_coordinates': True,
                            'absolute_extrude': False, 'speed': 50, 'speed_factor': 1,
@@ -91,6 +91,34 @@ async def run():
             except Rejected:
                 blocked = True
             cases.append({'case': 'changed configuration invalidates confirmation', 'passed': blocked and engine.pending is None})
+            del status['gcode_move']['axis_map']
+            try:
+                await engine.propose(parse_motion('move X 10', printer.id))
+                missing_blocked = False
+            except Rejected:
+                missing_blocked = engine.pending is None
+            cases.append({'case': 'absent axis mapping blocks review', 'passed': missing_blocked})
+            store.set('heater_limits', {printer.id: {'0': 80}})
+            backup = Path(root) / 'synthetic-backup.json'
+            store.export(backup)
+            store.restore(backup)
+            store.save_printer(printer)
+            engine.select(printer.id)
+            target = Intent(action=Action.HEAT, printer_id=printer.id, params={'heater': 0, 'temperature': 90})
+            try:
+                await engine.propose(target)
+                recovery_blocked = False
+            except Rejected as exc:
+                recovery_blocked = 'restored limits' in str(exc) and engine.pending is None
+            record = await engine.limits.refresh(printer)
+            engine.limits.save_review(printer, record, {}, {'0': 80})
+            try:
+                await engine.propose(target)
+                cap_preserved = False
+            except Rejected as exc:
+                cap_preserved = 'outside' in str(exc) and engine.pending is None
+            cases.append({'case': 'restore requires device limits review and respects prior heater cap',
+                          'passed': recovery_blocked and cap_preserved})
             return {'scope': 'Synthetic configuration and motion; every HTTP write forbidden', 'cases': cases,
                     'printer_writes': len(writes), 'passed': all(row['passed'] for row in cases) and not writes and engine.pending is None}
         finally:

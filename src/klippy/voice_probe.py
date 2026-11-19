@@ -13,90 +13,11 @@ from klippy.conversation import Conversation
 from klippy.domain import Printer
 from klippy.models import verify_pack
 from klippy.moonraker import Moonraker
+from klippy.preview_contract import qualify_preview_report, qualify_report
 from klippy.runtime import LlamaRuntime
 from klippy.safety import SafetyEngine
 from klippy.storage import Store
 from klippy.voice import SherpaBackend, VoiceLoop
-
-
-def qualify_report(report):
-    """Gate the composite application; retain raw embedded-keyword recall separately.
-
-    Interruption has two corroborating paths. A KWS-only miss is not an application
-    interruption failure when the actual ASR-verified barge-in succeeds.
-    """
-    cases = {(case["phrase"], case["synthetic_voice"]): case["detected"] for case in report["wake_cases"]}
-    embedded = [case for case in report["wake_cases"] if "klippy" in case["phrase"].lower()
-                and case["phrase"] not in {"Klippy", "Hey Klippy"}]
-    report["raw_embedded_keyword"] = {"detected": sum(bool(case["detected"]) for case in embedded),
-                                      "total": len(embedded),
-                                      "misses": [case for case in embedded if not case["detected"]]}
-    report["gates"] = {
-        "standalone_wake": all(cases.get((phrase, sid)) is True
-                               for phrase in ("Klippy", "Hey Klippy") for sid in (0, 3)),
-        "negative_words": all(cases.get((phrase, sid)) is False
-                              for phrase in ("clipper", "Klipper", "The printer is ready") for sid in (0, 3)),
-        "captured_status": bool(report["pipeline_transcripts"]) and "63%" in (report["simulated_status_response"] or ""),
-        "own_echo": report["own_echo_requests"] == 0 and report["own_echo_wakes"] == 0,
-        "verified_interruption": (report["barge_wakes"] > 0 and report["playback_flushed"]
-                                  and any("stop talking" in text.lower() for text in report["barge_requests"])),
-        "local_language": report["llm_intent"]["action"] == "temperatures",
-        "no_printer_writes": report["printer_writes"] == 0,
-    }
-    report["passed"] = all(report["gates"].values())
-
-
-def qualify_preview_report(report):
-    """Explicit engineering envelope; never changes the full-voice acceptance result.
-
-    Continuous wake+request reliability remains a separate open acoustic gate.
-    The preview requires actual ASR-to-status with a separately spoken wake word,
-    no accepted requests/sessions for six negative audio inputs, echo/interruption
-    gates, and the native read-only query probe. Raw KWS accuracy stays reported.
-    """
-    report["preview_gates"] = {key: value for key, value in report["gates"].items()
-                               if key not in {"captured_status", "negative_words"}}
-    report["preview_gates"]["paced_captured_status"] = (
-        bool(report.get("paced_pipeline_transcripts")) and "63%" in (report.get("paced_status_response") or ""))
-    query = report.get("query_catalog", {})
-    if 'dialogue' in report:
-        dialogue = report['dialogue']
-        report['preview_gates']['grounded_dialogue'] = dialogue.get('passed') is True and all(
-            dialogue.get('checks',{}).get(key) is True for key in (
-                'routine_no_model','routine_verified_nozzle','followup_bed','actual_model_composed',
-                'explanation_keeps_verified_observation','casual_without_printer','no_pending_or_writes','model_latency_bounded'))
-    if "audio_quality" in report:
-        quality=report['audio_quality']
-        report['preview_gates']['audio_signal_and_delivery']=(
-            quality.get('passed') is True and all(quality.get('checks',{}).get(key) is True for key in (
-                'original_is_finite_unclipped','callback_chunks_match_original','converted_length',
-                'chunk_invariance','antialias_rejection','render_preserves_converted_pcm',
-                'buffered_generation_has_no_starvation','non_silent_render_receipt'))
-            and quality.get('production_cached_pipeline',{}).get('passed') is True)
-    if "followup_capture_count" in report:
-        report["preview_gates"]["three_unprefixed_followups"] = (
-            report["followup_capture_count"] == 3 and len(report.get("paced_responses", [])) == 4
-            and all("63%" in (answer or "") for answer in report["paced_responses"][1:]))
-    report["preview_gates"]["read_only_query_catalog"] = (
-        query.get("passed") is True and query.get("printer_writes") == 0 and query.get("pending_write") is False)
-    negatives = report.get("negative_composite", [])
-    report["preview_gates"]["no_negative_query_activation"] = (
-        len(negatives) == 6 and all(row.get("accepted_requests") == [] and row.get("session_open") is False
-                                    for row in negatives))
-    report["engineering_preview_passed"] = all(report["preview_gates"].values())
-    limits = report.get('limits_probe', {})
-    report['preview_gates']['capability_limits_and_motion_safety'] = (
-        limits.get('passed') is True and limits.get('printer_writes') == 0
-        and len(limits.get('cases', [])) == 8 and all(row.get('passed') is True for row in limits['cases']))
-    report['engineering_preview_passed'] = all(report['preview_gates'].values())
-    if "heat_fix_probe" in report:
-        commands = report["heat_fix_probe"]
-        report["preview_gates"]["heating_parser_and_cancel_safety"] = (
-            commands.get("passed") is True and commands.get("printer_writes") == 0
-            and commands.get("supported_request_llm_calls") == 0 and commands.get("pending_write") is False)
-        report["engineering_preview_passed"] = all(report["preview_gates"].values())
-    report["preview_scope"] = "Query engineering preview; separately spoken wake then request and no accepted negative inputs; raw KWS/continuous-speech accuracy remains separate and unqualified"
-    report["continuous_wake_status_passed"] = report["gates"]["captured_status"]
 
 
 def run(pack, checkpoint=None):

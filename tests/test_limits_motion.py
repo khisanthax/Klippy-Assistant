@@ -329,7 +329,7 @@ async def test_discovery_has_no_write_authority_or_private_config_export(motion_
 
 async def test_packaged_limits_probe_is_strictly_read_only():
     report = await run()
-    assert report['passed'] and report['printer_writes'] == 0 and len(report['cases']) == 8
+    assert report['passed'] and report['printer_writes'] == 0 and len(report['cases']) == 10
 
 
 @pytest.mark.parametrize('phrase', ['move M1 X minus 20', 'move X minus 20 on M1', 'go to X 150 for Mercury One'])
@@ -412,13 +412,11 @@ async def test_injected_transport_cannot_start_network_subscription(motion_rig):
 
 
 @pytest.mark.parametrize('defect', ['missing','summary','write','case','count'])
-def test_limits_qualification_cannot_be_skipped(defect):
-    from pathlib import Path
+def test_limits_qualification_cannot_be_skipped(defect, preview_evidence):
 
     from klippy.voice_probe import qualify_preview_report
-    report = json.loads((Path(__file__).parents[1] / 'benchmarks/preview72-release-frozen.json').read_text())
-    limits = {'passed':True,'printer_writes':0,'cases':[{'passed':True} for _ in range(8)]}
-    report['limits_probe'] = limits
+    report = preview_evidence
+    limits = report['limits_probe']
     qualify_preview_report(report)
     assert report['engineering_preview_passed']
     if defect == 'missing':
@@ -450,3 +448,62 @@ async def test_monitor_discovery_and_reconnection_revoke_reviews(motion_rig, cha
         data['status']['configfile']['settings']['printer']['max_velocity'] = 250
     await monitor.poll()
     assert engine.pending is None and not data['writes']
+
+
+@pytest.mark.parametrize('change', ['standard','no_tool','no_map','neither','additional','bool'])
+async def test_upstream_axis_contract_through_conversation(motion_rig, change):
+    from pathlib import Path
+    _, data, engine, _ = motion_rig
+    contract = json.loads((Path(__file__).parent / 'fixtures/klipper_standard_axes.json').read_text())
+    tool, mapping = (data['status'][name] for name in ('toolhead', 'gcode_move'))
+    tool.update(contract['toolhead'])
+    mapping.update(contract['gcode_move'])
+    if change in ('no_tool', 'neither'):
+        del tool['extra_axes']
+    if change in ('no_map', 'neither'):
+        del mapping['axis_map']
+    if change == 'additional':
+        tool['extra_axes']['manual_stepper auxiliary'] = 4
+    if change == 'bool':
+        mapping['axis_map']['X'] = False
+    request = Conversation(engine).hear('move X 20 on M1')
+    if change == 'standard':
+        assert 'Confirm' in await request
+    else:
+        with pytest.raises(Rejected):
+            await request
+    assert bool(engine.pending) == (change == 'standard')
+    assert not data['writes']
+
+
+@pytest.mark.parametrize('old_backup', [True, False])
+async def test_recovery_requires_separate_device_limits_review(motion_rig, tmp_path, old_backup):
+    store, data, engine, printer = motion_rig
+    cmd = Intent(action=Action.HEAT, printer_id='sim', params={'heater': 0, 'temperature': 90})
+    store.set('heater_limits', {'sim': {'0': 80}})
+    with pytest.raises(Rejected, match='outside'):
+        await engine.propose(cmd)
+    path = tmp_path / 'backup.json'
+    store.export(path)
+    if old_backup:
+        value = json.loads(path.read_text())
+        value.pop('restriction_candidates')
+        value['version'] = 2
+        path.write_text(json.dumps(value))
+    store.restore(path)
+    store.save_printer(printer)
+    engine.select(printer.id)
+    with pytest.raises(Rejected, match='Review the restored limits'):
+        await engine.propose(cmd)
+    with pytest.raises(Rejected, match='Review the restored limits'):
+        await engine.propose(move())
+    assert store.get('limits_review_required')['sim']['heater_caps'] == {'0': 80}
+    engine.limits.save_review(printer, await engine.limits.refresh(printer), {}, {'0': 80})
+    with pytest.raises(Rejected, match='outside'):
+        await engine.propose(cmd)
+    store.restore(path)
+    store.save_printer(printer)
+    engine.select(printer.id)
+    engine.limits.save_review(printer, await engine.limits.refresh(printer), {}, {'0': 100})
+    assert 'Confirm' in await engine.propose(cmd)
+    assert not data['writes']

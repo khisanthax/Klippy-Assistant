@@ -1,5 +1,6 @@
 param(
     [switch]$Stable,
+    [switch]$ValidatedSource,
     [string]$ModelPack = 'local\bundle-models-voice',
     [string]$Iscc = '',
     [string]$Python = '.venv\Scripts\python.exe'
@@ -16,8 +17,14 @@ if ($Stable) {
 }
 $taskModelPack = (Resolve-Path -LiteralPath $ModelPack).Path
 Invoke-Checked $Python @('scripts/verify_models.py', $taskModelPack, '--qualified')
-Invoke-Checked $Python @('-m', 'pytest', '-q')
-Invoke-Checked $Python @('-m', 'ruff', 'check', 'src', 'tests', 'scripts')
+if ($ValidatedSource) {
+    if ($env:GITHUB_ACTIONS -ne 'true' -or $env:GITHUB_SHA -ne (git rev-parse HEAD)) {
+        throw 'Reusing source validation requires the same GitHub Actions checkout.'
+    }
+} else {
+    Invoke-Checked $Python @('-m', 'pytest', '-q')
+    Invoke-Checked $Python @('-m', 'ruff', 'check', 'src', 'tests', 'scripts')
+}
 Invoke-Checked $Python @('scripts/collect_licenses.py', 'build/licenses')
 $taskPythonExe = (Get-Command $Python).Source
 $taskPythonBase = & $taskPythonExe -c 'import sys; print(sys.base_prefix)'
@@ -68,7 +75,11 @@ if (-not $Iscc) {
 }
 if (-not $Iscc) { throw 'Install Inno Setup or supply -Iscc path; frozen application is in dist\Klippy.' }
 Invoke-Checked $Iscc @('packaging/klippy.iss')
-Get-ChildItem -LiteralPath 'dist' -Filter 'Klippy-Setup-*.exe' | ForEach-Object {
-    $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-    "$hash  $($_.Name)" | Set-Content -Encoding ascii -LiteralPath ($_.FullName + '.sha256')
-}
+$taskVersion = (Select-String -Path 'packaging/klippy.iss' -Pattern '^#define AppVersion "([^"]+)"').Matches[0].Groups[1].Value
+$taskSetup = Get-Item -LiteralPath ("dist/Klippy-Setup-" + $taskVersion + ".exe")
+$hash = (Get-FileHash -LiteralPath $taskSetup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+"$hash  $($taskSetup.Name)" | Set-Content -Encoding ascii -LiteralPath ($taskSetup.FullName + '.sha256')
+@{
+    source_sha=(git rev-parse HEAD); run_id=$env:GITHUB_RUN_ID; run_attempt=$env:GITHUB_RUN_ATTEMPT
+    installer_sha256=$hash; executable_sha256=(Get-FileHash dist/Klippy/Klippy.exe).Hash.ToLowerInvariant()
+} | ConvertTo-Json | Set-Content -Encoding utf8 -LiteralPath 'build/frozen-build.json'
