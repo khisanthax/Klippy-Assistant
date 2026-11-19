@@ -10,7 +10,7 @@ from klippy.moonraker import Moonraker
 from klippy.safety import IN_FLIGHT, Rejected
 
 
-@pytest.mark.parametrize("when", ["dns", "transport", "expired", "reconnect"])
+@pytest.mark.parametrize("when", ["dns", "transport", "expired", "reconnect", "reduced_cap", "confirmation_policy"])
 async def test_revocation_at_dispatch_boundary(rig, monkeypatch, when):
     store, sim, engine, clock = rig
     reached, resume = asyncio.Event(), asyncio.Event()
@@ -45,6 +45,10 @@ async def test_revocation_at_dispatch_boundary(rig, monkeypatch, when):
         await asyncio.wait_for(reached.wait(), 3)
         if when == "expired":
             clock[0] += 60
+        elif when == "reduced_cap":
+            store.set("heater_limits", {"sim": {"0": 80}})
+        elif when == "confirmation_policy":
+            store.set("confirmations", {"heat": False})
         elif when == "reconnect":
             engine.limits.invalidate("sim")
         else:

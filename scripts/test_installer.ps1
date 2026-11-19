@@ -29,6 +29,22 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Could not prepare isolated settings' }
     $taskIteration = 0
     $taskInstallers = @($PreviousInstaller, $Installer, $Installer) | Where-Object { $_ }
+    if ($BlockExternalNetwork) {
+        if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
+            throw 'Offline qualification requires enabled Windows firewall profiles'
+        }
+        $taskExternalAddresses = @('0.0.0.0-126.255.255.255','128.0.0.0-255.255.255.255',
+                                  '::2-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')
+        $taskBlocked = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+        function Block-QaProgram([string]$Program) {
+            if ($taskBlocked.Add($Program)) {
+                New-NetFirewallRule -DisplayName $taskFirewallGroup -Group $taskFirewallGroup -Direction Outbound -Action Block -Program $Program -RemoteAddress $taskExternalAddresses | Out-Null
+            }
+        }
+        foreach ($taskSetupPath in $taskInstallers) { Block-QaProgram (Resolve-Path -LiteralPath $taskSetupPath).Path }
+        Block-QaProgram (Join-Path $taskInstallDir 'Klippy.exe')
+        Block-QaProgram (Join-Path $taskInstallDir 'unins000.exe')
+    }
     foreach ($taskTargetInstaller in $taskInstallers) {
         $taskIteration++
         if ($taskTargetInstaller -eq $PreviousInstaller -and (Get-FileHash $PreviousInstaller).Hash -ne '0c308b113082c2bca18ba328d005e4d659ace77b909c497012775b79b0095238') {
@@ -42,6 +58,11 @@ try {
         if ((Get-Content -LiteralPath $taskSentinel) -ne 'Klippy installer QA sentinel') { throw 'Settings sentinel changed' }
         & $Python scripts/installer_settings.py verify $Consent
         if ($LASTEXITCODE -ne 0) { throw 'SQLite settings were not preserved' }
+        if ($BlockExternalNetwork) {
+            $taskRuntimes = @(Get-ChildItem -LiteralPath $taskInstallDir -Recurse -Filter 'llama-server.exe')
+            if (-not $taskRuntimes) { throw 'Bundled language runtime missing for firewall qualification' }
+            foreach ($taskRuntime in $taskRuntimes) { Block-QaProgram $taskRuntime.FullName }
+        }
         if ($taskTargetInstaller -eq $Installer) {
             $env:KLIPPY_SMOKE_QA_PROFILE = $taskDataDir
             $taskBoot = Start-Process -FilePath (Join-Path $taskInstallDir 'Klippy.exe') -WindowStyle Hidden -PassThru -ArgumentList '--smoke-test'
@@ -49,18 +70,6 @@ try {
             Remove-Item Env:KLIPPY_SMOKE_QA_PROFILE
             & $Python scripts/installer_settings.py verify $Consent
             if ($LASTEXITCODE -ne 0) { throw 'Opening the upgraded profile changed protected records' }
-        }
-    }
-    if ($BlockExternalNetwork) {
-        if (Get-NetFirewallProfile | Where-Object { -not $_.Enabled }) {
-            throw 'Offline qualification requires enabled Windows firewall profiles'
-        }
-        $taskExternalAddresses = @('0.0.0.0-126.255.255.255','128.0.0.0-255.255.255.255',
-                                  '::2-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')
-        $taskPrograms = @((Join-Path $taskInstallDir 'Klippy.exe')) + @(Get-ChildItem -LiteralPath $taskInstallDir -Recurse -Filter 'llama-server.exe' | ForEach-Object FullName)
-        if ($taskPrograms.Count -lt 2) { throw 'Bundled language runtime missing for firewall qualification' }
-        foreach ($taskProgram in $taskPrograms) {
-            New-NetFirewallRule -DisplayName $taskFirewallGroup -Group $taskFirewallGroup -Direction Outbound -Action Block -Program $taskProgram -RemoteAddress $taskExternalAddresses | Out-Null
         }
     }
     $env:KLIPPY_SMOKE_QA_PROFILE = $taskDataDir
@@ -95,7 +104,17 @@ try {
     if (-not (Test-Path -LiteralPath $taskSentinel)) { throw 'Uninstall removed preserved user data' }
     & $Python scripts/installer_settings.py verify $Consent
     if ($LASTEXITCODE -ne 0) { throw 'Uninstall or application startup changed protected SQLite records' }
+    $taskReportHashes = @{}
+    foreach ($taskReport in @($taskSmokeReport,$taskOrbReport,$taskVoiceReport,$taskWakeReport)) {
+        $taskReportHashes[[IO.Path]::GetFileName($taskReport)] = (Get-FileHash -LiteralPath $taskReport).Hash.ToLowerInvariant()
+    }
+    if ($MeasurePerformance) {
+        foreach ($taskReport in 'local/performance-voice.json','local/performance-budget.json') {
+            $taskReportHashes[[IO.Path]::GetFileName($taskReport)] = (Get-FileHash -LiteralPath $taskReport).Hash.ToLowerInvariant()
+        }
+    }
     @{
+        report_sha256=$taskReportHashes
         executable_sha256=$taskExecutableHash; consent=$Consent; preserved_profile_sha256=(Get-Content -Raw ($taskDataDir + '.sha256')).Trim();
         source_sha=(git rev-parse HEAD); run_id=$env:GITHUB_RUN_ID; run_attempt=$env:GITHUB_RUN_ATTEMPT;
         status='passed'; environment=$(if ($env:GITHUB_ACTIONS -eq 'true') { 'Fresh Windows CI runner; not a clean Windows desktop VM' } else { 'Development host; not a clean VM' });

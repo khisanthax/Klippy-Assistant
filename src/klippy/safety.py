@@ -71,9 +71,10 @@ READ_ONLY = {Action.STATUS, Action.TEMPERATURES, Action.MACROS}
 
 
 class Validation(tuple):
-    def __new__(cls, client, state, script, binding, review=None):
+    def __new__(cls, client, state, script, binding, review=None, record=None):
         result = super().__new__(cls, (client, state, script, binding))
         result.review = review
+        result.record = record
         return result
 
 
@@ -193,7 +194,7 @@ class SafetyEngine:
         state = Snapshot(connected=True) if intent.action == Action.EMERGENCY else await client.snapshot()
         if not state.connected:
             raise Rejected("Printer disconnected")
-        script, policy, motion_review = None, {}, None
+        script, policy, motion_review, record = None, {}, None, None
         if intent.action not in READ_ONLY and intent.action != Action.EMERGENCY:
             if not state.ready:
                 raise Rejected("Printer is not ready")
@@ -311,7 +312,7 @@ class SafetyEngine:
                 "confirmations": self.store.get("confirmations", {}),
             }
         )
-        return Validation(client, state, script, binding, motion_review)
+        return Validation(client, state, script, binding, motion_review, record)
 
     async def propose(self, intent: Intent, *, defer_confirmation=False, force_confirmation=False):
         initial = self.generation
@@ -434,9 +435,20 @@ class SafetyEngine:
             with self.state_lock:
                 self.validating = self.dispatch_committed = False
 
+    def _local_authority(self, intent):
+        printer_id = intent.printer_id
+        with self.store.lock:
+            return (self.store.get("selected"), next((p for p in self.store.printers() if p.id == printer_id), None),
+                    self.store.get("confirmations", {}), self.store.get("heater_limits", {}).get(printer_id),
+                    self.store.get("printer_limit_overrides", {}).get(printer_id),
+                    self.store.get("limits_review_required", {}).get(printer_id),
+                    self.store.macros(printer_id).get(intent.macro) if intent.action == Action.MACRO else None)
+
     async def _dispatch(self, intent, pending, pending_trace, generation):
+        authority = self._local_authority(intent)
         try:
-            client, _state, script, binding = await self.validate(intent)
+            validation = await self.validate(intent)
+            client, _state, script, binding = validation
         except Rejected as exc:
             self.audit("confirmation_rejected", trace=pending_trace, outcome="rejected", diagnostic=exc.code)
             raise
@@ -445,14 +457,14 @@ class SafetyEngine:
         try:
             checked = self.clock()
             limited = intent.action in (Action.MOVE, Action.HEAT)
-            record = self.limits.records.get(intent.printer_id)
+            record = validation.record
             def commit():
-                with self.state_lock:
+                with self.state_lock, self.store.lock:
                     if (generation != self.generation or self.clock() >= pending.expires
-                            or self.store.get("selected") != intent.printer_id
-                            or client.printer not in self.store.printers()
+                            or authority != self._local_authority(intent)
                             or self.clock() - checked > self.limits.maximum_read_seconds
-                            or limited and (record is None or self.limits.records.get(intent.printer_id) is not record)):
+                            or limited and (record is None or self.limits.records.get(intent.printer_id) is not record
+                                            or self.clock() - record.checked > self.limits.maximum_read_seconds)):
                         raise Rejected("Request expired, was canceled, or printer state changed before transmission.")
                     self.dispatch_committed = True
                     self.last_dispatch_trace = reaction_context.get()

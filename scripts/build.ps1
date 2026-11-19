@@ -79,7 +79,12 @@ $taskVersion = (Select-String -Path 'packaging/klippy.iss' -Pattern '^#define Ap
 $taskSetup = Get-Item -LiteralPath ("dist/Klippy-Setup-" + $taskVersion + ".exe")
 $hash = (Get-FileHash -LiteralPath $taskSetup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
 "$hash  $($taskSetup.Name)" | Set-Content -Encoding ascii -LiteralPath ($taskSetup.FullName + '.sha256')
+$taskReportHashes = @{}
+foreach ($taskReport in @($smokeReport,$orbReport,$voiceReport,$wakeReport)) {
+    $taskReportHashes[[IO.Path]::GetFileName($taskReport)] = (Get-FileHash -LiteralPath $taskReport).Hash.ToLowerInvariant()
+}
 @{
+    report_sha256=$taskReportHashes
     source_sha=(git rev-parse HEAD); run_id=$env:GITHUB_RUN_ID; run_attempt=$env:GITHUB_RUN_ATTEMPT
     installer_sha256=$hash; executable_sha256=(Get-FileHash dist/Klippy/Klippy.exe).Hash.ToLowerInvariant()
 } | ConvertTo-Json | Set-Content -Encoding utf8 -LiteralPath 'build/frozen-build.json'

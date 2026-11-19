@@ -1,5 +1,15 @@
 # Logbook
 
+## 2026-11-19 - Final dispatch state and artifact identity
+
+A second review traced edits to the local cap and confirmation policy during final endpoint
+lookup. Dispatch now compares the local policy under the settings lock and checks the exact
+discovery record returned by validation. Two new simulated races change policy during
+lookup. The artifact reviewer also recomputes every native report digest. The installer
+harness installs its program-scoped firewall rules before setup and protects the bundled
+runtime before application startup. Hosted run 44611591220 was blocked by the Actions
+budget before its first step.
+
 ## 2026-11-19 - Audit corrections for 0.8.0-preview.2
 
 The simulator now exercises cancellation during endpoint lookup and after HTTP handoff, strict

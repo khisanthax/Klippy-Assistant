@@ -18,7 +18,16 @@ def checks(section, names):
     return section["passed"] is True and all(section["checks"].get(name) is True for name in names)
 
 
+def hash_matches(path, receipt):
+    with path.open('rb') as data:
+        return receipt['report_sha256'][path.name] == hashlib.file_digest(data, 'sha256').hexdigest()
+
+
 def verify_native(folder, prefix):
+    receipt = read(folder / ("frozen-build.json" if prefix == "frozen" else "results.json"))
+    if not all(hash_matches(folder / f"{prefix}-{name}", receipt)
+               for name in ("voice.json", "orb.json", "wake.json", "smoke.txt")):
+        return False
     voice = read(folder / f"{prefix}-voice.json")
     if voice.get("qualification_revision") != REVISION:
         return False
@@ -88,6 +97,9 @@ def evaluate(root, source, run, attempt):
         gate("installed_native_consent_" + consent, lambda: verify_native(folder, "installed"))
         if consent == "on":
             def memory():
+                receipt = read(folder / "results.json")
+                if not all(hash_matches(base / name, receipt) for name in ("performance-budget.json", "performance-voice.json")):
+                    return False
                 perf = read(base / "performance-budget.json")
                 voice = read(base / "performance-voice.json")
                 if voice.get("qualification_revision") != REVISION:

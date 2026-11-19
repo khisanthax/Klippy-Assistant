@@ -96,7 +96,9 @@ def test_final_manifest_binds_every_runtime_to_one_installer(tmp_path, preview_e
             shutil.copy(project / f"benchmarks/preview8-local-frozen-{kind}.json", folder / f"{prefix}-{kind}.json")
     frozen = tmp_path / "frozen-qualification-diagnostics"
     native(frozen, "frozen")
-    (frozen / "frozen-build.json").write_text(json.dumps(identity))
+    def hashes(folder, pattern):
+        return {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in folder.glob(pattern) if p.is_file()}
+    (frozen / "frozen-build.json").write_text(json.dumps(dict(identity, report_sha256=hashes(frozen, "frozen-*"))))
     tests = tmp_path / "test-results"
     tests.mkdir()
     (tests / "test-results.xml").write_text('<testsuites><testsuite tests="917" failures="0" errors="0" skipped="0"/></testsuites>')
@@ -111,6 +113,8 @@ def test_final_manifest_binds_every_runtime_to_one_installer(tmp_path, preview_e
             (base / "performance-voice.json").write_text(voice)
             (base / "performance-budget.json").write_text(json.dumps(dict(
                 passed=True, memory_budget_gib=16, peak_job_commit_bytes=1024, peak_active_processes=2)))
+        result['report_sha256'] = {**hashes(installed, "installed-*"), **hashes(base, "performance-*")}
+        (installed / "results.json").write_text(json.dumps(result))
     def verdict():
         return module.evaluate(tmp_path, source, run, attempt)
     assert verdict()["qualified_for_publication"]
