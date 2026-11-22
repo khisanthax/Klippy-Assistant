@@ -101,7 +101,8 @@ def test_final_manifest_binds_every_runtime_to_one_installer(tmp_path, preview_e
     (frozen / "frozen-build.json").write_text(json.dumps(dict(identity, report_sha256=hashes(frozen, "frozen-*"))))
     tests = tmp_path / "test-results"
     tests.mkdir()
-    (tests / "test-results.xml").write_text('<testsuites><testsuite tests="917" failures="0" errors="0" skipped="0"/></testsuites>')
+    suite_xml = '<testsuites><testsuite tests="{}" failures="0" errors="0" skipped="0"/></testsuites>'
+    (tests / "test-results.xml").write_text(suite_xml.format(924))
     for consent in ("on", "off"):
         base = tmp_path / ("installer-qualification-evidence-" + consent)
         installed = base / "installer-qa"
@@ -118,6 +119,9 @@ def test_final_manifest_binds_every_runtime_to_one_installer(tmp_path, preview_e
     def verdict():
         return module.evaluate(tmp_path, source, run, attempt)
     assert verdict()["qualified_for_publication"]
+    (tests / "test-results.xml").write_text(suite_xml.format(923))
+    assert verdict()["gates"]["source_tests"] == "failed"
+    (tests / "test-results.xml").write_text(suite_xml.format(924))
     result["source_sha"] = "d" * 40
     (installed / "results.json").write_text(json.dumps(result))
     assert not verdict()["qualified_for_publication"]

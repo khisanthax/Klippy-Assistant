@@ -66,6 +66,7 @@ def test_multi_sentence_playback_with_measured_chunk_lengths(arrivals, finish, w
     parts = [np.full(n, .2, dtype=np.float32) for n in (73114, 68504, 63445)]
     result, pcm = replay(parts, arrivals, [1/3, 2/3, 1], finish, 24000, improved=True)
     assert result["receipt"] and result["queue_underruns"] == 0
+    assert result["queue_gap_seconds"] == 0
     assert (result["first_pcm_render_seconds"] >= finish) == wait_for_end
     np.testing.assert_array_equal(pcm, np.concatenate(convert_chunks(parts, 24000)))
 

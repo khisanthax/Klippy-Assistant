@@ -216,6 +216,30 @@ def test_barge_in_rejection_does_not_use_short_wake_recheck(window):
     assert not inputs and voice.wake_diagnostics()["prefix_rejected"] == 1
 
 
+@pytest.mark.parametrize("final,expected", [
+    ("Clibby stop talking", []),
+    ("Clippy stop talking", ["Klippy stop talking"]),
+])
+def test_rolling_interruption_never_substitutes_for_final_wake_verification(window, final, expected):
+    _, voice, _ = window
+    pcm = np.ones(RATE, np.float32)
+    voice.playback.enqueue(pcm, voice.epoch)
+    inputs, wakes = [], []
+    voice.on_text, voice.on_wake = inputs.append, wakes.append
+    transcripts = iter(("Clippy stop, top.", final))
+    voice.backend.transcribe = lambda samples: next(transcripts)
+    voice._probe_wake(pcm, voice.epoch)
+    voice.asr_pool.submit(lambda: None).result(timeout=4)
+    assert wakes == [voice.epoch] and voice.playback.remaining == 0
+    assert not inputs and not voice.session.until
+    voice._transcribe(pcm, voice.epoch, True, True)
+    voice.asr_pool.submit(lambda: None).result(timeout=4)
+    assert [item.text for item in inputs] == expected
+    assert all(item.confirmation_token is None for item in inputs)
+    assert voice.wake_diagnostics()["prefix_rejected"] == int(not expected)
+    assert bool(voice.session.until) == bool(expected)
+
+
 def test_event_counts_exclude_arbitrary_fields_and_credentials(window):
     value, _, _ = window
     value.history.record("voice_diagnostic", diagnostic="asr_unavailable", event_status="accepted",

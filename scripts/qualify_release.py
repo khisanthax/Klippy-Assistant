@@ -77,7 +77,7 @@ def evaluate(root, source, run, attempt):
 
     def tests():
         suite = ET.parse(root / "test-results" / "test-results.xml").getroot().find("testsuite")
-        return (suite is not None and int(suite.get("tests")) >= 886 and
+        return (suite is not None and int(suite.get("tests")) >= 924 and
                 all(int(suite.get(key)) == 0 for key in ("errors", "failures", "skipped")))
 
     gate("source_tests", tests)
