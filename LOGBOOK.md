@@ -1,5 +1,38 @@
 # Logbook
 
+## 2026-11-22 - Hosted Windows qualification after public visibility change
+
+GitHub's annotations for runs 45025283460 and 45025278667 state that an Actions
+budget prevented the jobs from starting. Neither run executed a test step. After
+the owner made the repository public, a standard GitHub-hosted Windows runner
+started the full manual qualification on `ad7288a33fd51e31047a71ac84cf467569e3b7d2`.
+The workflow and required tests were used as written. Ruff passed. The downloaded
+JUnit report recorded 924 tests with zero failures, errors, or skips, including
+dispatch cancellation, firmware and owner-limit checks, voice regressions,
+history, and release-evidence checks.
+[PR run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/45025283460)
+[Push run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/45025278667)
+[Full qualification](https://github.com/khisanthax/Klippy-Assistant/actions/runs/45027340828)
+
+All nine release-evidence gates passed in hosted run 45027340828, attempt 1.
+Both consent profiles passed upgrade from v0.7.2-preview.1, same-version
+reinstall, installed startup and offline checks, and uninstall. The isolated
+SQLite settings and seeded history matched their original receipts. The
+installed memory test peaked at 2,114,043,904 bytes (1.97 GiB) across three
+processes under the 16 GiB process-tree limit. The frozen, consent-on,
+consent-off, and memory voice probes each delivered the synthetic interruption
+request, measured zero playback gaps, and recorded zero simulated printer writes.
+The prior intermittent acoustic miss remains part of the local evidence.
+
+Downloaded the hosted artifacts and reran the release validator locally. Its
+verdict matched the hosted manifest exactly. The hosted installer is
+`Klippy-Setup-0.8.0-preview.3.exe`, 1,489,935,225 bytes, with SHA-256
+`67c4e7c3309f207fc10ee2e7d1599a56ca2799d556f6dfbe3d6cceb9f449f1da`.
+The checksum matches the sidecar and frozen and installed build receipts.
+The qualified candidate remains unpublished and owner installation awaits
+approval. Physical microphone and printer acceptance and clean desktop VM
+testing remain open.
+
 ## 2026-11-22 - PR #20 interruption diagnosis and Windows qualification
 
 Both archived preview.3 memory runs stopped playback after a rolling 1.60-second
