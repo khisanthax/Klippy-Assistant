@@ -1,4 +1,4 @@
-#define AppVersion "0.8.0-preview.2"
+#define AppVersion "0.8.0-preview.3"
 [Setup]
 AppId={{D51FBA83-D0C3-4CA5-BA79-EE038805EC21}
 AppName=Klippy Assistant Engineering Preview

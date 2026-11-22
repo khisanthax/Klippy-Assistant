@@ -5,7 +5,12 @@
 Revocation at HTTP handoff, the upstream single-extruder axis contract, explicit device
 limits review on restore, live console policy and fail-closed release evidence are implemented.
 The installer qualification now includes synthetic conversation rows and separate consent-on
-and consent-off profiles. Release evidence and remaining external gates are tracked in LOGBOOK.md.
+and consent-off profiles. The first budgeted playback run exposed an underrun after a slow
+first chunk. Preview.3 buffers the rest of that utterance while input capture stays available.
+Both preview.3 budgeted runs passed audio delivery. One of two passed verified interruption.
+Repeatable interruption and the hosted installer lifecycle remain open. GitHub Actions
+requires restored capacity for the hosted checks.
+[Preview.3 evidence](benchmarks/preview83-release-status.json) and [earlier failed run](benchmarks/preview82-release-status.json).
 
 ## Printer capability / safety limits registry - historical 0.8.0-preview.1 candidate
 

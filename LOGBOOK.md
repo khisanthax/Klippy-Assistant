@@ -1,5 +1,128 @@
 # Logbook
 
+## 2026-11-22 - Hosted Windows qualification after public visibility change
+
+GitHub's annotations for runs 45025283460 and 45025278667 state that an Actions
+budget prevented the jobs from starting. Neither run executed a test step. After
+the owner made the repository public, a standard GitHub-hosted Windows runner
+started the full manual qualification on `ad7288a33fd51e31047a71ac84cf467569e3b7d2`.
+The workflow and required tests were used as written. Ruff passed. The downloaded
+JUnit report recorded 924 tests with zero failures, errors, or skips, including
+dispatch cancellation, firmware and owner-limit checks, voice regressions,
+history, and release-evidence checks.
+[PR run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/45025283460)
+[Push run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/45025278667)
+[Full qualification](https://github.com/khisanthax/Klippy-Assistant/actions/runs/45027340828)
+
+All nine release-evidence gates passed in hosted run 45027340828, attempt 1.
+Both consent profiles passed upgrade from v0.7.2-preview.1, same-version
+reinstall, installed startup and offline checks, and uninstall. The isolated
+SQLite settings and seeded history matched their original receipts. The
+installed memory test peaked at 2,114,043,904 bytes (1.97 GiB) across three
+processes under the 16 GiB process-tree limit. The frozen, consent-on,
+consent-off, and memory voice probes each delivered the synthetic interruption
+request, measured zero playback gaps, and recorded zero simulated printer writes.
+The prior intermittent acoustic miss remains part of the local evidence.
+
+Downloaded the hosted artifacts and reran the release validator locally. Its
+verdict matched the hosted manifest exactly. The hosted installer is
+`Klippy-Setup-0.8.0-preview.3.exe`, 1,489,935,225 bytes, with SHA-256
+`67c4e7c3309f207fc10ee2e7d1599a56ca2799d556f6dfbe3d6cceb9f449f1da`.
+The checksum matches the sidecar and frozen and installed build receipts.
+The qualified candidate remains unpublished and owner installation awaits
+approval. Physical microphone and printer acceptance and clean desktop VM
+testing remain open.
+
+## 2026-11-22 - PR #20 interruption diagnosis and Windows qualification
+
+Both archived preview.3 memory runs stopped playback after a rolling 1.60-second
+ASR window produced “Clippy stop, top.” The keyword spotter recorded no hit in
+either run. The independent final 2.15-second decode produced “Clibby stop talking”
+in the first run and “Clippy stop talking” in the second. The strict wake-prefix
+check rejected the former and delivered the latter exactly once. Both had zero
+printer writes. Those reports identify the decision that differed. They did not
+retain the waveforms or hashes needed to isolate the acoustic cause retrospectively.
+
+On Windows, the new device-free probe ran the real Kokoro, echo filter, keyword
+spotter, and Whisper through VoiceLoop. For each of two independently synthesized
+speaker pairs, it completed ASR work after 12, 14, 16, 18, 20, then 12 capture
+frames (10 ms per frame). Delaying the worker changed the final PCM hash. Repeating
+the initial schedule reproduced the same PCM and result. A separate crossover held
+the delay at 18 frames and paired each of two playback signals with each of six
+user signals. All 24 replays flushed playback once and delivered the expected text.
+All 24 independent second decodes of the same final PCM agreed with the first.
+Timing and synthesis variation were measurable. Neither experiment reproduced
+the original misrecognition. The budgeted acoustic consistency gate remains open.
+[Per-trial synthetic transcripts and PCM hashes](benchmarks/preview83-interruption-replays.json)
+
+Qualification source `dfc25990321258505a394affce1b0ec0671412f9` passed all 924
+tests in 79.04 seconds with zero failures, errors or skips. Ruff passed. Two new
+regressions exercise the rolling interrupt and final wake check independently.
+The slow playback replay began at 12.08 seconds and the fast control at 0.30
+seconds. Both produced a delivery receipt, zero gap and zero queue underruns.
+All six dispatch-boundary cases passed, including cancellation before and after
+transport handoff. The firmware axis-map, restored owner-cap reapproval, evidence
+identity, and consent-on/off seeded SQLite checks passed. The release validator
+previously accepted 886 tests. It now rejects evidence below this 924-test suite.
+
+Recomputed the existing local preview.3 installer checksum, portable executable
+checksum, ten archived report hashes and all four per-attempt report hashes.
+The frozen native evidence validator passed. The installer contains 1,489,583,311
+bytes, SHA-256 `3d821a9d01a814a0543db6a3c72cdbde73170d68df85cf9a66221fc9fe3c9d64`,
+and its build receipt identifies application source `ffcff59`.
+[Original local build and memory receipts](benchmarks/preview83-release-status.json)
+
+A new self-test of that frozen executable under a 16 GiB Windows process-tree
+limit passed in 135.454 seconds. Peak commit was 2,528,817,152 bytes across
+three processes. The final transcript was “Clippy stop talking.” Playback
+flushed once, the playback quality test measured zero gaps and underruns, and
+the simulator recorded zero printer writes. Across all three retained frozen
+budget attempts, two passed the interruption gate. This was a portable run.
+
+GitHub reported an Actions budget block on the exact-source run. Zero steps ran
+and zero artifacts were created. When budget is restored, rerun 45025278667
+on its original SHA, check the hosted installer digest and release evidence, and
+verify upgrade, reinstall, uninstall, offline execution and installed memory for
+the applicable consent profiles. All v0.8 releases remain draft or unissued.
+Installation on the owner's machine and publication require explicit approval.
+[Windows qualification run](https://github.com/khisanthax/Klippy-Assistant/actions/runs/45025278667)
+
+## 2026-11-19 - Preview.3 packaged, publication still open
+
+Application source `ffcff59f6ff8b7a1ef2f9691098d5e2adc1c2ca7` is on PR #20.
+The Windows build passed 922 tests, Ruff, 57 asset checks, frozen startup, 29 orb
+checks, 26 desktop feature checks and the native voice suite. Both synthetic consent
+profiles preserved their seeded SQLite content after frozen startup. The independently
+verified installer is in `dist/Klippy-Setup-0.8.0-preview.3.exe`.
+
+Both 16 GiB process-tree runs had zero playback gaps and successful delivery receipts.
+In the measured slow replay, playback started at 12.08 seconds, compared with 4.53 seconds
+before the correction. The fast control started at 0.30 seconds. One of two budgeted
+runs passed overall. Playback stopped in both. The first run rejected the synthetic
+transcript “Clibby stop talking” and delivered zero commands. The second recognized
+“Clippy stop talking.” Continuous wake-plus-request also varied between the two runs.
+The peak process-tree commit was 2.37 GiB. The microphone and physical printers were
+outside this test. Both raw runs are retained under `local/preview83-qualification`.
+
+GitHub Actions run 44616461107 stopped before its first step because of the account
+budget. The next release checks are reproducible synthetic interruption and a hosted
+installer upgrade, offline run, reinstall and uninstall against both consent profiles.
+Clean desktop, actual 16 GB host and supervised hardware acceptance remain open.
+[Qualification record and digests](benchmarks/preview83-release-status.json)
+
+## 2026-11-19 - Measured multi-sentence playback regression
+
+The preview.2 frozen run passed, but the 16 GiB job on the identical binary reproduced a
+1.63-second queue gap. Kokoro delivered 73,114 samples at 24 kHz after 3.50 seconds.
+The estimated delay allowed playback to start while the producer was already behind.
+The receipt correctly failed. Peak job commit was 2,528,866,304 bytes across three processes.
+The preview.2 evidence retains that failed run. All printer services were simulated.
+
+Preview.3 uses the existing interruptible complete-PCM buffer when generating the first
+sentence group takes at least as long as its audio duration. A deterministic replay
+uses the measured arrivals and lengths. A faster replay checks that playback still starts
+before synthesis finishes. The microphone and confirmation receipt paths are unchanged.
+
 ## 2026-11-19 - Final dispatch state and artifact identity
 
 A second review traced edits to the local cap and confirmation policy during final endpoint
