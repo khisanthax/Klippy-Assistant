@@ -1,0 +1,1164 @@
+{
+  "qualification_source": "dfc25990321258505a394affce1b0ec0671412f9",
+  "scope": "Synthetic 16 kHz PCM, production VoiceLoop and native models, fixed-frame worker completion. No device or printer transport. All trials retained.",
+  "timing_experiment": {
+    "model_manifest_sha256": "c1ee41d40b27cf02de34723992d328111c8c06c5f6dfe1389c12ece654a5782f",
+    "sample_rate": 16000,
+    "frame_samples": 160,
+    "stimuli": [
+      {
+        "speaker_sha256": "c9e965ee0c6dcba444ddbce2317b3b408fe0337bd4921d386663974c0387ee8f",
+        "user_sha256": "b032fe573b179ae8651c8d9e639dec5472629756838d2a44b7294bab1f03315c",
+        "runs": [
+          {
+            "worker_delay_frames": 12,
+            "wakes": [
+              {
+                "frame": 418,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 326,
+                "pcm_sha256": "71122383c2b4bee582f45380136380217e715a38d6f8301d980ee286bfcfa210",
+                "samples": 25600,
+                "text": "Clear."
+              },
+              {
+                "stage": "rolling",
+                "frame": 372,
+                "pcm_sha256": "d5703f147ed3cbf9fbc731344f7d7156e2cdc6b83d4040255735e2761c19a688",
+                "samples": 25600,
+                "text": "Clibby stuff"
+              },
+              {
+                "stage": "rolling",
+                "frame": 418,
+                "pcm_sha256": "b05899c30d842021dd71578076598a97e07fb7fc058c266a34f5a1ff33c8f35b",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 521,
+                "pcm_sha256": "5c3e0893cfca5eea6597c6ed5f3fcf0d69fa20c27f32347517217011b64b073f",
+                "samples": 34240,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 14,
+            "wakes": [
+              {
+                "frame": 420,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 328,
+                "pcm_sha256": "71122383c2b4bee582f45380136380217e715a38d6f8301d980ee286bfcfa210",
+                "samples": 25600,
+                "text": "Clear."
+              },
+              {
+                "stage": "rolling",
+                "frame": 374,
+                "pcm_sha256": "d5703f147ed3cbf9fbc731344f7d7156e2cdc6b83d4040255735e2761c19a688",
+                "samples": 25600,
+                "text": "Clibby stuff"
+              },
+              {
+                "stage": "rolling",
+                "frame": 420,
+                "pcm_sha256": "b05899c30d842021dd71578076598a97e07fb7fc058c266a34f5a1ff33c8f35b",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 523,
+                "pcm_sha256": "12d76f957b2aa9cb571b28f7ef9ed52d5ee458edc0435af2f1a07d805852a59f",
+                "samples": 34240,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 16,
+            "wakes": [
+              {
+                "frame": 422,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 330,
+                "pcm_sha256": "71122383c2b4bee582f45380136380217e715a38d6f8301d980ee286bfcfa210",
+                "samples": 25600,
+                "text": "Clear."
+              },
+              {
+                "stage": "rolling",
+                "frame": 376,
+                "pcm_sha256": "d5703f147ed3cbf9fbc731344f7d7156e2cdc6b83d4040255735e2761c19a688",
+                "samples": 25600,
+                "text": "Clibby stuff"
+              },
+              {
+                "stage": "rolling",
+                "frame": 422,
+                "pcm_sha256": "b05899c30d842021dd71578076598a97e07fb7fc058c266a34f5a1ff33c8f35b",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 525,
+                "pcm_sha256": "2d136ec3d9b1bcadc23783c5b7f05f01b3e9a0ddbdfb1f61e7daf5510e9fd7ed",
+                "samples": 34240,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 18,
+            "wakes": [
+              {
+                "frame": 424,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 332,
+                "pcm_sha256": "71122383c2b4bee582f45380136380217e715a38d6f8301d980ee286bfcfa210",
+                "samples": 25600,
+                "text": "Clear."
+              },
+              {
+                "stage": "rolling",
+                "frame": 378,
+                "pcm_sha256": "d5703f147ed3cbf9fbc731344f7d7156e2cdc6b83d4040255735e2761c19a688",
+                "samples": 25600,
+                "text": "Clibby stuff"
+              },
+              {
+                "stage": "rolling",
+                "frame": 424,
+                "pcm_sha256": "b05899c30d842021dd71578076598a97e07fb7fc058c266a34f5a1ff33c8f35b",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 527,
+                "pcm_sha256": "52519d5fcc101d4732cbe060d3beac601556fd18bcf3e8a131d69c68c433e444",
+                "samples": 34240,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 20,
+            "wakes": [
+              {
+                "frame": 426,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 334,
+                "pcm_sha256": "71122383c2b4bee582f45380136380217e715a38d6f8301d980ee286bfcfa210",
+                "samples": 25600,
+                "text": "Clear."
+              },
+              {
+                "stage": "rolling",
+                "frame": 380,
+                "pcm_sha256": "d5703f147ed3cbf9fbc731344f7d7156e2cdc6b83d4040255735e2761c19a688",
+                "samples": 25600,
+                "text": "Clibby stuff"
+              },
+              {
+                "stage": "rolling",
+                "frame": 426,
+                "pcm_sha256": "b05899c30d842021dd71578076598a97e07fb7fc058c266a34f5a1ff33c8f35b",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 529,
+                "pcm_sha256": "abbf34280546e4afc1b98cec15697d8c34b51457d111a4bff3c7f0cf95091d93",
+                "samples": 34240,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 12,
+            "wakes": [
+              {
+                "frame": 418,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 326,
+                "pcm_sha256": "71122383c2b4bee582f45380136380217e715a38d6f8301d980ee286bfcfa210",
+                "samples": 25600,
+                "text": "Clear."
+              },
+              {
+                "stage": "rolling",
+                "frame": 372,
+                "pcm_sha256": "d5703f147ed3cbf9fbc731344f7d7156e2cdc6b83d4040255735e2761c19a688",
+                "samples": 25600,
+                "text": "Clibby stuff"
+              },
+              {
+                "stage": "rolling",
+                "frame": 418,
+                "pcm_sha256": "b05899c30d842021dd71578076598a97e07fb7fc058c266a34f5a1ff33c8f35b",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 521,
+                "pcm_sha256": "5c3e0893cfca5eea6597c6ed5f3fcf0d69fa20c27f32347517217011b64b073f",
+                "samples": 34240,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          }
+        ]
+      },
+      {
+        "speaker_sha256": "c47adccd463aec7e709b33f834e9269bc814fe3b4b7b730107f7a7bad48e06b3",
+        "user_sha256": "2d771527538551ebcb7641be9d7d5c38f5fc8c40f529a04809e54849d2e9a08e",
+        "runs": [
+          {
+            "worker_delay_frames": 12,
+            "wakes": [
+              {
+                "frame": 418,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 326,
+                "pcm_sha256": "159f7bbca4d1f0a89703fc8e6480ff7d76e26ca77d6faa592d0ad0128ebd06ff",
+                "samples": 25600,
+                "text": "[SOUND]"
+              },
+              {
+                "stage": "rolling",
+                "frame": 372,
+                "pcm_sha256": "ea63a34962ada41b591697b3c2c130b6e495f1fef8cbe4a2d0e604cd62974b5c",
+                "samples": 25600,
+                "text": "Clibby stuff."
+              },
+              {
+                "stage": "rolling",
+                "frame": 418,
+                "pcm_sha256": "e4609c5ec0e34f432598f58e7619d15c55fe35076b187c37fcdeff7f668bccd7",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 522,
+                "pcm_sha256": "b3198acaef1bd3b509d96cad8d7484d5b8d5d040a46d2fbb95d397a9352aa1c9",
+                "samples": 34400,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 14,
+            "wakes": [
+              {
+                "frame": 420,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 328,
+                "pcm_sha256": "159f7bbca4d1f0a89703fc8e6480ff7d76e26ca77d6faa592d0ad0128ebd06ff",
+                "samples": 25600,
+                "text": "[SOUND]"
+              },
+              {
+                "stage": "rolling",
+                "frame": 374,
+                "pcm_sha256": "ea63a34962ada41b591697b3c2c130b6e495f1fef8cbe4a2d0e604cd62974b5c",
+                "samples": 25600,
+                "text": "Clibby stuff."
+              },
+              {
+                "stage": "rolling",
+                "frame": 420,
+                "pcm_sha256": "e4609c5ec0e34f432598f58e7619d15c55fe35076b187c37fcdeff7f668bccd7",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 524,
+                "pcm_sha256": "b8691b190aeef2a974deaa874f0eceef2d8ee95a164055d6c870656fa030958e",
+                "samples": 34400,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 16,
+            "wakes": [
+              {
+                "frame": 422,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 330,
+                "pcm_sha256": "159f7bbca4d1f0a89703fc8e6480ff7d76e26ca77d6faa592d0ad0128ebd06ff",
+                "samples": 25600,
+                "text": "[SOUND]"
+              },
+              {
+                "stage": "rolling",
+                "frame": 376,
+                "pcm_sha256": "ea63a34962ada41b591697b3c2c130b6e495f1fef8cbe4a2d0e604cd62974b5c",
+                "samples": 25600,
+                "text": "Clibby stuff."
+              },
+              {
+                "stage": "rolling",
+                "frame": 422,
+                "pcm_sha256": "e4609c5ec0e34f432598f58e7619d15c55fe35076b187c37fcdeff7f668bccd7",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 526,
+                "pcm_sha256": "79ebebc19a25f0d3c3866c8f1dbbd99976349d9b27176272b01d4915eb89962c",
+                "samples": 34400,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 18,
+            "wakes": [
+              {
+                "frame": 424,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 332,
+                "pcm_sha256": "159f7bbca4d1f0a89703fc8e6480ff7d76e26ca77d6faa592d0ad0128ebd06ff",
+                "samples": 25600,
+                "text": "[SOUND]"
+              },
+              {
+                "stage": "rolling",
+                "frame": 378,
+                "pcm_sha256": "ea63a34962ada41b591697b3c2c130b6e495f1fef8cbe4a2d0e604cd62974b5c",
+                "samples": 25600,
+                "text": "Clibby stuff."
+              },
+              {
+                "stage": "rolling",
+                "frame": 424,
+                "pcm_sha256": "e4609c5ec0e34f432598f58e7619d15c55fe35076b187c37fcdeff7f668bccd7",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 528,
+                "pcm_sha256": "6a6d99ce3d3983dab7e1d7c859ef4ca06d05c174a266ca51b5049fb64a6b960f",
+                "samples": 34400,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 20,
+            "wakes": [
+              {
+                "frame": 426,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 334,
+                "pcm_sha256": "159f7bbca4d1f0a89703fc8e6480ff7d76e26ca77d6faa592d0ad0128ebd06ff",
+                "samples": 25600,
+                "text": "[SOUND]"
+              },
+              {
+                "stage": "rolling",
+                "frame": 380,
+                "pcm_sha256": "ea63a34962ada41b591697b3c2c130b6e495f1fef8cbe4a2d0e604cd62974b5c",
+                "samples": 25600,
+                "text": "Clibby stuff."
+              },
+              {
+                "stage": "rolling",
+                "frame": 426,
+                "pcm_sha256": "e4609c5ec0e34f432598f58e7619d15c55fe35076b187c37fcdeff7f668bccd7",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 530,
+                "pcm_sha256": "452a2827b766b511e8d1aa1065a4013f9b2b7800fb02c8a66b92e1f67fafb27e",
+                "samples": 34400,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          },
+          {
+            "worker_delay_frames": 12,
+            "wakes": [
+              {
+                "frame": 418,
+                "epoch": 1,
+                "remaining": 0
+              }
+            ],
+            "asr": [
+              {
+                "stage": "rolling",
+                "frame": 326,
+                "pcm_sha256": "159f7bbca4d1f0a89703fc8e6480ff7d76e26ca77d6faa592d0ad0128ebd06ff",
+                "samples": 25600,
+                "text": "[SOUND]"
+              },
+              {
+                "stage": "rolling",
+                "frame": 372,
+                "pcm_sha256": "ea63a34962ada41b591697b3c2c130b6e495f1fef8cbe4a2d0e604cd62974b5c",
+                "samples": 25600,
+                "text": "Clibby stuff."
+              },
+              {
+                "stage": "rolling",
+                "frame": 418,
+                "pcm_sha256": "e4609c5ec0e34f432598f58e7619d15c55fe35076b187c37fcdeff7f668bccd7",
+                "samples": 25600,
+                "text": "Clippy stop, top."
+              },
+              {
+                "stage": "utterance",
+                "frame": 522,
+                "pcm_sha256": "b3198acaef1bd3b509d96cad8d7484d5b8d5d040a46d2fbb95d397a9352aa1c9",
+                "samples": 34400,
+                "text": "Clippy stop talking",
+                "same_pcm_redecode": "Clippy stop talking"
+              }
+            ],
+            "delivered": [
+              "Klippy stop talking"
+            ],
+            "prefix_rejected": 0
+          }
+        ]
+      }
+    ]
+  },
+  "speaker_crossover": {
+    "worker_delay_frames": 18,
+    "speaker_sha256": [
+      "26663f118c08efcd8680edf481e9b359cb41b27aaa913f4c90c940ceee787547",
+      "87e0384490bd0179219ef30eb761a28cef03a4fa6ae3fd007c53aafc4fe8ea9c"
+    ],
+    "user_sha256": [
+      "6b34eaea8e7e2ef4d07cb92cea1257f70ff91e912351e8b2ea4f7792c73e8b3a",
+      "5783589beb28b9706593dea2dcfffce2fea2f0d962a8de331405bfa524f95551",
+      "122ff7a02cb0b308a8af3689a1d6ca9c6513e47ff5b14a9a519cac1e33ff3e60",
+      "c92fa264a5f2e8b58d493b5a227df0b247a062df3340f13b8e996883db2b45ef",
+      "320f006fab6d56174a1a49b1532bc0263df7d8260b4bbbd82b9866ee15d47bd8",
+      "c12b4605d52e28a46a236e886f25fe4807fd45227b0dd2b835081146ca0748e6"
+    ],
+    "runs": [
+      {
+        "speaker_index": 0,
+        "user_index": 0,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "849e66a0b3d760658a4f780a0856fef434225e6ac67ae5091ef5b240078a00b8",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "e7f510233fe0dcfc4966e6db6505579bdfe888f90e65c9b225fc148d80d34eb5",
+            "samples": 25600,
+            "text": "Clibby stuff."
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "2319795407eff0c6fd9e7b78ed39854bb9e448b8ca3ee043b036c6ab22ee698f",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "c4abee1affea0ef16f0152538e8a7e6c8ded0bf1cac9b12e3ecbb05845ecee31",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 0,
+        "user_index": 1,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 378,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "33fc5e3d9ce494621620a80a5dd2fcbdaf0d28ae8184c05db1778295acf1b11f",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "ef3e8d1c0c8833775383ae84f4a5389e96e1d6e6ecdba4453812affcc76a8512",
+            "samples": 25600,
+            "text": "Clippy stuff."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "7ebdcfa2b4087c9184226959d6c1712506dc12df25144df45689117da5066f47",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 0,
+        "user_index": 2,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "8d3fba2058363f61f301628ab9f5ee8c7bee6477a32925d55d580590ef4d59f9",
+            "samples": 25600,
+            "text": "Clear."
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "0b4ab08008132137ca3ed12ae1f7e1406f9153c68d078b3caaafcf70da7606ae",
+            "samples": 25600,
+            "text": "Clibby stuff"
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "3a6327c1ac21fa26ba0d1580303db08e68a67542a859dcaa80cbc98eb7780d6e",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "4ec85d32623605ab37b3f0496a507edb4fb7b18efc17b265c810c9b467dd268b",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 0,
+        "user_index": 3,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 378,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "a275d44442513929537cde9d594300cfc2d6e6b42cdd6a177e41375309841cfd",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "4035df8045ad5555ad48338fa93e000ae64d96cfa4139712f48631ce2e7ff81d",
+            "samples": 25600,
+            "text": "Clippy stuff"
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "d860282531993a3d37c1baf789a7f29e155f499330dfeabcbf4af36d6ccc76b3",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 0,
+        "user_index": 4,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "29001ebf9e05c8e8b88bfc43d8616be296fdfae280e12c7c935e85234bdfb9c7",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "0ecf2fcc8bba6657ae3fecdd1bed7d808af760ba52c8e07de14aecb47aace71f",
+            "samples": 25600,
+            "text": "Clibby stuff"
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "6d19ebfc641beeaeb2ea17133556ed698dc03b576e06f14e301ccc75ffef8886",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "b08f0e8b5ed7b7986cf87ab61ecfdee8106a53091ca9561d19af9aa372f33471",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 0,
+        "user_index": 5,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "b187dc53daf700fd861b2b2dd419dec739c62336d0d96a173201d6d267040db4",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "79e8c237b8fa134c43f739243797556122b921c57a4c644879761e1a8c590ab6",
+            "samples": 25600,
+            "text": "Clibby stuff"
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "574d11bbf5af7862fdc50516c2673ec0010ba93602392ea19fdc00b8afe1187c",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "3c00916f77f02cbca1f371d240c9a78eaf6a5814986a36f6562ef719ee9f9ab9",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 1,
+        "user_index": 0,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "6ce54090ccd8723a6ce9e72aacf342711ef4051aa4a8dec6f2b0e4c2f710228d",
+            "samples": 25600,
+            "text": "[SOUND]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "6c95dd802cd098c544a63a9afc666c64641ea44979242919e0f39fc236c0e642",
+            "samples": 25600,
+            "text": "Clibby stuff."
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "abc9e4f58f8a012faebfb0f68881c08c4930670011dc30d1736a55ccb5e8d160",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "9996c46ae01931dff48bdf94c522691c5daf813fc3391c48a96200f809105db2",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 1,
+        "user_index": 1,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 378,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "d63ddc506fc8dc62dce71fa79ba98f85e4db38bcf0bec0657009ba14382c33a4",
+            "samples": 25600,
+            "text": "Clear."
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "da177c8948546a6bd27eaf8dcb82843563e560fe1b69516b60886e341975fa8b",
+            "samples": 25600,
+            "text": "Clippy stuff."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "dd58032a443627526218021e3deabc295cdb6429b57918c8061576f172d69c32",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 1,
+        "user_index": 2,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "1f2b901b199dc2f3d49417561f9d7c3f8044adba40062854ef2988a0d860406f",
+            "samples": 25600,
+            "text": "Clear."
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "fa759b00f688e3f1c77d1046c645c5c332347e67b8978ed53b64ab106fb66015",
+            "samples": 25600,
+            "text": "Clibby stuff"
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "238f056327e5e990472e2c96320a928458a9b9b8d4d1c5e99916b0df7debf1d2",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "03ceef669756a755b325dce3fa30e3c9fd10e027f9bf9e586b4f551da8339563",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 1,
+        "user_index": 3,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 421,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 331,
+            "pcm_sha256": "23bfd94fec02e24bc66b62e7db57746c038868f314e3e317e51217e3721c39b0",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 376,
+            "pcm_sha256": "63f2a60d426cd692df63a4f6b81a3440ea9dbd1339d5928c9b378b6bd81b4948",
+            "samples": 25600,
+            "text": "Clibby stuff"
+          },
+          {
+            "stage": "rolling",
+            "frame": 421,
+            "pcm_sha256": "c83e18a36690c704eae84e92f6bfdb4c8a398bdf4f374bdfcfd1bfd2fbff67f7",
+            "samples": 25600,
+            "text": "Clippy stop top"
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "a1d13bc95884873b382c64ddced9d2e9eaa0a7387338e266f51122862485415d",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 1,
+        "user_index": 4,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "124cb528a8d869924cb17e16570cc28820857c21d115b84ae13ecdbeff01f3f6",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "8e91928b68a7885ba179761141442d5dffef7c0ad347b563a5c6fe730a14cf13",
+            "samples": 25600,
+            "text": "Clibby stuff"
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "87b43d072cd38554157d1d518305c7cb251b5d9ca9b5c6b14d547204007ff490",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "b20dff520264b0bb896bdeeb812d755c3a3bef1c314b5f8fdaddd4ceca4e7a46",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      },
+      {
+        "speaker_index": 1,
+        "user_index": 5,
+        "worker_delay_frames": 18,
+        "wakes": [
+          {
+            "frame": 424,
+            "epoch": 1,
+            "remaining": 0
+          }
+        ],
+        "asr": [
+          {
+            "stage": "rolling",
+            "frame": 332,
+            "pcm_sha256": "d0e55c9013e15f1152c471e21fa8b6dde462c5ac6731831e5f2b54b5d84f445f",
+            "samples": 25600,
+            "text": "[Music]"
+          },
+          {
+            "stage": "rolling",
+            "frame": 378,
+            "pcm_sha256": "0285e51d862d42d3990422166010a33e80d067a0699762704bea98bc7d1eb150",
+            "samples": 25600,
+            "text": "Clibby stuff"
+          },
+          {
+            "stage": "rolling",
+            "frame": 424,
+            "pcm_sha256": "3b49a8ea71cb368806686bf17d58074849c22d777219d3be122864f99486ffe7",
+            "samples": 25600,
+            "text": "Clippy stop, top."
+          },
+          {
+            "stage": "utterance",
+            "frame": 528,
+            "pcm_sha256": "66b00a34575d70e48f43096321ac9fbcb4f52085dfe86de0f5b1ead16df9be21",
+            "samples": 34400,
+            "text": "Clippy stop talking",
+            "same_pcm_redecode": "Clippy stop talking"
+          }
+        ],
+        "delivered": [
+          "Klippy stop talking"
+        ],
+        "prefix_rejected": 0
+      }
+    ]
+  },
+  "frozen_budget_followup": {
+    "app_source": "ffcff59f6ff8b7a1ef2f9691098d5e2adc1c2ca7",
+    "portable_executable_sha256": "412dbdd10c61e6d467209ff1118b096b8ec99009ab9120b51018eef85a106800",
+    "report_sha256": {
+      "performance-budget.json": "9d8b270159cce8d2c8641fdc6582cc3cd5d838c4416f0d239bd5c6d2f8bc4b80",
+      "performance-voice.json": "d7866d4c78ac5864fa448d4ba6ce4dcdfcacd1a484c3c976be37f25c4b858d9d"
+    },
+    "budget": {
+      "passed": true,
+      "memory_budget_gib": 16,
+      "peak_job_commit_bytes": 2528817152,
+      "peak_active_processes": 3,
+      "wall_seconds": 135.454
+    },
+    "engineering_preview_passed": true,
+    "printer_writes": 0,
+    "barge_wakes": 1,
+    "playback_flushed": true,
+    "barge_requests": [
+      "Klippy stop talking"
+    ],
+    "final_transcript": {
+      "at": 61.38,
+      "text": "Clippy stop talking",
+      "audio_seconds": 2.14
+    },
+    "playback": {
+      "first_pcm_render_seconds": 11.34,
+      "queue_gap_seconds": 0.0,
+      "receipt": true,
+      "queue_underruns": 0,
+      "missing_samples": 0,
+      "device_underflows": 0,
+      "device_overflows": 0,
+      "device_status_events": 0,
+      "clipped_samples": 0,
+      "invalid_pcm": 0,
+      "prefill_frames": 181440,
+      "complete_pcm_fallbacks": 1
+    }
+  }
+}
